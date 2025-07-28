@@ -1,0 +1,9 @@
+{
+    "checksets": [
+        {
+            "name": "default",
+            "items": ["BuildVersion"]
+        }
+    ],
+    "eol_version": "4.4.0"
+}
