@@ -5,7 +5,7 @@ from libs.utils import *
 class SecurityItem(BaseItem):
     def __init__(self, output_folder, config = None):
         super().__init__(output_folder, config)
-        self._name = "SecurityItem"
+        self._name = "Security"
         self._description = "Collects & review security related information."
         self._category = CATEGORY.SECURITY
 
@@ -27,7 +27,7 @@ class SecurityItem(BaseItem):
         redact_logs = security_settings.get("redactClientLogData", None)
         if redact_logs != True:
             self._test_result.append({
-                "severity": SEVERITY.HIGH,
+                "severity": SEVERITY.MEDIUM,
                 "message": "Redaction of client log data is not enabled, which may lead to sensitive information exposure."
             })
         
@@ -38,12 +38,17 @@ class SecurityItem(BaseItem):
                 "severity": SEVERITY.HIGH,
                 "message": "TLS is not enabled, which may lead to unencrypted connections."
             })
+        elif tls_enabled != "requireTLS":
+            self._test_result.append({
+                "severity": SEVERITY.MEDIUM,
+                "message": f"TLS is enabled but not set to `requireTLS`, current mode is `{tls_enabled}`."
+            })
 
         port = net.get("port", None)
         if port == 27017:
             self._test_result.append({
                 "severity": SEVERITY.MEDIUM,
-                "message": "Default port 27017 is used, which may expose the server to unnecessary risks."
+                "message": "Default port `27017` is used, which may expose the server to unnecessary risks."
             })
 
         self.sample_result = result

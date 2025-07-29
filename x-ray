@@ -22,6 +22,7 @@ def main():
     checkset = args.checkset
     framework = Framework(config)
     framework.run_checks(checkset, client, output_folder=args.output)
+    framework.output_results(output_folder=args.output)
 
 if __name__ == "__main__":
     main()

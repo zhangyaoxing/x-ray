@@ -5,7 +5,7 @@ from libs.utils import *
 class BuildInfoItem(BaseItem):
     def __init__(self, output_folder: str, config: dict = None):
         super().__init__(output_folder, config)
-        self._name = "BuildInfoItem"
+        self._name = "Build Info"
         self._description = "Collects & review server build information."
         self._category = CATEGORY.SERVER_INFO
 
