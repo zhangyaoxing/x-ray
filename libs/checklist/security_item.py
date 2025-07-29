@@ -5,7 +5,7 @@ from libs.utils import *
 class SecurityItem(BaseItem):
     def __init__(self, output_folder, config = None):
         super().__init__(output_folder, config)
-        self._name = "Security"
+        self._name = "Authentication & Security"
         self._description = "Collects & review security related information."
         self._category = CATEGORY.SECURITY
 
