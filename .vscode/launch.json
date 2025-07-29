@@ -13,7 +13,10 @@
             "console": "integratedTerminal",
             "args": [
                 "--uri", "mongodb://localhost:27017"
-            ]
+            ],
+            "env": {
+                "LOG_LEVEL": "DEBUG"
+            }
         }
     ]
 }

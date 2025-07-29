@@ -1,9 +1,12 @@
 {
-    "checksets": [
-        {
-            "name": "default",
-            "items": ["BuildVersion"]
+    "checksets":{
+        "default": {
+            "items": ["BuildInfoItem"]
         }
-    ],
-    "eol_version": "4.4.0"
+    },
+    "item_config": {
+        "BuildInfoItem": {
+            "eol_version": [4, 4, 0]
+        }
+    }
 }
