@@ -26,7 +26,7 @@ class Framework:
     def run_checks(self, name: str, *args, **kwargs):
         # Create output folder if it doesn't exist
         output_folder = kwargs.get("output_folder", "output/")
-        if level == "DEBUG":
+        if env == "development":
             batch_folder = output_folder
         else:
             batch_folder = f"{output_folder}/{name}-{datetime.now().isoformat()}"

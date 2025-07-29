@@ -2,6 +2,7 @@ from abc import abstractmethod
 from enum import Enum
 import logging
 from bson import json_util
+from libs.utils import env
 
 class SEVERITY(Enum):
     HIGH = 1
@@ -47,7 +48,8 @@ class BaseItem:
     @sample_result.setter
     def sample_result(self, data):
         with open(self.cache_file_name, "w") as f:
-            if self._config.get("log_level") == "DEBUG":
+            if env == "development":
+                # Pretty print in development mode for easier debugging
                 f.write(json_util.dumps(data, indent=4))
             else:
                 f.write(json_util.dumps(data))

@@ -15,7 +15,8 @@
                 "--uri", "mongodb://localhost:27017"
             ],
             "env": {
-                "LOG_LEVEL": "DEBUG"
+                "LOG_LEVEL": "INFO",
+                "ENV": "development"
             }
         }
     ]

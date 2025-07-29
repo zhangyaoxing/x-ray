@@ -7,6 +7,7 @@ from pathlib import Path
 
 levels = logging._nameToLevel
 level = os.getenv("LOG_LEVEL", "INFO")
+env = os.getenv("ENV", "production")
 if (level not in levels):
     level = "INFO"
 log_level = levels[level]
