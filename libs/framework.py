@@ -49,6 +49,6 @@ class Framework:
                 continue
             item_config = self._config.get("item_config", {}).get(item_name, {})
             item = item_cls(batch_folder, item_config)
-            self._logger.info(f"Running check item: {green(item.name)} - {item.description}")
+            self._logger.info(f"Running check item: {bold(green(item.name))} - {item.description}")
             item.test(kwargs.get("client"))
             self._items.append(item)
