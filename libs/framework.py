@@ -55,6 +55,7 @@ class Framework:
             if not item_cls:
                 self._logger.warning(yellow(f"Check item '{item_name}' not found. Skipping."))
                 continue
+            # The config for the item can be specified in the `item_config` section, under the item class name.
             item_config = self._config.get("item_config", {}).get(item_name, {})
             item = item_cls(batch_folder, item_config)
             self._logger.info(f"Running check item: {bold(green(item.name))} - {item.description}")
@@ -101,4 +102,4 @@ class Framework:
                 f.write('</html>\n')
 
         # TODO: may need to output the raw results to a file.
-        self._logger.info(bold(green("All checks completed.")))
+        self._logger.info(bold(green("All checks complete.")))

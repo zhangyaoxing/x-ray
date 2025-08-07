@@ -12,7 +12,9 @@
             "program": "x-ray",
             "console": "integratedTerminal",
             "args": [
-                "--uri", "mongodb://localhost:27017"
+                "--uri", "mongodb://localhost:27017",
+                "-f", "html",
+                "-c", "config.json"
             ],
             "env": {
                 "LOG_LEVEL": "INFO",

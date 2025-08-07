@@ -26,10 +26,10 @@ def get_script_path(filename = None):
         return str((script_folder / ".." / filename).resolve())
     
 config = None
-def load_config():
+def load_config(config_path = "config.json"):
     global config
     if not config:
-        config_path = get_script_path("config.json")
+        config_path = get_script_path(config_path)
         config = json.load(open(config_path))
     return config
 

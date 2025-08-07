@@ -1,12 +1,17 @@
 {
     "checksets":{
         "default": {
-            "items": ["BuildInfoItem", "SecurityItem"]
+            "items": ["BuildInfoItem", "SecurityItem", "CollInfoItem"]
         }
     },
     "item_config": {
         "BuildInfoItem": {
             "eol_version": [4, 4, 0]
+        },
+        "CollInfoItem": {
+            "obj_size_kb": 32,
+            "num_indexes": 10,
+            "unused_index_days": 7
         }
     }
 }
