@@ -14,6 +14,8 @@ class CATEGORY(Enum):
     SERVER_INFO = "Server Info"
     SECURITY = "Security"
     REPLICA_SET = "Replica Set"
+    SHARDING = "Sharding"
+    DATA = "Data"
     OTHER = "Other"
 
 def colorize_severity(severity: SEVERITY) -> str:

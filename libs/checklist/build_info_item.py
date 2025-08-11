@@ -11,7 +11,7 @@ class BuildInfoItem(BaseItem):
 
     def test(self, *args, **kwargs):
         self._logger.info(f"Gathering server build information...")
-        client = MongoClient(kwargs.get("client"))
+        client = kwargs.get("client")
         result = client.admin.command("buildInfo")
         self._logger.info(f"Testing server build information...")
         eol_version = self._config.get("eol_version", [4, 4, 0])

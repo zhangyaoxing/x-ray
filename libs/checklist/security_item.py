@@ -11,7 +11,7 @@ class SecurityItem(BaseItem):
 
     def test(self, *args, **kwargs):
         self._logger.info(f"Gathering security information...")
-        client = MongoClient(kwargs.get("client"))
+        client = kwargs.get("client")
         result = client.admin.command("getCmdLineOpts")
         self._logger.info("Testing security information...")
 

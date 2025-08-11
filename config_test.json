@@ -12,7 +12,8 @@
             "obj_size_kb": 0.01,
             "num_indexes": 1,
             "unused_index_days": 0,
-            "fragmentation_threshold": 0.001
+            "fragmentation_medium": 0.4,
+            "fragmentation_high": 0.5
         }
     }
 }

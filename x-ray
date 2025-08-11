@@ -23,7 +23,7 @@ def main():
     config = load_config(args.config)  # Load configuration from file
     checkset = args.checkset
     framework = Framework(config)
-    framework.run_checks(checkset, client, output_folder=args.output)
+    framework.run_checks(checkset, client=client, output_folder=args.output)
     framework.output_results(output_folder=args.output, format=args.format)
 
 if __name__ == "__main__":
