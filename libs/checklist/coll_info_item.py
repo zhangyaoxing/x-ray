@@ -11,7 +11,7 @@ class CollInfoItem(BaseItem):
     def __init__(self, output_folder, config = None):
         super().__init__(output_folder, config)
         self._name = "Collection Information"
-        self._description = "Collects & review security related information."
+        self._description = "Collects & review collection statistics."
         self._category = CATEGORY.DATA
 
     def _fragmentation_check(self, stats):
