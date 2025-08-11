@@ -121,7 +121,7 @@ class CollInfoItem(BaseItem):
                 ns = f"{db_name}.{coll_name}"
                 try:
                     stats = db.command("collStats", coll_name, indexDetails=True)
-                    all_stats.append(stats)
+                    all_stats.append({ns: stats})
                     # Check for average object size
                     self._check_obj_size(ns, stats, obj_size_bytes)
 

@@ -79,7 +79,7 @@ class BaseItem:
 
     @property
     def cache_file_name(self):
-        return f"{self._output_folder}/{self.__class__.__name__}.json"
+        return f"{self._output_folder}/{self.__class__.__name__}_raw.json"
     
     def append_item_result(self, severity: SEVERITY, title: str, message: str):
         self._test_result.append({

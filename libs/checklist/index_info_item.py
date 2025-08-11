@@ -97,7 +97,7 @@ class IndexInfoItem(BaseItem):
                     index_stats = list(db[coll_name].aggregate([
                         {"$indexStats": {}}
                     ]))
-                    all_index_stats.append(index_stats)
+                    all_index_stats.append({ns: index_stats})
                     self._num_indexes_check(ns, index_stats, num_indexes)
 
                     # Check for unused indexes
