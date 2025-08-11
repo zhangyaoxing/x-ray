@@ -9,10 +9,10 @@
             "eol_version": [4, 4, 0]
         },
         "CollInfoItem": {
-            "obj_size_kb": 32,
-            "num_indexes": 10,
-            "unused_index_days": 7,
-            "fragmentation_threshold": 0.5
+            "obj_size_kb": 0.01,
+            "num_indexes": 1,
+            "unused_index_days": 0,
+            "fragmentation_threshold": 0.001
         }
     }
 }

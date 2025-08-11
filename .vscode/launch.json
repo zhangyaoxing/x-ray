@@ -14,7 +14,7 @@
             "args": [
                 "--uri", "mongodb://localhost:27017",
                 "-f", "html",
-                "-c", "config.json"
+                "-c", "config_test.json"
             ],
             "env": {
                 "LOG_LEVEL": "INFO",
