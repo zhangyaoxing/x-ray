@@ -56,8 +56,7 @@ class BaseItem:
     
     @property
     def test_result_markdown(self):
-        result = f"## {self.name}\n\n"
-        result += f"*{self.description}*\n\n"
+        result = ""
         if len(self._test_result) == 0:
             result += "<b style='color: green;'>All pass.</b>\n\n"
             return result
