@@ -1,7 +1,7 @@
 from datetime import datetime
 from pymongo import MongoClient
 from pymongo.errors import OperationFailure
-from libs.checklist.base_item import BaseItem, SEVERITY, CATEGORY
+from libs.checklist.base_item import BaseItem, SEVERITY
 from libs.utils import *
 
 """
@@ -12,7 +12,6 @@ class CollInfoItem(BaseItem):
         super().__init__(output_folder, config)
         self._name = "Collection Information"
         self._description = "Collects & review collection statistics."
-        self._category = CATEGORY.DATA
 
     def _fragmentation_check(self, stats, threshold=0.5):
         """

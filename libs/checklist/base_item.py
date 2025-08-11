@@ -10,14 +10,6 @@ class SEVERITY(Enum):
     LOW = 3
     INFO = 4
 
-class CATEGORY(Enum):
-    SERVER_INFO = "Server Info"
-    SECURITY = "Security"
-    REPLICA_SET = "Replica Set"
-    SHARDING = "Sharding"
-    DATA = "Data"
-    OTHER = "Other"
-
 def colorize_severity(severity: SEVERITY) -> str:
     if severity == SEVERITY.HIGH:
         return "red"
@@ -32,7 +24,6 @@ class BaseItem:
     def __init__(self, output_folder: str, config: dict = None):
         self._name = "BaseItem"
         self._description = "Base item for checklist framework. If you see this, it means the item is not properly defined."
-        self._category = CATEGORY.OTHER
         self._config = config or {}
         self._test_result = []
         self._logger = logging.getLogger(__name__)
@@ -49,10 +40,6 @@ class BaseItem:
     @property
     def description(self):
         return self._description
-    
-    @property
-    def category(self):
-        return self._category
 
     @property
     def sample_result(self):
@@ -64,13 +51,12 @@ class BaseItem:
         return {
             "name": self.name,
             "description": self.description,
-            "category": self.category.value,
             "items": self._test_result
         }
     
     @property
     def test_result_markdown(self):
-        result = f"### {self.name}\n\n"
+        result = f"## {self.name}\n\n"
         result += f"*{self.description}*\n\n"
         if len(self._test_result) == 0:
             result += "<b style='color: green;'>All pass.</b>\n\n"

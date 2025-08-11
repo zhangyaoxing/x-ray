@@ -1,7 +1,6 @@
 
 from datetime import datetime
 from libs.utils import *
-from libs.checklist.base_item import CATEGORY
 import logging
 import importlib
 import pkgutil
@@ -68,20 +67,11 @@ class Framework:
         output_file = f"{batch_folder}/results.md"
         self._logger.info(f"Saving results to {green(output_file)}")
 
-        results = {c.name: {"category_name": c.value, "result_items": []} for c in CATEGORY}
-        for item in self._items:
-            results.get(item.category.name, {"result_items": []})["result_items"].append(item.test_result_markdown)
-
         with open(output_file, "w") as f:
             f.write("# Check Results\n\n")
-            for category, data in results.items():
-                f.write(f"## {data['category_name']}\n\n")
-                if not data["result_items"]:
-                    f.write("<b style='color: green;'>All pass.</b>\n\n")
-                    continue
-                for item in data["result_items"]:
-                    f.write(item)
-        
+            for item in self._items:
+                f.write(item.test_result_markdown)
+
         if format == "html":
             with open(f"{batch_folder}/results.html", "w") as f:
                 with open(output_file, "r") as md_file:

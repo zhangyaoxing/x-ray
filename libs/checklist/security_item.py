@@ -1,5 +1,5 @@
 from pymongo import MongoClient
-from libs.checklist.base_item import BaseItem, SEVERITY, CATEGORY
+from libs.checklist.base_item import BaseItem, SEVERITY
 from libs.utils import *
 
 class SecurityItem(BaseItem):
@@ -7,7 +7,6 @@ class SecurityItem(BaseItem):
         super().__init__(output_folder, config)
         self._name = "Authentication & Security"
         self._description = "Collects & review security related information."
-        self._category = CATEGORY.SECURITY
 
     def test(self, *args, **kwargs):
         self._logger.info(f"Gathering security information...")

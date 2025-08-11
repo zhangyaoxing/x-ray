@@ -1,5 +1,5 @@
 from pymongo import MongoClient
-from libs.checklist.base_item import BaseItem, SEVERITY, CATEGORY
+from libs.checklist.base_item import BaseItem, SEVERITY
 from libs.utils import *
 
 class BuildInfoItem(BaseItem):
@@ -7,7 +7,6 @@ class BuildInfoItem(BaseItem):
         super().__init__(output_folder, config)
         self._name = "Build Info"
         self._description = "Collects & review server build information."
-        self._category = CATEGORY.SERVER_INFO
 
     def test(self, *args, **kwargs):
         self._logger.info(f"Gathering server build information...")
