@@ -21,9 +21,10 @@ class BuildInfoItem(BaseItem):
             return False
         if sample_version[0] < eol_version[0] or \
            (sample_version[0] == eol_version[0] and sample_version[1] < eol_version[1]):
-            self._test_result.append({
-                "severity": SEVERITY.HIGH,
-                "message": f"Server version {sample_version} is below EOL version {eol_version}."
-            })
+            self.append_item_result(
+                SEVERITY.HIGH,
+                "Server Version EOL",
+                f"Server version {sample_version} is below EOL version {eol_version}."
+            )
 
         self.sample_result = result

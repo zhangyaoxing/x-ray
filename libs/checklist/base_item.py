@@ -76,10 +76,10 @@ class BaseItem:
             result += "<b style='color: green;'>All pass.</b>\n\n"
             return result
         
-        result += "| \\# | Severity | Message |\n"
-        result += "|----------|----------|---------|\n"
+        result += "| \\# | Severity | Title | Message |\n"
+        result += "|----------|----------|---------|---------|\n"
         for idx, item in enumerate(self._test_result):
-            result += f"| **{idx + 1}** | <b style='color: {colorize_severity(item['severity'])}'> {item['severity'].name} </b> | {item['message']} |\n"
+            result += f"| **{idx + 1}** | <b style='color: {colorize_severity(item['severity'])}'> {item['severity'].name} </b> | {item['title']} | {item['message']} |\n"
         result += "\n"
         return result
         
@@ -96,8 +96,9 @@ class BaseItem:
     def cache_file_name(self):
         return f"{self._output_folder}/{self._name}.json"
     
-    def append_item_result(self, severity: SEVERITY, message: str):
+    def append_item_result(self, severity: SEVERITY, title: str, message: str):
         self._test_result.append({
             "severity": severity,
+            "title": title,
             "message": message
         })

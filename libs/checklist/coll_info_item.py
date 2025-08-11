@@ -14,7 +14,7 @@ class CollInfoItem(BaseItem):
         self._description = "Collects & review collection statistics."
         self._category = CATEGORY.DATA
 
-    def _fragmentation_check(self, stats):
+    def _fragmentation_check(self, stats, threshold=0.5):
         """
         Check for fragmentation in the collection.
         """
@@ -43,8 +43,85 @@ class CollInfoItem(BaseItem):
         else:
             results.append(get_details(stats["ns"], stats))
 
-        return results
+        for detail in results:
+            storage_size = detail.get("storage_size", 0)
+            total_index_size = detail.get("total_index_size", 0)
+            coll_reusable = detail.get("coll_reusable", 0)
+            index_reusable = detail.get("index_reusable", 0)
+            coll_frag = coll_reusable / storage_size if storage_size else 0
+            index_frag = index_reusable / total_index_size if total_index_size else 0
+            if coll_frag > threshold:
+                self.append_item_result(
+                    SEVERITY.MEDIUM,
+                    "High Collection Fragmentation",
+                    f"Collection `{detail['id']}` has a higher fragmentation: `{coll_frag:.2%}` than threshold `{threshold:.2%}`."
+                )
+            if index_frag > threshold:
+                self.append_item_result(
+                    SEVERITY.MEDIUM,
+                    "High Index Fragmentation",
+                    f"Collection `{detail['id']}` has a higher index fragmentation: `{index_frag:.2%}` than threshold `{threshold:.2%}`."
+                )
         
+    def _imbalance_check(self, ns, stats, shards, threshold=0.3):
+        """
+        Check for sharding imbalance in the collection.
+        """
+        shard_names = [s["_id"] for s in shards]
+        if "sharded" in stats and stats["sharded"]:
+            sizes = [{"shard": n, "size": s["size"]} for n, s in stats["shards"].items()]
+            sorted_sizes = sorted(sizes, key=lambda x: x["size"], reverse=True)
+            high = sorted_sizes[0]
+            if len(sorted_sizes) < len(shards):
+                # Find name that exists in shard_names but not in sorted_sizes
+                missing_shards = set(shard_names) - {s["shard"] for s in sorted_sizes}
+                low = {"shard": list(missing_shards)[0], "size": 0}
+                imbalance_percent = 1.0  # If not all shards have data, consider it imbalanced
+            else:
+                low = sorted_sizes[-1]
+                imbalance_percent = (high["size"] - low["size"]) / low["size"]
+            if imbalance_percent > threshold:
+                self.append_item_result(
+                    SEVERITY.MEDIUM,
+                    "Sharding Imbalance",
+                    f"Sharding imbalance detected in `{ns}`: `{high['shard']}` has `{imbalance_percent:.2%}` more data than `{low['shard']}`."
+                )
+
+    def _check_obj_size(self, ns, stats, obj_size_bytes):
+        """ Check for average object size in the collection.
+        """
+        if stats.get("avgObjSize", 0) > obj_size_bytes:
+            self.append_item_result(
+                SEVERITY.LOW,
+                "Large Object Size",
+                f"Collection `{ns}` has average object size `{stats.get('avgObjSize', 0) / 1024} KB`, which is larger than `{obj_size_bytes / 1024} KB`."
+            )
+
+    def _num_indexes_check(self, ns, index_stats, num_indexes):
+        """ Check for the number of indexes in the collection.
+        """
+        if len(index_stats) > num_indexes:
+            self.append_item_result(
+                SEVERITY.MEDIUM,
+                "Too Many Indexes",
+                f"Collection `{ns}` has more than `{num_indexes}` indexes, which may lead to write performance issues."
+            )
+    
+    def unused_indexes_check(self, ns, index_stats, unused_index_days):
+        """
+        Check for unused indexes in the collection.
+        """
+        for index in index_stats:
+            if index.get("accesses", {}).get("ops", 0) == 0:
+                last_used = index.get("accesses", {}).get("since", None)
+                if last_used:
+                    if (datetime.now() - last_used).days > unused_index_days:
+                        self.append_item_result(
+                            SEVERITY.MEDIUM,
+                            "Unused Index",
+                            f"Index `{index.get('name')}` in collection `{ns}` has not been used for more than `{unused_index_days}` days."
+                        )
+
     def test(self, *args, **kwargs):
         self._logger.info(f"Gathering collection statistics...")
         client = kwargs.get("client")
@@ -59,62 +136,35 @@ class CollInfoItem(BaseItem):
             obj_size_bytes = self._config.get("obj_size_kb", 32) * 1024
             unused_index_days = self._config.get("unused_index_days", 7)
             num_indexes = self._config.get("num_indexes", 10)
+            sharding_imbalance_percentage = self._config.get("sharding_imbalance_percentage", 0.3)
+            fragmentation_ratio = self._config.get("fragmentation_ratio", 0.5)
+            shards = list(client["config"].get_collection("shards").find())
   
             for coll_name in collections:
                 if coll_name.startswith("system."):
                     self._logger.debug(f"Skipping system collection: {db_name}.{coll_name}")
                     continue
                 self._logger.info(f"Gathering stats for collection: `{db_name}.{coll_name}`")
+                ns = f"{db_name}.{coll_name}"
                 try:
                     stats = db.command("collStats", coll_name, indexDetails=True)
                     # Check for average object size
-                    if stats.get("avgObjSize", 0) > obj_size_bytes:
-                        self._test_result.append({
-                            "severity": SEVERITY.MEDIUM,
-                            "message": f"Collection `{db_name}.{coll_name}` has average object size `{stats.get('avgObjSize', 0) / 1024} KB`, which is larger than `{self._config.get('obj_size_kb', 32)} KB`."
-                        })
+                    self._check_obj_size(ns, stats, obj_size_bytes)
+
+                    # Check for sharding imbalance
+                    self._imbalance_check(ns, stats, shards, sharding_imbalance_percentage)
 
                     # Check for fragmentation
-                    fragmentation = self._fragmentation_check(stats)
-                    for detail in fragmentation:
-                        storage_size = detail.get("storage_size", 0)
-                        total_index_size = detail.get("total_index_size", 0)
-                        coll_reusable = detail.get("coll_reusable", 0)
-                        index_reusable = detail.get("index_reusable", 0)
-                        coll_frag = coll_reusable / storage_size if storage_size else 0
-                        index_frag = index_reusable / total_index_size if total_index_size else 0
-                        medium_threshold = self._config.get("fragmentation_medium", 0.5)
-                        high_threshold = self._config.get("fragmentation_high", 0.75)
-                        if coll_frag > medium_threshold:
-                            self._test_result.append({
-                                "severity": SEVERITY.MEDIUM if coll_frag < high_threshold else SEVERITY.HIGH,
-                                "message": f"Collection `{detail['id']}` has a higher fragmentation: `{coll_frag:.2%}` than threshold `{(medium_threshold if coll_frag < high_threshold else high_threshold):.2%}`."
-                            })
-                        if index_frag > medium_threshold:
-                            self._test_result.append({
-                                "severity": SEVERITY.MEDIUM if index_frag < high_threshold else SEVERITY.HIGH,
-                                "message": f"Collection `{detail['id']}` has a higher index fragmentation: `{index_frag:.2%}` than threshold `{(medium_threshold if index_frag < high_threshold else high_threshold):.2%}`."
-                            })
+                    self._fragmentation_check(stats, fragmentation_ratio)
 
+                    # Check for number of indexes
                     index_stats = list(db[coll_name].aggregate([
                         {"$indexStats": {}}
                     ]))
-                    # Check for number of indexes
-                    if len(index_stats) > num_indexes:
-                        self._test_result.append({
-                            "severity": SEVERITY.MEDIUM,
-                            "message": f"Collection `{db_name}.{coll_name}` has more than `{num_indexes}` indexes, which may lead to write performance issues."
-                        })
+                    self._num_indexes_check(ns, index_stats, num_indexes)
+
                     # Check for unused indexes
-                    for index in index_stats:
-                        if index.get("accesses", {}).get("ops", 0) == 0:
-                            last_used = index.get("accesses", {}).get("since", None)
-                            if last_used:
-                                if (datetime.now() - last_used).days > unused_index_days:
-                                    self._test_result.append({
-                                        "severity": SEVERITY.LOW,
-                                        "message": f"Index `{index.get('name')}` in collection `{db_name}.{coll_name}` has not been used for more than `{unused_index_days}` days."
-                                    })
+                    self.unused_indexes_check(ns, index_stats, unused_index_days)
                     
                 except Exception as e:
                     if isinstance(e, OperationFailure) and e.code == 166:

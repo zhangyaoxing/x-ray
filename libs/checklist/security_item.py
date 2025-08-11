@@ -19,36 +19,41 @@ class SecurityItem(BaseItem):
         security_settings = result.get("parsed", {}).get("security", {})
         authorization = security_settings.get("authorization", None)
         if authorization != "enabled":
-            self._test_result.append({
-                "severity": SEVERITY.HIGH,
-                "message": "Authorization is not enabled, which may lead to unauthorized access."
-            })
+            self.append_item_result(
+                SEVERITY.HIGH,
+                "Authorization Disabled",
+                "Authorization is disabled, which may lead to unauthorized access."
+            )
 
         redact_logs = security_settings.get("redactClientLogData", None)
         if redact_logs != True:
-            self._test_result.append({
-                "severity": SEVERITY.MEDIUM,
-                "message": "Redaction of client log data is not enabled, which may lead to sensitive information exposure."
-            })
-        
+            self.append_item_result(
+                SEVERITY.MEDIUM,
+                "Log Redaction Disabled",
+                "Redaction of log is disabled, which may lead to sensitive information exposure."
+            )
+
         net = result.get("parsed", {}).get("net", {})
         tls_enabled = net.get("tls", {}).get("mode", None)
         if tls_enabled is None:
-            self._test_result.append({
-                "severity": SEVERITY.HIGH,
-                "message": "TLS is not enabled, which may lead to unencrypted connections."
-            })
+            self.append_item_result(
+                SEVERITY.HIGH,
+                "TLS Disabled",
+                "TLS is disabled, which may lead to unencrypted connections."
+            )
         elif tls_enabled != "requireTLS":
-            self._test_result.append({
-                "severity": SEVERITY.MEDIUM,
-                "message": f"TLS is enabled but not set to `requireTLS`, current mode is `{tls_enabled}`."
-            })
+            self.append_item_result(
+                SEVERITY.MEDIUM,
+                "Optional TLS",
+                f"TLS is enabled but not set to `requireTLS`, current mode is `{tls_enabled}`."
+            )
 
         port = net.get("port", None)
         if port == 27017:
-            self._test_result.append({
-                "severity": SEVERITY.MEDIUM,
-                "message": "Default port `27017` is used, which may expose the server to unnecessary risks."
-            })
+            self.append_item_result(
+                SEVERITY.LOW,
+                "Default Port Used",
+                "Default port `27017` is used, which may expose the server to unnecessary risks."
+            )
 
         self.sample_result = result

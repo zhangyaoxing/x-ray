@@ -12,8 +12,8 @@
             "obj_size_kb": 32,
             "num_indexes": 10,
             "unused_index_days": 7,
-            "fragmentation_medium": 0.5,
-            "fragmentation_high": 0.8
+            "fragmentation_ratio": 0.5,
+            "sharding_imbalance_percentage": 0.3
         }
     }
 }

@@ -13,7 +13,8 @@
             "num_indexes": 1,
             "unused_index_days": 0,
             "fragmentation_medium": 0.4,
-            "fragmentation_high": 0.5
+            "fragmentation_high": 0.5,
+            "sharding_imbalance_percentage": 0.00001
         }
     }
 }
