@@ -94,7 +94,7 @@ class CollInfoItem(BaseItem):
             self.append_item_result(
                 SEVERITY.LOW,
                 "Large Object Size",
-                f"Collection `{ns}` has average object size `{stats.get('avgObjSize', 0) / 1024} KB`, which is larger than `{obj_size_bytes / 1024} KB`."
+                f"Collection `{ns}` has average object size `{stats.get('avgObjSize', 0) / 1024} KB` larger than `{obj_size_bytes / 1024} KB`."
             )
 
     def _num_indexes_check(self, ns, index_stats, num_indexes):
@@ -104,7 +104,7 @@ class CollInfoItem(BaseItem):
             self.append_item_result(
                 SEVERITY.MEDIUM,
                 "Too Many Indexes",
-                f"Collection `{ns}` has more than `{num_indexes}` indexes, which may lead to write performance issues."
+                f"Collection `{ns}` has more than `{num_indexes}` indexes, which can cause potential write performance issues."
             )
     
     def unused_indexes_check(self, ns, index_stats, unused_index_days):
