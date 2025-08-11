@@ -1,7 +1,7 @@
 {
     "checksets":{
         "default": {
-            "items": ["BuildInfoItem", "SecurityItem", "CollInfoItem"]
+            "items": ["BuildInfoItem", "SecurityItem", "CollInfoItem", "IndexInfoItem"]
         }
     },
     "item_config": {
@@ -10,11 +10,13 @@
         },
         "CollInfoItem": {
             "obj_size_kb": 0.01,
-            "num_indexes": 1,
-            "unused_index_days": 0,
             "fragmentation_medium": 0.4,
             "fragmentation_high": 0.5,
             "sharding_imbalance_percentage": 0.00001
+        },
+        "IndexInfoItem": {
+            "unused_index_days": 0,
+            "num_indexes": 1
         }
     }
 }

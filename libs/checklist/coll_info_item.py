@@ -96,35 +96,11 @@ class CollInfoItem(BaseItem):
                 f"Collection `{ns}` has average object size `{stats.get('avgObjSize', 0) / 1024} KB` larger than `{obj_size_bytes / 1024} KB`."
             )
 
-    def _num_indexes_check(self, ns, index_stats, num_indexes):
-        """ Check for the number of indexes in the collection.
-        """
-        if len(index_stats) > num_indexes:
-            self.append_item_result(
-                SEVERITY.MEDIUM,
-                "Too Many Indexes",
-                f"Collection `{ns}` has more than `{num_indexes}` indexes, which can cause potential write performance issues."
-            )
-    
-    def unused_indexes_check(self, ns, index_stats, unused_index_days):
-        """
-        Check for unused indexes in the collection.
-        """
-        for index in index_stats:
-            if index.get("accesses", {}).get("ops", 0) == 0:
-                last_used = index.get("accesses", {}).get("since", None)
-                if last_used:
-                    if (datetime.now() - last_used).days > unused_index_days:
-                        self.append_item_result(
-                            SEVERITY.MEDIUM,
-                            "Unused Index",
-                            f"Index `{index.get('name')}` in collection `{ns}` has not been used for more than `{unused_index_days}` days."
-                        )
-
     def test(self, *args, **kwargs):
         self._logger.info(f"Gathering collection statistics...")
         client = kwargs.get("client")
         dbs = client.admin.command("listDatabases").get("databases", [])
+        all_stats = []
         for db_obj in dbs:
             db_name = db_obj.get("name")
             if db_name in ["admin", "local", "config"]:
@@ -133,8 +109,6 @@ class CollInfoItem(BaseItem):
             db = client[db_name]
             collections = db.list_collection_names()
             obj_size_bytes = self._config.get("obj_size_kb", 32) * 1024
-            unused_index_days = self._config.get("unused_index_days", 7)
-            num_indexes = self._config.get("num_indexes", 10)
             sharding_imbalance_percentage = self._config.get("sharding_imbalance_percentage", 0.3)
             fragmentation_ratio = self._config.get("fragmentation_ratio", 0.5)
             shards = list(client["config"].get_collection("shards").find())
@@ -147,6 +121,7 @@ class CollInfoItem(BaseItem):
                 ns = f"{db_name}.{coll_name}"
                 try:
                     stats = db.command("collStats", coll_name, indexDetails=True)
+                    all_stats.append(stats)
                     # Check for average object size
                     self._check_obj_size(ns, stats, obj_size_bytes)
 
@@ -155,18 +130,11 @@ class CollInfoItem(BaseItem):
 
                     # Check for fragmentation
                     self._fragmentation_check(stats, fragmentation_ratio)
-
-                    # Check for number of indexes
-                    index_stats = list(db[coll_name].aggregate([
-                        {"$indexStats": {}}
-                    ]))
-                    self._num_indexes_check(ns, index_stats, num_indexes)
-
-                    # Check for unused indexes
-                    self.unused_indexes_check(ns, index_stats, unused_index_days)
                     
                 except Exception as e:
                     if isinstance(e, OperationFailure) and e.code == 166:
-                        self._logger.warning(yellow(f"Collection '{db_name}.{coll_name}' is a view, skipping stats collection."))
+                        self._logger.warning(yellow(f"Collection '{ns}' is a view, skipping stats collection."))
                     else:
-                        self._logger.error(red(f"Failed to gather stats for collection '{db_name}.{coll_name}': {str(e)}"))
+                        self._logger.error(red(f"Failed to gather stats for collection '{ns}': {str(e)}"))
+
+        self.sample_result = all_stats
