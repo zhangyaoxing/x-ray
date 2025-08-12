@@ -1,5 +1,3 @@
-from datetime import datetime, timedelta
-from pymongo import MongoClient
 from pymongo.errors import OperationFailure
 from libs.check_items.base_item import BaseItem, SEVERITY
 from libs.utils import *

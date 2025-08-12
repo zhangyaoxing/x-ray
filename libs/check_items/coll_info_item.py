@@ -111,8 +111,8 @@ class CollInfoItem(BaseItem):
             obj_size_bytes = self._config.get("obj_size_kb", 32) * 1024
             sharding_imbalance_percentage = self._config.get("sharding_imbalance_percentage", 0.3)
             fragmentation_ratio = self._config.get("fragmentation_ratio", 0.5)
-            shards = list(client["config"].get_collection("shards").find())
-  
+            shards = client["admin"].command("listShards").get("shards", [])
+
             for coll_info in collections:
                 coll_name = coll_info.get("name")
                 coll_type = coll_info.get("type", "collection")
