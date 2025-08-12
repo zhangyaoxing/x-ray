@@ -4,6 +4,7 @@ import logging
 from libs.utils import *
 from libs.framework import Framework
 from pymongo import MongoClient
+from pymongo.uri_parser import parse_uri
 
 parser = argparse.ArgumentParser(description="HSBC X-Ray project.")
 parser.add_argument("-q", "--quiet", help="Quiet mode.", action="store_true", default=False)
@@ -19,11 +20,12 @@ if args.quiet:
     logger.setLevel(logging.FATAL)
 
 def main():
+    parsed_uri = parse_uri(args.uri)
     client = MongoClient(args.uri)  # Initialize MongoDB client
     config = load_config(args.config)  # Load configuration from file
     checkset = args.checkset
     framework = Framework(config)
-    framework.run_checks(checkset, client=client, output_folder=args.output)
+    framework.run_checks(checkset, client=client, output_folder=args.output, parsed_uri=parsed_uri)
     framework.output_results(output_folder=args.output, format=args.format)
 
 if __name__ == "__main__":
