@@ -4,16 +4,26 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-
         {
-            "name": "Python Debugger: Current File with Arguments",
+            "name": "Python Debugger: Current File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "env": {
+                "LOG_LEVEL": "INFO",
+                "ENV": "development"
+            }
+        },
+        {
+            "name": "App: X-Ray",
             "type": "debugpy",
             "request": "launch",
             "program": "x-ray",
             "console": "integratedTerminal",
             "args": [
-                // "--uri", "mongodb://localhost:30017",
-                "--uri", "mongodb://localhost:27017",
+                "--uri", "mongodb://localhost:30017",
+                // "--uri", "mongodb://localhost:27017",
                 "-f", "html",
                 "-c", "config_test.json"
             ],
