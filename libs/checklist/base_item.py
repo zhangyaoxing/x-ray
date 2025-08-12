@@ -26,7 +26,7 @@ class BaseItem:
         self._description = "Base item for checklist framework. If you see this, it means the item is not properly defined."
         self._config = config or {}
         self._test_result = []
-        self._logger = logging.getLogger(__name__)
+        self._logger = logging.getLogger(self.__class__.__name__)
         self._output_folder = output_folder
 
     @abstractmethod
