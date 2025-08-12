@@ -107,13 +107,18 @@ class CollInfoItem(BaseItem):
                 self._logger.info(f"Skipping system database: {db_name}")
                 continue
             db = client[db_name]
-            collections = db.list_collection_names()
+            collections = db.list_collections()
             obj_size_bytes = self._config.get("obj_size_kb", 32) * 1024
             sharding_imbalance_percentage = self._config.get("sharding_imbalance_percentage", 0.3)
             fragmentation_ratio = self._config.get("fragmentation_ratio", 0.5)
             shards = list(client["config"].get_collection("shards").find())
   
-            for coll_name in collections:
+            for coll_info in collections:
+                coll_name = coll_info.get("name")
+                coll_type = coll_info.get("type", "collection")
+                if coll_type != "collection":
+                    self._logger.debug(f"Skipping non-collection type: {coll_name} ({coll_type})")
+                    continue
                 if coll_name.startswith("system."):
                     self._logger.debug(f"Skipping system collection: {db_name}.{coll_name}")
                     continue
@@ -132,9 +137,6 @@ class CollInfoItem(BaseItem):
                     self._fragmentation_check(stats, fragmentation_ratio)
                     
                 except Exception as e:
-                    if isinstance(e, OperationFailure) and e.code == 166:
-                        self._logger.warning(yellow(f"Collection '{ns}' is a view, skipping stats collection."))
-                    else:
-                        self._logger.error(red(f"Failed to gather stats for collection '{ns}': {str(e)}"))
+                    self._logger.error(red(f"Failed to gather stats for collection '{ns}': {str(e)}"))
 
         self.sample_result = all_stats

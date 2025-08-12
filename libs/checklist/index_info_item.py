@@ -82,15 +82,20 @@ class IndexInfoItem(BaseItem):
                 self._logger.info(f"Skipping system database: {db_name}")
                 continue
             db = client[db_name]
-            collections = db.list_collection_names()
+            collections = db.list_collections()
             unused_index_days = self._config.get("unused_index_days", 7)
             num_indexes = self._config.get("num_indexes", 10)
-  
-            for coll_name in collections:
+
+            for coll_info in collections:
+                coll_name = coll_info.get("name")
+                coll_type = coll_info.get("type", "collection")
+                if coll_type != "collection":
+                    self._logger.debug(f"Skipping non-collection type: {coll_name} ({coll_type})")
+                    continue
                 if coll_name.startswith("system."):
                     self._logger.debug(f"Skipping system collection: {db_name}.{coll_name}")
                     continue
-                self._logger.info(f"Gathering index of collection: `{db_name}.{coll_name}`")
+                self._logger.info(f"Gathering index info of collection: `{db_name}.{coll_name}`")
                 ns = f"{db_name}.{coll_name}"
                 try:
                     # Check for number of indexes
@@ -109,9 +114,6 @@ class IndexInfoItem(BaseItem):
                     self._redundant_indexes_check(ns, indexes)
                     
                 except Exception as e:
-                    if isinstance(e, OperationFailure) and e.code == 166:
-                        self._logger.warning(yellow(f"Collection '{ns}' is a view, skipping index check."))
-                    else:
-                        self._logger.error(red(f"Failed to gather index info of collection '{ns}': {str(e)}"))
+                    self._logger.error(red(f"Failed to gather index info of collection '{ns}': {str(e)}"))
 
             self.sample_result = all_index_stats
