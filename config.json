@@ -1,7 +1,7 @@
 {
     "checksets":{
         "default": {
-            "items": ["BuildInfoItem", "SecurityItem", "CollInfoItem", "IndexInfoItem"]
+            "items": ["BuildInfoItem", "SecurityItem", "CollInfoItem", "IndexInfoItem", "ReplicaSetItem"]
         }
     },
     "item_config": {
@@ -16,6 +16,9 @@
         "IndexInfoItem": {
             "unused_index_days": 7,
             "num_indexes": 10
+        },
+        "ReplicaSetItem": {
+            "replication_lag_seconds": 60
         }
     }
 }

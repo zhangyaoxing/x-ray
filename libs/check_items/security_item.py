@@ -1,5 +1,5 @@
 from pymongo import MongoClient
-from libs.checklist.base_item import BaseItem, SEVERITY
+from libs.check_items.base_item import BaseItem, SEVERITY
 from libs.utils import *
 
 class SecurityItem(BaseItem):

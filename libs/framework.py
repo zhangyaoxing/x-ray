@@ -6,7 +6,7 @@ import importlib
 import pkgutil
 import markdown
 
-def load_checklist_classes(package_name="libs.checklist"):
+def load_checklist_classes(package_name="libs.check_items"):
     class_map = {}
     package = importlib.import_module(package_name)
     for _, module_name, _ in pkgutil.iter_modules(package.__path__):
