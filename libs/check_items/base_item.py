@@ -2,13 +2,8 @@ from abc import abstractmethod
 from enum import Enum
 import logging
 from bson import json_util
+from libs.shared import SEVERITY
 from libs.utils import env
-
-class SEVERITY(Enum):
-    HIGH = 1
-    MEDIUM = 2
-    LOW = 3
-    INFO = 4
 
 def colorize_severity(severity: SEVERITY) -> str:
     if severity == SEVERITY.HIGH:
