@@ -1,9 +1,10 @@
 
+from datetime import datetime, timedelta, timezone
 from pymongo import MongoClient
 from pymongo.uri_parser import parse_uri
 from libs.check_items.base_item import BaseItem
 from libs.shared import discover_nodes
-from libs.utils import red
+from libs.utils import red, yellow
 
 
 class HostInfoItem(BaseItem):
@@ -17,6 +18,10 @@ class HostInfoItem(BaseItem):
         Gather host information from the given node URI.
         """
         try:
+            ping = node["ping"].replace(tzinfo=timezone.utc) if "ping" in node else datetime.now(timezone.utc)
+            if datetime.now(timezone.utc) - ping > timedelta(seconds=60):
+                self._logger.warning(yellow(f"Skip {node['host']} because its heartbeat is older than 60s."))
+                return None
             client = MongoClient(node["uri"])
             host_info = client.admin.command("hostInfo")
             return host_info

@@ -10,7 +10,7 @@ def colorize_severity(severity: SEVERITY) -> str:
     elif severity == SEVERITY.MEDIUM:
         return "orange"
     elif severity == SEVERITY.LOW:
-        return "blue"
+        return "green"
     elif severity == SEVERITY.INFO:
         return "gray"
 
