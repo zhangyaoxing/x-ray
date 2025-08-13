@@ -3,7 +3,9 @@ import logging
 import urllib.parse
 from libs.utils import *
 from pymongo.uri_parser import parse_uri
-from datetime import datetime, timedelta, timezone
+from pymongo import MongoClient
+from pymongo.errors import OperationFailure
+from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)
 CONNECT_TIMEOUT_MS = 5000
@@ -67,9 +69,9 @@ def discover_nodes(client, parsed_uri):
                 }
             nodes["map"] = parsed_map
             # mongos nodes
-            active_mongos = list(client.config.get_collection("mongos").find())
+            all_mongos = list(client.config.get_collection("mongos").find())
             nodes["mongos"] = []
-            for host in active_mongos:
+            for host in all_mongos:
                 ping = host.get("ping", datetime.now()).replace(tzinfo=timezone.utc)
                 nodes["mongos"].append({
                     "host": host["_id"],
@@ -186,6 +188,68 @@ def check_replset_config(replset_config, config):
             })
     return result
 
+def check_oplog_window(nodes, config):
+    """
+    Check the oplog window for each replica set member.
+    """
+    result = []
+    raw = []
+    max_oplog_window = config.get("oplog_window_hours", 48)
+    for node in nodes["members"]:
+        client = MongoClient(node["uri"], serverSelectionTimeoutMS=CONNECT_TIMEOUT_MS)
+        try:
+            oplog_info = gather_oplog_info(client)
+            raw.append({node["host"]: oplog_info})
+            retention_hours = oplog_info.get("retentionHours", 0)
+            if retention_hours < max_oplog_window:
+                result.append({
+                    "severity": SEVERITY.HIGH,
+                    "title": "Oplog Window Too Small",
+                    "description": f"`{node['host']}` oplog window is {retention_hours} hours, below the recommended minimum {max_oplog_window} hours."
+                })
+            
+        except Exception as e:
+            logger.error(red(f"Failed to check oplog window for `{node['host']}`: {str(e)}"))
+            
+    return raw, result
+def gather_replset_info(client):
+    """
+    Gather replica set configuration and status.
+    """
+    try:
+        is_master = client.admin.command("isMaster")
+        if not is_master.get("setName"):
+            logger.warning(yellow("This MongoDB instance is not part of a replica set. Skipping..."))
+            return None, None
+        replset_status = client.admin.command("replSetGetStatus")
+        replset_config = client.admin.command("replSetGetConfig")
+        return replset_status, replset_config
+    except OperationFailure as e:
+        logger.warning(yellow(f"Failed to gather replica set information: {str(e)}"))
+        return None, None
+    
+def gather_oplog_info(client):
+    """
+    Gather oplog information.
+    """
+    try:
+        stats = client.local.command("collStats", "oplog.rs")
+        server_status = client.admin.command("serverStatus")
+        if server_status.get("oplogTruncation", {}).get("minRetentionHours", None) is not None:
+            retention_hours = server_status["oplogTruncation"]["minRetentionHours"]
+        else:
+            latest = list(client.local.oplog.rs.find().sort("$natural", -1).limit(1))[0]["ts"]
+            earliest = list(client.local.oplog.rs.find().sort("$natural", 1).limit(1))[0]["ts"]
+            delta = latest.time - earliest.time
+            retention_hours = delta / 3600  # Convert seconds to hours
+        return {
+            "retentionHours": retention_hours,
+            "oplogStats": stats
+        }
+    except Exception as e:
+        logger.error(red(f"Failed to check oplog window for `{node['host']}`: {str(e)}"))
+        return {}
+    
 if __name__ == "__main__":
     from pymongo import MongoClient
     parsed_uri = parse_uri("mongodb://localhost:30017")
