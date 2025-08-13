@@ -17,11 +17,12 @@ class HostInfoItem(BaseItem):
         Gather host information from the given node URI.
         """
         try:
-            client = MongoClient(node)
+            client = MongoClient(node["uri"])
             host_info = client.admin.command("hostInfo")
             return host_info
         except Exception as e:
             self._logger.error(red(f"Failed to gather host info from {node['host']}: {str(e)}"))
+        return None
 
     def test(self, *args, **kwargs):
         """
@@ -36,10 +37,11 @@ class HostInfoItem(BaseItem):
         }
         if nodes["type"] == "RS":
             self._logger.info(f"Replica Set detected, gathering host info from all members...")
-            host_info_all["members"] = [self._gather_host_info(node) for node in nodes["members"]]
+            host_info_all["members"] = {node["host"]: self._gather_host_info(node) for node in nodes["members"]}
         elif nodes["type"] == "SH":
             self._logger.info(f"Sharded Cluster detected, gathering host info from all config/shards members...")
             for k, v in nodes["map"].items():
-                host_info_all[k] = [self._gather_host_info(node["uri"]) for node in v["hosts"]]
-        
-        self.sample_result = host_info_all
+                host_info_all[k] = {node["host"]: self._gather_host_info(node) for node in v["hosts"]}
+            host_info_all["mongos"] = {node["host"]: self._gather_host_info(node) for node in nodes["mongos"]}
+
+            self.sample_result = host_info_all
