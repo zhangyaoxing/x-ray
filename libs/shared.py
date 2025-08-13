@@ -3,6 +3,7 @@ import logging
 import urllib.parse
 from libs.utils import *
 from pymongo.uri_parser import parse_uri
+from datetime import datetime, timedelta, timezone
 
 logger = logging.getLogger(__name__)
 CONNECT_TIMEOUT_MS = 5000
@@ -58,20 +59,23 @@ def discover_nodes(client, parsed_uri):
                 hosts = v.split("/")[1].split(",")
                 parsed_map[k] = {
                     "setName": rs_name,
-                    "uri": f"mongodb://{credential}{'_'.join(hosts)}/?authSource={auth_source}&connectTimeoutMS={CONNECT_TIMEOUT_MS}",
+                    "uri": f"mongodb://{credential}{','.join(hosts)}/?authSource={auth_source}&connectTimeoutMS={CONNECT_TIMEOUT_MS}",
                     "hosts": [{
                         "host": host,
                         "uri": f"mongodb://{credential}{host}/?authSource={auth_source}&directConnection=true&connectTimeoutMS={CONNECT_TIMEOUT_MS}"
                     } for host in hosts]
                 }
+            nodes["map"] = parsed_map
             # mongos nodes
             active_mongos = list(client.config.get_collection("mongos").find())
-            nodes["mongos"] = [{
-                "host": host["_id"],
-                "uri": f"mongodb://{credential}{host['_id']}/?authSource={auth_source}&connectTimeoutMS={CONNECT_TIMEOUT_MS}",
-                "ping": host["ping"]
-            } for host in active_mongos]
-            nodes["map"] = parsed_map
+            nodes["mongos"] = []
+            for host in active_mongos:
+                ping = host.get("ping", datetime.now()).replace(tzinfo=timezone.utc)
+                nodes["mongos"].append({
+                    "host": host["_id"],
+                    "uri": f"mongodb://{credential}{host['_id']}/?authSource={auth_source}&connectTimeoutMS={CONNECT_TIMEOUT_MS}",
+                    "pingLatencySec": (datetime.now(timezone.utc) - ping).total_seconds()
+                })
 
     except Exception as e:
         logger.error(red(f"Failed to discover nodes: {str(e)}"))
@@ -91,11 +95,12 @@ def check_replset_status(replset_status, config):
         result.append({
             "severity": SEVERITY.HIGH,
             "title": "No Primary",
-            "description": "The replica set does not have a primary."
+            "description": f"`{replset_status['set']}` does not have a primary."
         })
 
     # Check member states
     max_delay = config.get("replication_lag_seconds", 60)
+    set_name = replset_status.get("set", "Unknown Set")
     for member in replset_status["members"]:
         # Check problematic states
         state = member["state"]
@@ -105,13 +110,13 @@ def check_replset_status(replset_status, config):
             result.append({
                 "severity": SEVERITY.HIGH,
                 "title": "Unhealthy Member",
-                "description": f"Member `{host}` is in `{MEMBER_STATE[state]}` state."
+                "description": f"`{set_name}` member `{host}` is in `{MEMBER_STATE[state]}` state."
             })
         elif state in [0, 5]:
             result.append({
                 "severity": SEVERITY.LOW,
                 "title": "Initializing Member",
-                "description": f"Member `{host}` is being initialized in `{MEMBER_STATE[state]}` state."
+                "description": f"`{set_name}` member `{host}` is being initialized in `{MEMBER_STATE[state]}` state."
             })
 
         # Check replication lag
@@ -121,7 +126,7 @@ def check_replset_status(replset_status, config):
                 result.append({
                     "severity": SEVERITY.HIGH,
                     "title": "High Replication Lag",
-                    "description": f"Member `{host}` has a replication lag of `{lag.seconds}` seconds, which is greater than the configured threshold of `{max_delay}` seconds."
+                    "description": f"`{set_name}` member `{host}` has a replication lag of `{lag.seconds}` seconds, which is greater than the configured threshold of `{max_delay}` seconds."
                 })
 
     return result
@@ -131,19 +136,20 @@ def check_replset_config(replset_config, config):
     Check the replica set configuration for any issues.
     """
     result = []
+    set_name = replset_config["config"]["_id"]
     # Check number of voting members
     voting_members = sum(1 for member in replset_config["config"]["members"] if member.get("votes", 0) > 0)
     if voting_members < 3:
         result.append({
             "severity": SEVERITY.HIGH,
             "title": "Insufficient Voting Members",
-            "description": f"The replica set has only {voting_members} voting members. Consider adding more to ensure fault tolerance."
+            "description": f"`{set_name}` has only {voting_members} voting members. Consider adding more to ensure fault tolerance."
         })
     if voting_members % 2 == 0:
         result.append({
             "severity": SEVERITY.HIGH,
             "title": "Even Voting Members",
-            "description": "The replica set has an even number of voting members, which can lead to split-brain scenarios. Consider adding an additional member."
+            "description": f"`{set_name}` has an even number of voting members, which can lead to split-brain scenarios. Consider adding an additional member."
         })
 
     for member in replset_config["config"]["members"]:
@@ -152,31 +158,31 @@ def check_replset_config(replset_config, config):
                 result.append({
                     "severity": SEVERITY.HIGH,
                     "title": "Delayed Voting Member",
-                    "description": f"Member `{member['host']}` is a delayed secondary but is also a voting member. This can lead to performance issues."
+                    "description": f"`{set_name}` member `{member['host']}` is a delayed secondary but is also a voting member. This can lead to performance issues."
                 })
             elif member.get("priority", 0) > 0:
                 result.append({
                     "severity": SEVERITY.HIGH,
                     "title": "Delayed Voting Member",
-                    "description": f"Member `{member['host']}` is a delayed secondary but is has non-zero priority. This can lead to potential issues."
+                    "description": f"`{set_name}` member `{member['host']}` is a delayed secondary but is has non-zero priority. This can lead to potential issues."
                 })
             elif not member.get("hidden", False):
                 result.append({
                     "severity": SEVERITY.MEDIUM,
                     "title": "Delayed Voting Member",
-                    "description": f"Member `{member['host']}` is a delayed secondary and should be configured as hidden."
+                    "description": f"`{set_name}` member `{member['host']}` is a delayed secondary and should be configured as hidden."
                 })
             else:
                 result.append({
                     "severity": SEVERITY.LOW,
                     "title": "Delayed Voting Member",
-                    "description": f"Member `{member['host']}` is a delayed secondary. Delayed secondaries are not recommended in general."
+                    "description": f"`{set_name}` member `{member['host']}` is a delayed secondary. Delayed secondaries are not recommended in general."
                 })
         if member.get("arbiterOnly", False):
             result.append({
                 "severity": SEVERITY.HIGH,
                 "title": "Arbiter Member",
-                "description": f"Member `{member['host']}` is an arbiter. Arbiters are not recommended."
+                "description": f"`{set_name}` member `{member['host']}` is an arbiter. Arbiters are not recommended."
             })
     return result
 

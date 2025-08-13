@@ -18,9 +18,8 @@ class HostInfoItem(BaseItem):
         Gather host information from the given node URI.
         """
         try:
-            ping = node["ping"].replace(tzinfo=timezone.utc) if "ping" in node else datetime.now(timezone.utc)
-            if datetime.now(timezone.utc) - ping > timedelta(seconds=60):
-                self._logger.warning(yellow(f"Skip {node['host']} because its heartbeat is older than 60s."))
+            if "pingLatencySec" in node and node["pingLatencySec"] > 60:
+                self._logger.warning(yellow(f"Skip {node['host']} because its last heartbeat is earlier than 60s ago."))
                 return None
             client = MongoClient(node["uri"])
             host_info = client.admin.command("hostInfo")
