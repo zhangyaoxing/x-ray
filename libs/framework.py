@@ -69,13 +69,13 @@ class Framework:
 
         with open(output_file, "w") as f:
             f.write("# Deployment Health Check\n\n")
-            f.write("## Check Results\n\n")
+            f.write("## 1 Check Results\n\n")
             for i, item in enumerate(self._items):
-                f.write(f"### {i + 1} {item.name}\n\n")
+                f.write(f"### 1.{i + 1} {item.name}\n\n")
                 f.write(f"*{item.description}*\n\n")
                 f.write(item.test_result_markdown)
             
-            f.write("## Check Data Review\n\n")
+            f.write("## 2 Check Data Review\n\n")
 
         if format == "html":
             self._logger.info(f"Converting results to HTML format and saving to: {green(batch_folder + '/results.html')}")
