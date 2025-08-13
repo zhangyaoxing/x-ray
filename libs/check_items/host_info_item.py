@@ -45,7 +45,7 @@ class HostInfoItem(BaseItem):
         elif nodes["type"] == "SH":
             self._logger.info(f"Sharded Cluster detected, gathering host info from all config/shards members...")
             for k, v in nodes["map"].items():
-                host_info_all[k] = {node["host"]: self._gather_host_info(node) for node in v["hosts"]}
+                host_info_all[k] = {node["host"]: self._gather_host_info(node) for node in v["members"]}
             host_info_all["mongos"] = {node["host"]: self._gather_host_info(node) for node in nodes["mongos"]}
 
             self.sample_result = host_info_all

@@ -1,0 +1,98 @@
+from datetime import datetime, timedelta, timezone
+from pymongo import MongoClient
+from pymongo.errors import OperationFailure
+from libs.check_items.base_item import BaseItem
+from libs.shared import SEVERITY, check_oplog_window, check_replset_config, check_replset_status, discover_nodes, gather_replset_info
+from libs.utils import *
+
+class ShardedClusterItem(BaseItem):
+    def __init__(self, output_folder, config=None):
+        super().__init__(output_folder, config)
+        self._name = "Sharded Cluster Information"
+        self._description = "Collects and reviews sharded cluster configuration and status."
+    
+    def _check_mongos_availability(self, nodes):
+        """
+        Check if the mongos is available and connected.
+        """
+        all_mongos = nodes["mongos"]
+        active_mongos = []
+        for mongos in all_mongos:
+            if mongos.get("pingLatencySec", 0) > 60:
+                self.append_item_result(
+                    SEVERITY.LOW,
+                    "Irresponsive Mongos",
+                    f"Mongos `{mongos['host']}` is not responsive. Last ping was at `{round(mongos['pingLatencySec'])}` seconds ago. This is expected if the mongos has been removed from the cluster."
+                )
+            else:
+                active_mongos.append(mongos["host"])
+
+        if len(active_mongos) == 0:
+            self.append_item_result(
+                SEVERITY.HIGH,
+                "No Active Mongos",
+                "No active mongos found in the cluster."
+            )
+        if len(active_mongos) == 1:
+            self.append_item_result(
+                SEVERITY.HIGH,
+                "Single Mongos",
+                f"Only one mongos `{active_mongos[0]}` is available in the cluster. No failover is possible."
+            )
+        return [{
+            "host": mongos["host"],
+            "pingLatencySec": mongos["pingLatencySec"]
+        } for mongos in all_mongos]
+        
+    def _check_map(self, nodes):
+        """
+        Check the shards in the cluster.
+        """
+        sample_result = {}
+        for shard in nodes["map"]:
+            shard_info = nodes["map"][shard]
+            # Connect to shard primary
+            uri = shard_info["uri"]
+            try:
+                client = MongoClient(uri, serverSelectionTimeoutMS=5000)
+                replset_status, replset_config = gather_replset_info(client)
+                sample_result[shard] = {
+                    "replset_status": replset_status,
+                    "replset_config": replset_config
+                }
+
+                # Check replica set status and config
+                result = check_replset_status(replset_status, self._config)
+                for item in result:
+                    self.append_item_result(item["severity"], item["title"], item["description"])
+                result = check_replset_config(replset_config, self._config)
+                for item in result:
+                    self.append_item_result(item["severity"], item["title"], item["description"])
+
+                # Check oplog window
+                raw_oplog_info, result = check_oplog_window(shard_info, self._config)
+                sample_result[shard]["oplog"] = raw_oplog_info
+                for item in result:
+                    self.append_item_result(item["severity"], item["title"], item["description"])
+            except OperationFailure as e:
+                self._logger.error(red(f"Failed to connect to shard `{shard}`: {str(e)}"))
+        return sample_result
+
+    def test(self, *args, **kwargs):
+        """
+        Main test method to gather sharded cluster information.
+        """
+        self._logger.info(f"Gathering sharded cluster info...")
+        client = kwargs.get("client")
+        parsed_uri = kwargs.get("parsed_uri")
+
+        is_master = client.admin.command("isMaster")
+        if "setName" in is_master:
+            self._logger.warning(yellow("This MongoDB instance is not part of a sharded cluster. Skipping..."))
+            return
+        nodes = discover_nodes(client, parsed_uri)
+        sample_result = {}
+        sample_result["mongos"] = self._check_mongos_availability(nodes)
+        sample_result["map"] = self._check_map(nodes)
+
+        self.sample_result = sample_result

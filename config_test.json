@@ -1,7 +1,7 @@
 {
     "checksets":{
         "default": {
-            "items": ["ShardKeyItem", "HostInfoItem", "BuildInfoItem", "SecurityItem", "CollInfoItem", "IndexInfoItem", "ReplicaSetItem"]
+            "items": ["ShardKeyItem", "HostInfoItem", "BuildInfoItem", "SecurityItem", "CollInfoItem", "IndexInfoItem", "ReplicaSetItem", "ShardedClusterItem"]
         }
     },
     "item_config": {
@@ -19,7 +19,12 @@
             "num_indexes": 1
         },
         "ReplicaSetItem": {
-            "replication_lag_seconds": 0
+            "replication_lag_seconds": 0,
+            "oplog_window_hours": 1000000
+        },
+        "ShardedClusterItem": {
+            "replication_lag_seconds": 0,
+            "oplog_window_hours": 1000000
         }
     }
 }

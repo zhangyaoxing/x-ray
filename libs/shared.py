@@ -62,7 +62,7 @@ def discover_nodes(client, parsed_uri):
                 parsed_map[k] = {
                     "setName": rs_name,
                     "uri": f"mongodb://{credential}{','.join(hosts)}/?authSource={auth_source}&connectTimeoutMS={CONNECT_TIMEOUT_MS}",
-                    "hosts": [{
+                    "members": [{
                         "host": host,
                         "uri": f"mongodb://{credential}{host}/?authSource={auth_source}&directConnection=true&connectTimeoutMS={CONNECT_TIMEOUT_MS}"
                     } for host in hosts]
