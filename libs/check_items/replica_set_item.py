@@ -1,5 +1,5 @@
 from pymongo.errors import OperationFailure
-from libs.check_items.base_item import BaseItem, SEVERITY
+from libs.check_items.base_item import BaseItem
 from libs.shared import check_replset_config, check_replset_status
 from libs.utils import *
 

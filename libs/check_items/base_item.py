@@ -1,5 +1,4 @@
 from abc import abstractmethod
-from enum import Enum
 import logging
 from bson import json_util
 from libs.shared import SEVERITY

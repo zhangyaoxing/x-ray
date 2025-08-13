@@ -1,5 +1,5 @@
-from pymongo import MongoClient
-from libs.check_items.base_item import BaseItem, SEVERITY
+from libs.check_items.base_item import BaseItem
+from libs.shared import SEVERITY
 from libs.utils import *
 
 class BuildInfoItem(BaseItem):

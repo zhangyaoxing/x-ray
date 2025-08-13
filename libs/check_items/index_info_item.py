@@ -1,7 +1,6 @@
 from datetime import datetime
-from pymongo import MongoClient
-from pymongo.errors import OperationFailure
-from libs.check_items.base_item import BaseItem, SEVERITY
+from libs.check_items.base_item import BaseItem
+from libs.shared import SEVERITY
 from libs.utils import *
 
 """
