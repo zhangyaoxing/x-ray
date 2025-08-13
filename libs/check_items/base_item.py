@@ -10,9 +10,9 @@ def colorize_severity(severity: SEVERITY) -> str:
     elif severity == SEVERITY.MEDIUM:
         return "orange"
     elif severity == SEVERITY.LOW:
-        return "gray"
-    else:
         return "blue"
+    elif severity == SEVERITY.INFO:
+        return "gray"
 
 class BaseItem:
     def __init__(self, output_folder: str, config: dict = None):
