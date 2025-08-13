@@ -1,6 +1,6 @@
 import logging
 import urllib.parse
-from utils import *
+from libs.utils import *
 from pymongo.uri_parser import parse_uri
 
 logger = logging.getLogger(__name__)
@@ -53,8 +53,8 @@ def discover_nodes(client, parsed_uri):
 
 if __name__ == "__main__":
     from pymongo import MongoClient
-    parsed_uri = parse_uri("mongodb://root:qwe%21%40%23@localhost:30017")
-    client = MongoClient("mongodb://root:qwe%21%40%23@localhost:30017")
+    parsed_uri = parse_uri("mongodb://localhost:30017")
+    client = MongoClient("mongodb://localhost:30017")
     nodes = discover_nodes(client, parsed_uri)
     for node in nodes:
         print(node)
