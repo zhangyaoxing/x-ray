@@ -78,11 +78,12 @@ class BaseItem:
             type = block.get("type")
             caption = block.get("caption")
             if type == "table":
-                result += f"### ({i + 1}) {block.get('caption')}\n"
+                result += f"#### ({i + 1}) {caption}\n"
                 result += "| " + " | ".join(col.get("name") for col in block.get("columns", [])) + " |\n"
-                result += "|:----------:|" + "|:----------:|" * (len(block.get("columns", [])) - 1) + "\n"
+                result += "|:----------:" * len(block["columns"]) + "|\n"
                 for row in block.get("rows", []):
                     result += "| " + " | ".join(str(cell) for cell in row) + " |\n"
+                result += "\n"
             # TODO: support other types.
         return result
 

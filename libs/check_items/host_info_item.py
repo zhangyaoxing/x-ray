@@ -36,6 +36,7 @@ class HostInfoItem(BaseItem):
         client = kwargs.get("client")
         parsed_uri = kwargs.get("parsed_uri")
         nodes = discover_nodes(client, parsed_uri)
+        self._nodes = nodes
         host_info_all = {
             "type": nodes["type"],
         }
@@ -48,17 +49,52 @@ class HostInfoItem(BaseItem):
                 host_info_all[k] = {node["host"]: self._gather_host_info(node) for node in v["members"]}
             host_info_all["mongos"] = {node["host"]: self._gather_host_info(node) for node in nodes["mongos"]}
 
-            self.captured_sample = host_info_all
+        self.captured_sample = host_info_all
 
     @property
     def review_result(self):
         """
         Review the gathered host information.
         """
-        if not self.captured_sample:
-            self._logger.warning(yellow("No sample result available for review."))
-            return None
+        captured = self.captured_sample
 
-        # Perform review logic here
-        self._logger.info(f"Reviewing host info...")
-        return self.captured_sample
+        if captured["type"] == "SH":
+            data = []
+            for component, block in captured.items():
+                if component == "type":
+                    continue
+                rows = []
+                for host, info in block.items():
+                    if info is None:
+                        rows.append([host, "N/A", "N/A", "N/A", "N/A"])
+                        continue
+                    system = info["system"]
+                    os = info["os"]
+                    extra = info["extra"]
+                    rows.append([
+                        host,
+                        f"{extra['cpuString']} ({system['cpuArch']}) {extra['cpuFrequencyMHz']} MHz {system['numCores']} cores",
+                        system["numaEnabled"],
+                        system["memSizeMB"] / 1024,
+                        f"{os['name']} {os['version']}"
+                    ])
+                data.append({
+                    "type": "table",
+                    "caption": f"Hardware & OS Information ({component})",
+                    "columns": [
+                        {"name": "Host", "type": "string"},
+                        {"name": "CPU", "type": "string"},
+                        {"name": "NUMA", "type": "boolean"},
+                        {"name": "Memory (GB)", "type": "string"},
+                        {"name": "OS", "type": "string"},
+                    ],
+                    "rows": rows
+                })
+        else:
+            pass
+
+        return {
+            "name": self.name,
+            "description": self._description,
+            "data": data
+        }
