@@ -20,6 +20,7 @@ class ShardedClusterItem(BaseItem):
         for mongos in all_mongos:
             if mongos.get("pingLatencySec", 0) > MAX_MONGOS_PING_LATENCY:
                 self.append_item_result(
+                    mongos["host"],
                     SEVERITY.LOW,
                     "Irresponsive Mongos",
                     f"Mongos `{mongos['host']}` is not responsive. Last ping was at `{round(mongos['pingLatencySec'])}` seconds ago. This is expected if the mongos has been removed from the cluster."
@@ -29,12 +30,14 @@ class ShardedClusterItem(BaseItem):
 
         if len(active_mongos) == 0:
             self.append_item_result(
+                "cluster",
                 SEVERITY.HIGH,
                 "No Active Mongos",
                 "No active mongos found in the cluster."
             )
         if len(active_mongos) == 1:
             self.append_item_result(
+                active_mongos[0],
                 SEVERITY.HIGH,
                 "Single Mongos",
                 f"Only one mongos `{active_mongos[0]}` is available in the cluster. No failover is possible."
@@ -64,16 +67,16 @@ class ShardedClusterItem(BaseItem):
                 # Check replica set status and config
                 result = check_replset_status(replset_status, self._config)
                 for item in result:
-                    self.append_item_result(item["severity"], item["title"], item["description"])
+                    self.append_item_result(item["host"], item["severity"], item["title"], item["description"])
                 result = check_replset_config(replset_config, self._config)
                 for item in result:
-                    self.append_item_result(item["severity"], item["title"], item["description"])
+                    self.append_item_result(item["host"], item["severity"], item["title"], item["description"])
 
                 # Check oplog window
                 raw_oplog_info, result = check_oplog_window(shard_info, self._config)
                 sample_result[shard]["oplog"] = raw_oplog_info
                 for item in result:
-                    self.append_item_result(item["severity"], item["title"], item["description"])
+                    self.append_item_result(item["host"], item["severity"], item["title"], item["description"])
             except OperationFailure as e:
                 self._logger.error(red(f"Failed to connect to shard `{shard}`: {str(e)}"))
         return sample_result

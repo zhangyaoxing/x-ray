@@ -20,6 +20,7 @@ class SecurityItem(BaseItem):
         authorization = security_settings.get("authorization", None)
         if authorization != "enabled":
             self.append_item_result(
+                "cluster",
                 SEVERITY.HIGH,
                 "Authorization Disabled",
                 "Authorization is disabled, which may lead to unauthorized access."
@@ -28,6 +29,7 @@ class SecurityItem(BaseItem):
         redact_logs = security_settings.get("redactClientLogData", None)
         if redact_logs != True:
             self.append_item_result(
+                "cluster",
                 SEVERITY.MEDIUM,
                 "Log Redaction Disabled",
                 "Redaction of log is disabled, which may lead to sensitive information exposure."
@@ -37,20 +39,24 @@ class SecurityItem(BaseItem):
         tls_enabled = net.get("tls", {}).get("mode", None)
         if tls_enabled is None:
             self.append_item_result(
+                "cluster",
                 SEVERITY.HIGH,
                 "TLS Disabled",
                 "TLS is disabled, which may lead to unencrypted connections."
             )
         elif tls_enabled != "requireTLS":
             self.append_item_result(
+                "cluster",
                 SEVERITY.MEDIUM,
                 "Optional TLS",
                 f"TLS is enabled but not set to `requireTLS`, current mode is `{tls_enabled}`."
             )
 
+        # TODO: check each node.
         port = net.get("port", None)
         if port == 27017:
             self.append_item_result(
+                "cluster",
                 SEVERITY.LOW,
                 "Default Port Used",
                 "Default port `27017` is used, which may expose the server to unnecessary risks."

@@ -21,6 +21,7 @@ class BuildInfoItem(BaseItem):
         if sample_version[0] < eol_version[0] or \
            (sample_version[0] == eol_version[0] and sample_version[1] < eol_version[1]):
             self.append_item_result(
+                "cluster",
                 SEVERITY.HIGH,
                 "Server Version EOL",
                 f"Server version {sample_version} is below EOL version {eol_version}."

@@ -18,17 +18,17 @@ class ReplicaSetItem(BaseItem):
         # Check replica set status
         result = check_replset_status(replset_status, self._config)
         for item in result:
-            self.append_item_result(item["severity"], item["title"], item["description"])
+            self.append_item_result(item["host"], item["severity"], item["title"], item["description"])
         # Check replica set config
         result = check_replset_config(replset_config, self._config)
         for item in result:
-            self.append_item_result(item["severity"], item["title"], item["description"])
+            self.append_item_result(item["host"], item["severity"], item["title"], item["description"])
 
         # Check oplog window
         nodes = discover_nodes(client, kwargs.get("parsed_uri"))
         raw_oplog_info, result = check_oplog_window(nodes, self._config)
         for item in result:
-            self.append_item_result(item["severity"], item["title"], item["description"])
+            self.append_item_result(item["host"], item["severity"], item["title"], item["description"])
 
         self.sample_result = {
             "replset_status": replset_status,

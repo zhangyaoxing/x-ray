@@ -17,6 +17,7 @@ class IndexInfoItem(BaseItem):
         """
         if len(index_stats) > num_indexes:
             self.append_item_result(
+                "cluster",
                 SEVERITY.MEDIUM,
                 "Too Many Indexes",
                 f"Collection `{ns}` has more than `{num_indexes}` indexes, which can cause potential write performance issues."
@@ -32,7 +33,8 @@ class IndexInfoItem(BaseItem):
                 if last_used:
                     if (datetime.now() - last_used).days > unused_index_days:
                         self.append_item_result(
-                            SEVERITY.MEDIUM,
+                            "cluster",
+                            SEVERITY.LOW,
                             "Unused Index",
                             f"Index `{index.get('name')}` in collection `{ns}` has not been used for more than `{unused_index_days}` days."
                         )
@@ -64,6 +66,7 @@ class IndexInfoItem(BaseItem):
             for target in index_targets:
                 if is_redundant(index, target):
                     self.append_item_result(
+                        "cluster",
                         SEVERITY.MEDIUM,
                         "Redundant Index",
                         f"Index `{index.get('name')}` in collection `{ns}` is redundant with index `{target.get('name')}`."

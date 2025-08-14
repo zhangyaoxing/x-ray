@@ -24,6 +24,7 @@ class ShardKeyItem(BaseItem):
                 v = key.get("_id", None)
                 if (v == 1 or v == -1) and len(key.keys()) == 1:
                     self.append_item_result(
+                        "cluster",
                         SEVERITY.INFO,
                         "Shard Key",
                         f"Collection `{c['_id']}` has the shard key set to `{{_id: {v}}}`. Make sure the value of `_id` is not monotonically increasing or decreasing."

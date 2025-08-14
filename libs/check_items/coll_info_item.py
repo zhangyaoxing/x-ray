@@ -15,6 +15,7 @@ class CollInfoItem(BaseItem):
         """
         Check for fragmentation in the collection.
         """
+        # TODO: move to each node
         def get_details(id, s):
             detail = {
                 "id": id,
@@ -49,12 +50,14 @@ class CollInfoItem(BaseItem):
             index_frag = index_reusable / total_index_size if total_index_size else 0
             if coll_frag > threshold:
                 self.append_item_result(
+                    "cluster",
                     SEVERITY.MEDIUM,
                     "High Collection Fragmentation",
                     f"Collection `{detail['id']}` has a higher fragmentation: `{coll_frag:.2%}` than threshold `{threshold:.2%}`."
                 )
             if index_frag > threshold:
                 self.append_item_result(
+                    "cluster",
                     SEVERITY.MEDIUM,
                     "High Index Fragmentation",
                     f"Collection `{detail['id']}` has a higher index fragmentation: `{index_frag:.2%}` than threshold `{threshold:.2%}`."
@@ -79,6 +82,7 @@ class CollInfoItem(BaseItem):
                 imbalance_percent = (high["size"] - low["size"]) / low["size"]
             if imbalance_percent > threshold:
                 self.append_item_result(
+                    "cluster",
                     SEVERITY.MEDIUM,
                     "Sharding Imbalance",
                     f"Sharding imbalance detected in `{ns}`: `{high['shard']}` has `{imbalance_percent:.2%}` more data than `{low['shard']}`."
@@ -89,6 +93,7 @@ class CollInfoItem(BaseItem):
         """
         if stats.get("avgObjSize", 0) > obj_size_bytes:
             self.append_item_result(
+                "cluster",
                 SEVERITY.LOW,
                 "Large Object Size",
                 f"Collection `{ns}` has average object size `{stats.get('avgObjSize', 0) / 1024} KB` larger than `{obj_size_bytes / 1024} KB`."

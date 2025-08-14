@@ -35,6 +35,8 @@ def discover_nodes(client, parsed_uri):
     """
     nodes = {}
     try:
+        # TODO: accept invalid TLS certificates
+        # TODO: accept custom CA certificates
         is_master = client.admin.command("isMaster")
         auth_source = parsed_uri['options'].get('authSource', 'admin')
         if parsed_uri.get("username") and parsed_uri.get("password"):
@@ -97,6 +99,7 @@ def check_replset_status(replset_status, config):
 
     if not primary_member:
         result.append({
+            "host": "cluster",
             "severity": SEVERITY.HIGH,
             "title": "No Primary",
             "description": f"`{replset_status['set']}` does not have a primary."
@@ -112,12 +115,14 @@ def check_replset_status(replset_status, config):
         
         if state in [3, 6, 8, 9, 10]:
             result.append({
+                "host": host,
                 "severity": SEVERITY.HIGH,
                 "title": "Unhealthy Member",
                 "description": f"`{set_name}` member `{host}` is in `{MEMBER_STATE[state]}` state."
             })
         elif state in [0, 5]:
             result.append({
+                "host": host,
                 "severity": SEVERITY.LOW,
                 "title": "Initializing Member",
                 "description": f"`{set_name}` member `{host}` is being initialized in `{MEMBER_STATE[state]}` state."
@@ -128,6 +133,7 @@ def check_replset_status(replset_status, config):
             lag = member["optimeDate"] - primary_member["optimeDate"]
             if lag.seconds >= max_delay:
                 result.append({
+                    "host": host,
                     "severity": SEVERITY.HIGH,
                     "title": "High Replication Lag",
                     "description": f"`{set_name}` member `{host}` has a replication lag of `{lag.seconds}` seconds, which is greater than the configured threshold of `{max_delay}` seconds."
@@ -145,12 +151,14 @@ def check_replset_config(replset_config, config):
     voting_members = sum(1 for member in replset_config["config"]["members"] if member.get("votes", 0) > 0)
     if voting_members < 3:
         result.append({
+            "host": "cluster",
             "severity": SEVERITY.HIGH,
             "title": "Insufficient Voting Members",
             "description": f"`{set_name}` has only {voting_members} voting members. Consider adding more to ensure fault tolerance."
         })
     if voting_members % 2 == 0:
         result.append({
+            "host": "cluster",
             "severity": SEVERITY.HIGH,
             "title": "Even Voting Members",
             "description": f"`{set_name}` has an even number of voting members, which can lead to split-brain scenarios. Consider adding an additional member."
@@ -160,30 +168,35 @@ def check_replset_config(replset_config, config):
         if member.get("slaveDelay", 0) > 0:
             if member.get("votes", 0) > 0:
                 result.append({
+                    "host": member["host"],
                     "severity": SEVERITY.HIGH,
                     "title": "Delayed Voting Member",
                     "description": f"`{set_name}` member `{member['host']}` is a delayed secondary but is also a voting member. This can lead to performance issues."
                 })
             elif member.get("priority", 0) > 0:
                 result.append({
+                    "host": member["host"],
                     "severity": SEVERITY.HIGH,
                     "title": "Delayed Voting Member",
                     "description": f"`{set_name}` member `{member['host']}` is a delayed secondary but is has non-zero priority. This can lead to potential issues."
                 })
             elif not member.get("hidden", False):
                 result.append({
+                    "host": member["host"],
                     "severity": SEVERITY.MEDIUM,
                     "title": "Delayed Voting Member",
                     "description": f"`{set_name}` member `{member['host']}` is a delayed secondary and should be configured as hidden."
                 })
             else:
                 result.append({
+                    "host": member["host"],
                     "severity": SEVERITY.LOW,
                     "title": "Delayed Voting Member",
                     "description": f"`{set_name}` member `{member['host']}` is a delayed secondary. Delayed secondaries are not recommended in general."
                 })
         if member.get("arbiterOnly", False):
             result.append({
+                "host": member["host"],
                 "severity": SEVERITY.HIGH,
                 "title": "Arbiter Member",
                 "description": f"`{set_name}` member `{member['host']}` is an arbiter. Arbiters are not recommended."
@@ -207,6 +220,7 @@ def check_oplog_window(nodes, config):
             retention_hours = min_retention_hours if min_retention_hours > 0 else current_retention_hours
             if retention_hours < max_oplog_window:
                 result.append({
+                    "host": node["host"],
                     "severity": SEVERITY.HIGH,
                     "title": "Oplog Window Too Small",
                     "description": f"`{node['host']}` oplog window is {retention_hours} hours, below the recommended minimum {max_oplog_window} hours."
