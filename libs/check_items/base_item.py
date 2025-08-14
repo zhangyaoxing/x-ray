@@ -24,7 +24,7 @@ class BaseItem:
         self._output_folder = output_folder
 
     @abstractmethod
-    def test(self):
+    def test(self, *args, **kwargs):
         pass
 
     @property
