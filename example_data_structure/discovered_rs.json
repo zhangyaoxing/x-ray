@@ -1,0 +1,18 @@
+{
+    "type": "RS",
+    "setName": "replset",
+    "members": [
+        {
+            "host": "localhost:27017",
+            "uri": "mongodb://localhost:27017/?authSource=admin&directConnection=true&connectTimeoutMS=5000"
+        },
+        {
+            "host": "localhost:27018",
+            "uri": "mongodb://localhost:27018/?authSource=admin&directConnection=true&connectTimeoutMS=5000"
+        },
+        {
+            "host": "localhost:27019",
+            "uri": "mongodb://localhost:27019/?authSource=admin&directConnection=true&connectTimeoutMS=5000"
+        }
+    ]
+}
