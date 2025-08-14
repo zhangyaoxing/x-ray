@@ -27,6 +27,8 @@ class SEVERITY(Enum):
     LOW = 3
     INFO = 4
 
+MAX_MONGOS_PING_LATENCY = 60  # seconds
+
 def discover_nodes(client, parsed_uri):
     """
     Discover nodes in the MongoDB replica set or sharded cluster.

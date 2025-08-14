@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, timezone
 from pymongo import MongoClient
 from pymongo.errors import OperationFailure
 from libs.check_items.base_item import BaseItem
-from libs.shared import SEVERITY, check_oplog_window, check_replset_config, check_replset_status, discover_nodes, gather_replset_info
+from libs.shared import *
 from libs.utils import *
 
 class ShardedClusterItem(BaseItem):
@@ -18,7 +18,7 @@ class ShardedClusterItem(BaseItem):
         all_mongos = nodes["mongos"]
         active_mongos = []
         for mongos in all_mongos:
-            if mongos.get("pingLatencySec", 0) > 60:
+            if mongos.get("pingLatencySec", 0) > MAX_MONGOS_PING_LATENCY:
                 self.append_item_result(
                     SEVERITY.LOW,
                     "Irresponsive Mongos",
