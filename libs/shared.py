@@ -246,7 +246,13 @@ def gather_oplog_info(client):
         return {
             "minRetentionHours": min_retention_hours,
             "currentRetentionHours": current_retention_hours,
-            "oplogStats": stats
+            "oplogStats": {
+                "size": stats["size"],
+                "count": stats["count"],
+                "storageSize": stats["storageSize"],
+                "maxSize": stats["maxSize"],
+                "averageObjectSize": stats["avgObjSize"],
+            }
         }
     except Exception as e:
         logger.error(red(f"Failed to check oplog window for `{node['host']}`: {str(e)}"))
