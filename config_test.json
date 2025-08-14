@@ -20,11 +20,11 @@
         },
         "ReplicaSetItem": {
             "replication_lag_seconds": 0,
-            "oplog_window_hours": 1000000
+            "oplog_window_hours": 100000
         },
         "ShardedClusterItem": {
             "replication_lag_seconds": 0,
-            "oplog_window_hours": 1000000
+            "oplog_window_hours": 100000
         }
     }
 }

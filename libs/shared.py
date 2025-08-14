@@ -200,7 +200,9 @@ def check_oplog_window(nodes, config):
         try:
             oplog_info = gather_oplog_info(client)
             raw.append({node["host"]: oplog_info})
-            retention_hours = oplog_info.get("retentionHours", 0)
+            min_retention_hours = oplog_info.get("minRetentionHours", 0)
+            current_retention_hours = oplog_info.get("currentRetentionHours", 0)
+            retention_hours = min_retention_hours if min_retention_hours > 0 else current_retention_hours
             if retention_hours < max_oplog_window:
                 result.append({
                     "severity": SEVERITY.HIGH,
@@ -235,15 +237,15 @@ def gather_oplog_info(client):
     try:
         stats = client.local.command("collStats", "oplog.rs")
         server_status = client.admin.command("serverStatus")
-        if server_status.get("oplogTruncation", {}).get("minRetentionHours", None) is not None:
-            retention_hours = server_status["oplogTruncation"]["minRetentionHours"]
-        else:
-            latest = list(client.local.oplog.rs.find().sort("$natural", -1).limit(1))[0]["ts"]
-            earliest = list(client.local.oplog.rs.find().sort("$natural", 1).limit(1))[0]["ts"]
-            delta = latest.time - earliest.time
-            retention_hours = delta / 3600  # Convert seconds to hours
+        min_retention_hours = server_status.get("oplogTruncation", {}).get("minRetentionHours", 0)
+
+        latest = list(client.local.oplog.rs.find().sort("$natural", -1).limit(1))[0]["ts"]
+        earliest = list(client.local.oplog.rs.find().sort("$natural", 1).limit(1))[0]["ts"]
+        delta = latest.time - earliest.time
+        current_retention_hours = delta / 3600  # Convert seconds to hours
         return {
-            "retentionHours": retention_hours,
+            "minRetentionHours": min_retention_hours,
+            "currentRetentionHours": current_retention_hours,
             "oplogStats": stats
         }
     except Exception as e:
