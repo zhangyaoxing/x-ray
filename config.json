@@ -26,7 +26,9 @@
             "oplog_window_hours": 48
         },
         "ServerStatusItem": {
-            "used_connection_ratio": 0.8
+            "used_connection_ratio": 0.8,
+            "query_targeting": 1000,
+            "query_targeting_obj": 1000
         }
     }
 }

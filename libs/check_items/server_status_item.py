@@ -20,19 +20,13 @@ class ServerStatusItem(BaseItem):
         except Exception as e:
             self._logger.warning(f"Failed to gather server status: {str(e)}")
             return None
-        
-    def _check_server_status(self, server_status):
-        """
-        Check server status for any issues.
-        """
-        host = server_status.get("host", "unknown")
-        connections = server_status.get("connections", {})
-        self._check_connections(host, connections)
-    
-    def _check_connections(self, host, connections):
+
+    def _check_connections(self, server_status):
         """
         Check the connections metrics.
         """
+        host = server_status.get("host", "unknown")
+        connections = server_status.get("connections", {})
         used_connection_ratio = self._config.get("used_connection_ratio", 0.8)
         available = connections.get("available", 0)
         current = connections.get("current", 0)
@@ -42,7 +36,32 @@ class ServerStatusItem(BaseItem):
                 host,
                 SEVERITY.HIGH,
                 "High Connection Usage",
-                f"Current connections ({current}) exceed {used_connection_ratio * 100:.2f}% of total connections ({total})."
+                f"Current connections (`{current}`) exceed `{used_connection_ratio * 100:.2f}%` of total connections (`{total}`)."
+            )
+    def _check_query_targeting(self, server_status):
+        """
+        Check query targeting metrics.
+        """
+        host = server_status.get("host", "unknown")
+        query_executor = server_status["metrics"].get("queryExecutor", {})
+        document = server_status["metrics"].get("document", {})
+        scanned_returned = (query_executor["scanned"] / document["returned"]) if document["returned"] > 0 else 0
+        scanned_obj_returned = (query_executor["scannedObjects"] / document["returned"]) if document["returned"] > 0 else 0
+        query_targeting = self._config.get("query_targeting", {})
+        query_targeting_obj = self._config.get("query_targeting_obj", {})
+        if scanned_returned > query_targeting:
+            self.append_item_result(
+                host,
+                SEVERITY.HIGH,
+                "Poor Query Targeting",
+                f"Scanned/Returned ratio `{scanned_returned:.2f}` exceeds the threshold `{query_targeting}`."
+            )
+        if scanned_obj_returned > query_targeting_obj:
+            self.append_item_result(
+                host,
+                SEVERITY.HIGH,
+                "Poor Query Targeting",
+                f"Scanned Objects/Returned ratio `{scanned_obj_returned:.2f}` exceeds the threshold `{query_targeting_obj}`."
             )
 
     def test(self, *args, **kwargs):
@@ -64,7 +83,7 @@ class ServerStatusItem(BaseItem):
             c = MongoClient(uri, serverSelectionTimeoutMS=5000)
             status = self._gather_server_status(c)
             all_status["mongos"].append(status)
-            self._check_server_status(status)
+            self._check_connections(status)
 
         # Gather shard and config server status
         for shard, shard_info in nodes["map"].items():
@@ -74,6 +93,7 @@ class ServerStatusItem(BaseItem):
                 c = MongoClient(uri, serverSelectionTimeoutMS=5000)
                 status = self._gather_server_status(c)
                 all_status["map"][shard].append(status)
-                self._check_server_status(status)
+                self._check_connections(status)
+                self._check_query_targeting(status)
 
         self.sample_result = all_status
