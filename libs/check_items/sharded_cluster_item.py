@@ -10,12 +10,45 @@ class ShardedClusterItem(BaseItem):
         super().__init__(output_folder, config)
         self._name = "Sharded Cluster Information"
         self._description = "Collects and reviews sharded cluster configuration and status."
-    
-    def _check_mongos_availability(self, nodes):
+
+    def _check_rs(self, info):
+        """
+        Check if the replica set config and status.
+        """
+        sample_result = {}
+        for member in info["members"]:
+            uri = member["uri"]
+            try:
+                client = MongoClient(uri, serverSelectionTimeoutMS=5000)
+                replset_status, replset_config = gather_replset_info(client)
+
+                # Check replica set status and config
+                result = check_replset_status(replset_status, self._config)
+                for item in result:
+                    self.append_item_result(item["host"], item["severity"], item["title"], item["description"])
+                result = check_replset_config(replset_config, self._config)
+                for item in result:
+                    self.append_item_result(item["host"], item["severity"], item["title"], item["description"])
+                # Check oplog window
+                raw_oplog_info, result = check_oplog_window(info, self._config)
+                for item in result:
+                    self.append_item_result(item["host"], item["severity"], item["title"], item["description"])
+
+                sample_result[member["host"]] = {
+                    "replset_status": replset_status,
+                    "replset_config": replset_config,
+                    "oplog": raw_oplog_info
+                }
+            except Exception as e:
+                self._logger.error(red(f"Failed to connect to shard `{member['host']}`: {str(e)}"))
+                sample_result[member["host"]] = None
+        return sample_result
+
+    def _check_mongos(self, nodes):
         """
         Check if the mongos is available and connected.
         """
-        all_mongos = nodes["mongos"]
+        all_mongos = nodes["map"]["mongos"]["members"]
         active_mongos = []
         for mongos in all_mongos:
             if mongos.get("pingLatencySec", 0) > MAX_MONGOS_PING_LATENCY:
@@ -42,44 +75,11 @@ class ShardedClusterItem(BaseItem):
                 "Single Mongos",
                 f"Only one mongos `{active_mongos[0]}` is available in the cluster. No failover is possible."
             )
-        return [{
-            "host": mongos["host"],
-            "pingLatencySec": mongos["pingLatencySec"]
-        } for mongos in all_mongos]
-        
-    def _check_map(self, nodes):
-        """
-        Check the shards in the cluster.
-        """
-        sample_result = {}
-        for shard in nodes["map"]:
-            shard_info = nodes["map"][shard]
-            # Connect to shard primary
-            uri = shard_info["uri"]
-            try:
-                client = MongoClient(uri, serverSelectionTimeoutMS=5000)
-                replset_status, replset_config = gather_replset_info(client)
-                sample_result[shard] = {
-                    "replset_status": replset_status,
-                    "replset_config": replset_config
-                }
-
-                # Check replica set status and config
-                result = check_replset_status(replset_status, self._config)
-                for item in result:
-                    self.append_item_result(item["host"], item["severity"], item["title"], item["description"])
-                result = check_replset_config(replset_config, self._config)
-                for item in result:
-                    self.append_item_result(item["host"], item["severity"], item["title"], item["description"])
-
-                # Check oplog window
-                raw_oplog_info, result = check_oplog_window(shard_info, self._config)
-                sample_result[shard]["oplog"] = raw_oplog_info
-                for item in result:
-                    self.append_item_result(item["host"], item["severity"], item["title"], item["description"])
-            except OperationFailure as e:
-                self._logger.error(red(f"Failed to connect to shard `{shard}`: {str(e)}"))
-        return sample_result
+        return {
+            mongos["host"]: {
+                "pingLatencySec": mongos["pingLatencySec"]
+            } for mongos in all_mongos
+        }
 
     def test(self, *args, **kwargs):
         """
@@ -95,7 +95,12 @@ class ShardedClusterItem(BaseItem):
             return
         nodes = discover_nodes(client, parsed_uri)
         sample_result = {}
-        sample_result["mongos"] = self._check_mongos_availability(nodes)
-        sample_result["map"] = self._check_map(nodes)
+        for component, info in nodes["map"].items():
+            if component == "mongos":
+                result = self._check_mongos(nodes)
+            else:
+                result = self._check_rs(info)
+
+            sample_result[component] = result
 
         self.captured_sample = sample_result

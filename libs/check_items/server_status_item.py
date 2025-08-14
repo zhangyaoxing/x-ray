@@ -72,28 +72,29 @@ class ServerStatusItem(BaseItem):
         parsed_uri = kwargs.get("parsed_uri")
         nodes = discover_nodes(client, parsed_uri)
         all_status = {
-            "mongos": [],
-            "map": {},
+            "type": nodes["type"]
         }
-        # Gather mongos server status
-        for node in nodes["mongos"]:
-            uri = node["uri"]
-            if node.get("pingLatencySec", 0) > MAX_MONGOS_PING_LATENCY:
-                continue
-            c = MongoClient(uri, serverSelectionTimeoutMS=5000)
-            status = self._gather_server_status(c)
-            all_status["mongos"].append(status)
-            self._check_connections(status)
-
-        # Gather shard and config server status
-        for shard, shard_info in nodes["map"].items():
-            all_status["map"][shard] = []
-            for node in shard_info["members"]:
+        if nodes["type"] == "SH":
+            all_status["map"] = {}
+            for component, shard_info in nodes["map"].items():
+                all_status["map"][component] = []
+                for node in shard_info["members"]:
+                    if component == "mongos" and node.get("pingLatencySec", 0) > MAX_MONGOS_PING_LATENCY:
+                        # Skip the mongos that haven't send ping for `MAX_MONGOS_PING_LATENCY`
+                        continue
+                    uri = node["uri"]
+                    c = MongoClient(uri, serverSelectionTimeoutMS=5000)
+                    status = self._gather_server_status(c)
+                    all_status["map"][component].append(status)
+                    self._check_connections(status)
+                    self._check_query_targeting(status) if component != "mongos" else None
+        else:
+            all_status["members"] = []
+            for node in nodes["members"]:
                 uri = node["uri"]
                 c = MongoClient(uri, serverSelectionTimeoutMS=5000)
                 status = self._gather_server_status(c)
-                all_status["map"][shard].append(status)
+                all_status["members"].append(status)
                 self._check_connections(status)
                 self._check_query_targeting(status)
-
         self.captured_sample = all_status

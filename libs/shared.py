@@ -71,17 +71,19 @@ def discover_nodes(client, parsed_uri):
                         "uri": f"mongodb://{credential}{host}/?authSource={auth_source}&directConnection=true&connectTimeoutMS={CONNECT_TIMEOUT_MS}"
                     } for host in hosts]
                 }
-            nodes["map"] = parsed_map
             # mongos nodes
             all_mongos = list(client.config.get_collection("mongos").find())
-            nodes["mongos"] = []
+            parsed_map["mongos"] = {
+                "members": []
+            }
             for host in all_mongos:
                 ping = host.get("ping", datetime.now()).replace(tzinfo=timezone.utc)
-                nodes["mongos"].append({
+                parsed_map["mongos"]["members"].append({
                     "host": host["_id"],
                     "uri": f"mongodb://{credential}{host['_id']}/?authSource={auth_source}&connectTimeoutMS={CONNECT_TIMEOUT_MS}",
                     "pingLatencySec": (datetime.now(timezone.utc) - ping).total_seconds()
                 })
+            nodes["map"] = parsed_map
 
     except Exception as e:
         logger.error(red(f"Failed to discover nodes: {str(e)}"))

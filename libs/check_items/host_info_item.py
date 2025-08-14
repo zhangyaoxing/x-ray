@@ -36,18 +36,18 @@ class HostInfoItem(BaseItem):
         client = kwargs.get("client")
         parsed_uri = kwargs.get("parsed_uri")
         nodes = discover_nodes(client, parsed_uri)
-        self._nodes = nodes
         host_info_all = {
             "type": nodes["type"],
+            "setName": nodes["setName"]
         }
         if nodes["type"] == "RS":
             self._logger.info(f"Replica Set detected, gathering host info from all members...")
             host_info_all["members"] = {node["host"]: self._gather_host_info(node) for node in nodes["members"]}
         elif nodes["type"] == "SH":
+            host_info_all["map"] = {}
             self._logger.info(f"Sharded Cluster detected, gathering host info from all config/shards members...")
             for k, v in nodes["map"].items():
-                host_info_all[k] = {node["host"]: self._gather_host_info(node) for node in v["members"]}
-            host_info_all["mongos"] = {node["host"]: self._gather_host_info(node) for node in nodes["mongos"]}
+                host_info_all["map"][k] = {node["host"]: self._gather_host_info(node) for node in v["members"]}
 
         self.captured_sample = host_info_all
 
@@ -58,40 +58,43 @@ class HostInfoItem(BaseItem):
         """
         captured = self.captured_sample
 
-        if captured["type"] == "SH":
-            data = []
-            for component, block in captured.items():
-                if component == "type":
+        def generate_table(component_name, host_info):
+            data = {
+                "type": "table",
+                "caption": f"Hardware & OS Information ({component_name})",
+                "columns": [
+                    {"name": "Host", "type": "string"},
+                    {"name": "CPU", "type": "string"},
+                    {"name": "NUMA", "type": "boolean"},
+                    {"name": "Memory (GB)", "type": "string"},
+                    {"name": "OS", "type": "string"},
+                ],
+                "rows": []
+            }
+            for host, info in host_info.items():
+                if info is None:
+                    data["rows"].append([host, "N/A", "N/A", "N/A", "N/A"])
                     continue
-                rows = []
-                for host, info in block.items():
-                    if info is None:
-                        rows.append([host, "N/A", "N/A", "N/A", "N/A"])
-                        continue
-                    system = info["system"]
-                    os = info["os"]
-                    extra = info["extra"]
-                    rows.append([
-                        host,
-                        f"{extra['cpuString']} ({system['cpuArch']}) {extra['cpuFrequencyMHz']} MHz {system['numCores']} cores",
-                        system["numaEnabled"],
-                        system["memSizeMB"] / 1024,
-                        f"{os['name']} {os['version']}"
-                    ])
-                data.append({
-                    "type": "table",
-                    "caption": f"Hardware & OS Information ({component})",
-                    "columns": [
-                        {"name": "Host", "type": "string"},
-                        {"name": "CPU", "type": "string"},
-                        {"name": "NUMA", "type": "boolean"},
-                        {"name": "Memory (GB)", "type": "string"},
-                        {"name": "OS", "type": "string"},
-                    ],
-                    "rows": rows
-                })
+                system = info["system"]
+                os = info["os"]
+                extra = info["extra"]
+                data["rows"].append([
+                    host,
+                    f"{extra['cpuString']} ({system['cpuArch']}) {extra['cpuFrequencyMHz']} MHz {system['numCores']} cores",
+                    system["numaEnabled"],
+                    system["memSizeMB"] / 1024,
+                    f"{os['name']} {os['version']}"
+                ])
+            return data
+            
+        data = []
+        if captured["type"] == "SH":
+            for component_name, host_info in captured["map"].items():
+                table = generate_table(component_name, host_info)
+                data.append(table)
         else:
-            pass
+            table = generate_table(captured["setName"], captured["members"])
+            data.append(table)
 
         return {
             "name": self.name,
