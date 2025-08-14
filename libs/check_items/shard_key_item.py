@@ -32,4 +32,4 @@ class ShardKeyItem(BaseItem):
         except OperationFailure as e:
             self._logger.error(red(f"Error checking shard keys: {e}"))
 
-        self.sample_result = collections
+        self.captured_sample = collections

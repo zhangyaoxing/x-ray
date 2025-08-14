@@ -30,7 +30,7 @@ class ReplicaSetItem(BaseItem):
         for item in result:
             self.append_item_result(item["host"], item["severity"], item["title"], item["description"])
 
-        self.sample_result = {
+        self.captured_sample = {
             "replset_status": replset_status,
             "replset_config": replset_config,
             "oplog": raw_oplog_info

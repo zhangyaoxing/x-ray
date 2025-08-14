@@ -76,6 +76,10 @@ class Framework:
                 f.write(item.test_result_markdown)
             
             f.write("## 2 Check Data Review\n\n")
+            for i, item in enumerate(self._items):
+                f.write(f"### 2.{i + 1} {item.name}\n\n")
+                f.write(f"*{item.description}*\n\n")
+                f.write(item.review_result_markdown)
 
         if format == "html":
             self._logger.info(f"Converting results to HTML format and saving to: {green(batch_folder + '/results.html')}")

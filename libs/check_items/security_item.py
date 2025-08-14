@@ -62,4 +62,4 @@ class SecurityItem(BaseItem):
                 "Default port `27017` is used, which may expose the server to unnecessary risks."
             )
 
-        self.sample_result = result
+        self.captured_sample = result

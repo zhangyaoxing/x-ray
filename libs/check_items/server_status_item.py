@@ -96,4 +96,4 @@ class ServerStatusItem(BaseItem):
                 self._check_connections(status)
                 self._check_query_targeting(status)
 
-        self.sample_result = all_status
+        self.captured_sample = all_status

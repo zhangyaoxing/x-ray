@@ -146,4 +146,4 @@ class CollInfoItem(BaseItem):
                 except Exception as e:
                     self._logger.error(red(f"Failed to gather stats for collection '{ns}': {str(e)}"))
 
-        self.sample_result = all_stats
+        self.captured_sample = all_stats

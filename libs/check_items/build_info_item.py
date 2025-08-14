@@ -27,4 +27,4 @@ class BuildInfoItem(BaseItem):
                 f"Server version {sample_version} is below EOL version {eol_version}."
             )
 
-        self.sample_result = result
+        self.captured_sample = result

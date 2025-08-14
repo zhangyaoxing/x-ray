@@ -118,4 +118,4 @@ class IndexInfoItem(BaseItem):
                 except Exception as e:
                     self._logger.error(red(f"Failed to gather index info of collection '{ns}': {str(e)}"))
 
-            self.sample_result = all_index_stats
+            self.captured_sample = all_index_stats

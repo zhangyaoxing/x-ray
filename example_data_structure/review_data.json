@@ -1,0 +1,33 @@
+{
+    "name": "Information",
+    "description": "Collects and reviews host hardware and OS information.",
+    "data": [
+        {
+            "type": "table",
+            "caption": "Host Information (mongos)",
+            "columns": [
+                {
+                    "name": "Host",
+                    "type": "string"
+                },
+                {
+                    "name": "CPU",
+                    "type": "string"
+                },
+                {
+                    "name": "Memory (GB)",
+                    "type": "string"
+                },
+                {
+                    "name": "OS",
+                    "type": "string"
+                }
+            ],
+            "rows": [
+                ["localhost:27017", "4", "16", "Ubuntu 20.04"],
+                ["localhost:27018", "4", "16", "Ubuntu 20.04"],
+                ["localhost:27019", "4", "16", "Ubuntu 20.04"]
+            ]
+        }
+    ]
+}

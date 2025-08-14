@@ -36,7 +36,7 @@ class BaseItem:
         return self._description
 
     @property
-    def sample_result(self):
+    def captured_sample(self):
         with open(self.cache_file_name, "r") as f:
             return json_util.loads(f.read())
         
@@ -61,9 +61,33 @@ class BaseItem:
             result += f"| **{idx + 1}** | `{item['host']}` | <b style='color: {colorize_severity(item['severity'])}'> {item['severity'].name} </b> | {item['title']} | {item['message']} |\n"
         result += "\n"
         return result
-        
-    @sample_result.setter
-    def sample_result(self, data):
+
+    @property
+    def review_result(self):
+        return {
+            "name": self.name,
+            "description": self.description,
+            "data": []
+        }
+
+    @property
+    def review_result_markdown(self):
+        result_data = self.review_result["data"]
+        result = ""
+        for i, block in enumerate(result_data):
+            type = block.get("type")
+            caption = block.get("caption")
+            if type == "table":
+                result += f"### ({i + 1}) {block.get('caption')}\n"
+                result += "| " + " | ".join(col.get("name") for col in block.get("columns", [])) + " |\n"
+                result += "|:----------:|" + "|:----------:|" * (len(block.get("columns", [])) - 1) + "\n"
+                for row in block.get("rows", []):
+                    result += "| " + " | ".join(str(cell) for cell in row) + " |\n"
+            # TODO: support other types.
+        return result
+
+    @captured_sample.setter
+    def captured_sample(self, data):
         with open(self.cache_file_name, "w") as f:
             if env == "development":
                 # Pretty print in development mode for easier debugging

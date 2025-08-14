@@ -48,4 +48,17 @@ class HostInfoItem(BaseItem):
                 host_info_all[k] = {node["host"]: self._gather_host_info(node) for node in v["members"]}
             host_info_all["mongos"] = {node["host"]: self._gather_host_info(node) for node in nodes["mongos"]}
 
-            self.sample_result = host_info_all
+            self.captured_sample = host_info_all
+
+    @property
+    def review_result(self):
+        """
+        Review the gathered host information.
+        """
+        if not self.captured_sample:
+            self._logger.warning(yellow("No sample result available for review."))
+            return None
+
+        # Perform review logic here
+        self._logger.info(f"Reviewing host info...")
+        return self.captured_sample

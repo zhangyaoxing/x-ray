@@ -98,4 +98,4 @@ class ShardedClusterItem(BaseItem):
         sample_result["mongos"] = self._check_mongos_availability(nodes)
         sample_result["map"] = self._check_map(nodes)
 
-        self.sample_result = sample_result
+        self.captured_sample = sample_result
