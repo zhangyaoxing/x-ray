@@ -56,7 +56,7 @@ class BaseItem:
             return result
         
         result += "| \\# | Severity | Category | Message |\n"
-        result += "|----------|----------|---------|---------|\n"
+        result += "|:----------:|:----------:|---------|---------|\n"
         for idx, item in enumerate(self._test_result):
             result += f"| **{idx + 1}** | <b style='color: {colorize_severity(item['severity'])}'> {item['severity'].name} </b> | {item['title']} | {item['message']} |\n"
         result += "\n"
