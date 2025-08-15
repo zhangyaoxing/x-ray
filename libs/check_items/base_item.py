@@ -107,3 +107,11 @@ class BaseItem:
             "title": title,
             "message": message
         })
+    def append_item_result(self, items: list):
+        for item in items:
+            self.append_item_result(
+                item["host"],
+                item["severity"],
+                item["title"],
+                item["description"]
+            )
