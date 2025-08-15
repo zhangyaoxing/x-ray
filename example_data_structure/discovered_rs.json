@@ -1,18 +1,23 @@
 {
     "type": "RS",
     "setName": "replset",
+    "uri": "mongodb://localhost:27017,localhost:27018,localhost:27019/?authSource=admin&connectTimeoutMS=5000",
+    "client": "<MongoClient object that connects to the above URI>",
     "members": [
         {
             "host": "localhost:27017",
-            "uri": "mongodb://localhost:27017/?authSource=admin&directConnection=true&connectTimeoutMS=5000"
+            "uri": "mongodb://localhost:27017/?authSource=admin&directConnection=true&connectTimeoutMS=5000",
+            "client": "<MongoClient object that connects to the above URI>"
         },
         {
             "host": "localhost:27018",
-            "uri": "mongodb://localhost:27018/?authSource=admin&directConnection=true&connectTimeoutMS=5000"
+            "uri": "mongodb://localhost:27018/?authSource=admin&directConnection=true&connectTimeoutMS=5000",
+            "client": "<MongoClient object that connects to the above URI>"
         },
         {
             "host": "localhost:27019",
-            "uri": "mongodb://localhost:27019/?authSource=admin&directConnection=true&connectTimeoutMS=5000"
+            "uri": "mongodb://localhost:27019/?authSource=admin&directConnection=true&connectTimeoutMS=5000",
+            "client": "<MongoClient object that connects to the above URI>"
         }
     ]
 }

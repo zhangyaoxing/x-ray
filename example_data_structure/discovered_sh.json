@@ -1,62 +1,79 @@
 {
     "type": "SH",
+    "uri": "mongodb://localhost:30017,localhost:30028/?authSource=admin&connectTimeoutMS=5000",
+    "client": "<MongoClient object that connects to the above URI>",
     "map": {
         "shard01": {
             "setName": "shard01",
             "uri": "mongodb://localhost:30018,localhost:30019,localhost:30020/?authSource=admin&connectTimeoutMS=5000",
+            "client": "<MongoClient object that connects to the above URI>",
             "members": [
                 {
                     "host": "localhost:30018",
-                    "uri": "mongodb://localhost:30018/?authSource=admin&directConnection=true&connectTimeoutMS=5000"
+                    "uri": "mongodb://localhost:30018/?authSource=admin&directConnection=true&connectTimeoutMS=5000",
+                    "client": "<MongoClient object that connects to the above URI>"
                 },
                 {
                     "host": "localhost:30019",
-                    "uri": "mongodb://localhost:30019/?authSource=admin&directConnection=true&connectTimeoutMS=5000"
+                    "uri": "mongodb://localhost:30019/?authSource=admin&directConnection=true&connectTimeoutMS=5000",
+                    "client": "<MongoClient object that connects to the above URI>"
                 },
                 {
                     "host": "localhost:30020",
-                    "uri": "mongodb://localhost:30020/?authSource=admin&directConnection=true&connectTimeoutMS=5000"
+                    "uri": "mongodb://localhost:30020/?authSource=admin&directConnection=true&connectTimeoutMS=5000",
+                    "client": "<MongoClient object that connects to the above URI>"
                 }
             ]
         },
         "shard02": {
             "setName": "shard02",
             "uri": "mongodb://localhost:30021,localhost:30022,localhost:30023/?authSource=admin&connectTimeoutMS=5000",
+            "client": "<MongoClient object that connects to the above URI>",
             "members": [
                 {
                     "host": "localhost:30021",
-                    "uri": "mongodb://localhost:30021/?authSource=admin&directConnection=true&connectTimeoutMS=5000"
+                    "uri": "mongodb://localhost:30021/?authSource=admin&directConnection=true&connectTimeoutMS=5000",
+                    "client": "<MongoClient object that connects to the above URI>"
                 },
                 {
                     "host": "localhost:30022",
-                    "uri": "mongodb://localhost:30022/?authSource=admin&directConnection=true&connectTimeoutMS=5000"
+                    "uri": "mongodb://localhost:30022/?authSource=admin&directConnection=true&connectTimeoutMS=5000",
+                    "client": "<MongoClient object that connects to the above URI>"
                 },
                 {
                     "host": "localhost:30023",
-                    "uri": "mongodb://localhost:30023/?authSource=admin&directConnection=true&connectTimeoutMS=5000"
+                    "uri": "mongodb://localhost:30023/?authSource=admin&directConnection=true&connectTimeoutMS=5000",
+                    "client": "<MongoClient object that connects to the above URI>"
                 }
             ]
         },
         "config": {
             "setName": "configRepl",
             "uri": "mongodb://localhost:30024/?authSource=admin&connectTimeoutMS=5000",
+            "client": "<MongoClient object that connects to the above URI>",
             "members": [
                 {
                     "host": "localhost:30024",
-                    "uri": "mongodb://localhost:30024/?authSource=admin&directConnection=true&connectTimeoutMS=5000"
+                    "uri": "mongodb://localhost:30024/?authSource=admin&directConnection=true&connectTimeoutMS=5000",
+                    "client": "<MongoClient object that connects to the above URI>"
                 }
             ]
         },
         "mongos": {
+            "setName": "mongos",
+            "uri": "mongodb://localhost:30017,localhost:30028/?authSource=admin&connectTimeoutMS=5000",
+            "client": "<MongoClient object that connects to the above URI>",
             "members": [
                 {
                     "host": "M-QTFH0WFXLG:30017",
                     "uri": "mongodb://M-QTFH0WFXLG:30017/?authSource=admin&connectTimeoutMS=5000",
+                    "client": "<MongoClient object that connects to the above URI>",
                     "pingLatencySec": 3.480887
                 },
                 {
                     "host": "M-QTFH0WFXLG:30028",
                     "uri": "mongodb://M-QTFH0WFXLG:30028/?authSource=admin&connectTimeoutMS=5000",
+                    "client": "<MongoClient object that connects to the above URI>",
                     "pingLatencySec": 67086.035915
                 }
             ]
