@@ -191,7 +191,7 @@ class ClusterItem(BaseItem):
             }
             data.append(table_details)
 
-        enumerate_result_items(result, func_sh=func_sh, func_rs=func_rs)
+        enum_result_items(result, func_sh=func_sh, func_rs=func_rs)
         return {
             "name": self.name,
             "description": self._description,

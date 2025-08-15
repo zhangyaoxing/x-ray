@@ -165,6 +165,7 @@ def enum_all_nodes(nodes, **kwargs):
     """
     func_rs = kwargs.get("func_rs", lambda s, n: (None, None))
     func_sh = kwargs.get("func_sh", lambda s, n: (None, None))
+    func_all_mongos = kwargs.get("func_all_mongos", lambda s, n: (None, None))
     func_mongos = kwargs.get("func_mongos", lambda s, n: (None, None))
     func_rs_member = kwargs.get("func_rs_member", lambda s, n: (None, None))
     result = {
@@ -209,7 +210,7 @@ def enum_all_nodes(nodes, **kwargs):
             }
             test_result, raw_result = None, None
             try:
-                test_result, raw_result = func_rs(set_name, host_info) if component_name != "mongos" else (None, None)
+                test_result, raw_result = func_rs(set_name, host_info) if component_name != "mongos" else func_all_mongos(set_name, host_info)
                 result["map"][component_name]["testResult"] = test_result
                 result["map"][component_name]["rawResult"] = raw_result
             except Exception as e:
@@ -229,9 +230,10 @@ def enum_all_nodes(nodes, **kwargs):
                 })
     return result
 
-def enumerate_result_items(result, **kwargs):
+def enum_result_items(result, **kwargs):
     func_rs = kwargs.get("func_rs", lambda s, n: None)
     func_sh = kwargs.get("func_sh", lambda s, n: None)
+    func_all_mongos = kwargs.get("func_all_mongos", lambda s, n: None)
     func_mongos = kwargs.get("func_mongos", lambda s, n: None)
     func_rs_member = kwargs.get("func_rs_member", lambda s, n: None)
     if result["type"] == "RS":
@@ -242,7 +244,7 @@ def enumerate_result_items(result, **kwargs):
         func_sh("mongos", result)
         for component_name, host_info in result["map"].items():
             set_name = host_info["setName"]
-            func_rs(set_name, host_info) if set_name != "mongos" else None
+            func_rs(set_name, host_info) if set_name != "mongos" else func_all_mongos(set_name, host_info)
             for member in host_info["members"]:
                 func_mongos(set_name, member) if component_name == "mongos" else func_rs_member(set_name, member)
 
