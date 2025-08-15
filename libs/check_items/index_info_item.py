@@ -16,7 +16,7 @@ class IndexInfoItem(BaseItem):
         """ Check for the number of indexes in the collection.
         """
         if len(index_stats) > num_indexes:
-            self.append_item_result(
+            self.append_test_result(
                 "cluster",
                 SEVERITY.MEDIUM,
                 "Too Many Indexes",
@@ -32,7 +32,7 @@ class IndexInfoItem(BaseItem):
                 last_used = index.get("accesses", {}).get("since", None)
                 if last_used:
                     if (datetime.now() - last_used).days > unused_index_days:
-                        self.append_item_result(
+                        self.append_test_result(
                             "cluster",
                             SEVERITY.LOW,
                             "Unused Index",
@@ -65,7 +65,7 @@ class IndexInfoItem(BaseItem):
         for index in indexes:
             for target in index_targets:
                 if is_redundant(index, target):
-                    self.append_item_result(
+                    self.append_test_result(
                         "cluster",
                         SEVERITY.MEDIUM,
                         "Redundant Index",

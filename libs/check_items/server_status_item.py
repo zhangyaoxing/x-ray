@@ -32,7 +32,7 @@ class ServerStatusItem(BaseItem):
         current = connections.get("current", 0)
         total = available + current
         if current / total > used_connection_ratio:
-            self.append_item_result(
+            self.append_test_result(
                 host,
                 SEVERITY.HIGH,
                 "High Connection Usage",
@@ -50,14 +50,14 @@ class ServerStatusItem(BaseItem):
         query_targeting = self._config.get("query_targeting", {})
         query_targeting_obj = self._config.get("query_targeting_obj", {})
         if scanned_returned > query_targeting:
-            self.append_item_result(
+            self.append_test_result(
                 host,
                 SEVERITY.HIGH,
                 "Poor Query Targeting",
                 f"Scanned/Returned ratio `{scanned_returned:.2f}` exceeds the threshold `{query_targeting}`."
             )
         if scanned_obj_returned > query_targeting_obj:
-            self.append_item_result(
+            self.append_test_result(
                 host,
                 SEVERITY.HIGH,
                 "Poor Query Targeting",

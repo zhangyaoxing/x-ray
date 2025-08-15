@@ -1,7 +1,7 @@
 from abc import abstractmethod
 import logging
 from bson import json_util
-from libs.shared import SEVERITY
+from libs.shared import SEVERITY, to_json
 from libs.utils import env
 
 def colorize_severity(severity: SEVERITY) -> str:
@@ -90,26 +90,22 @@ class BaseItem:
     @captured_sample.setter
     def captured_sample(self, data):
         with open(self.cache_file_name, "w") as f:
-            if env == "development":
-                # Pretty print in development mode for easier debugging
-                f.write(json_util.dumps(data, indent=4))
-            else:
-                f.write(json_util.dumps(data))
+            f.write(to_json(data))
 
     @property
     def cache_file_name(self):
         return f"{self._output_folder}/{self.__class__.__name__}_raw.json"
     
-    def append_item_result(self, host: str, severity: SEVERITY, title: str, message: str):
+    def append_test_result(self, host: str, severity: SEVERITY, title: str, message: str):
         self._test_result.append({
             "host": host,
             "severity": severity,
             "title": title,
             "message": message
         })
-    def append_item_result(self, items: list):
+    def append_test_results(self, items: list):
         for item in items:
-            self.append_item_result(
+            self.append_test_result(
                 item["host"],
                 item["severity"],
                 item["title"],

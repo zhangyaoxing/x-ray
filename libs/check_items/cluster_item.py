@@ -14,67 +14,69 @@ class ClusterItem(BaseItem):
         Run the cluster level checks
         """
         client = node["client"]
-        raw_result = None
+        test_result= []
         replset_status = client.admin.command("replSetGetStatus")
         replset_config = client.admin.command("replSetGetConfig")
+        raw_result = {
+            "replsetStatus": replset_status,
+            "replsetConfig": replset_config,
+        }
 
         # Check replica set status and config
         result = check_replset_status(replset_status, self._config)
-        for item in result:
-            self.append_item_result(item["host"], item["severity"], item["title"], item["description"])
+        test_result.extend(result)
         result = check_replset_config(replset_config, self._config)
-        for item in result:
-            self.append_item_result(item["host"], item["severity"], item["title"], item["description"])
+        test_result.extend(result)
 
-        raw_result = {
-            "replset_status": replset_status,
-            "replset_config": replset_config,
-        }
-        return raw_result
+        self.append_test_results(test_result)
+
+        return test_result, raw_result
 
     def _check_sh(self, set_name, node):
         """
         Check if the sharded cluster is available and connected.
         """
-        raw_result = None
+        test_result = []
         all_mongos = node["map"]["mongos"]["members"]
         active_mongos = []
         for mongos in all_mongos:
             if mongos.get("pingLatencySec", 0) > MAX_MONGOS_PING_LATENCY:
-                self.append_item_result(
-                    mongos["host"],
-                    SEVERITY.LOW,
-                    "Irresponsive Mongos",
-                    f"Mongos `{mongos['host']}` is not responsive. Last ping was at `{round(mongos['pingLatencySec'])}` seconds ago. This is expected if the mongos has been removed from the cluster."
-                )
+                test_result.append({
+                    "host": mongos["host"],
+                    "severity": SEVERITY.LOW,
+                    "title": "Irresponsive Mongos",
+                    "description": f"Mongos `{mongos['host']}` is not responsive. Last ping was at `{round(mongos['pingLatencySec'])}` seconds ago. This is expected if the mongos has been removed from the cluster."
+                })
             else:
                 active_mongos.append(mongos["host"])
 
         if len(active_mongos) == 0:
-            self.append_item_result(
-                "cluster",
-                SEVERITY.HIGH,
-                "No Active Mongos",
-                "No active mongos found in the cluster."
-            )
+            test_result.append({
+                "host": "cluster",
+                "severity": SEVERITY.HIGH,
+                "title": "No Active Mongos",
+                "description": "No active mongos found in the cluster."
+            })
         if len(active_mongos) == 1:
-            self.append_item_result(
-                "cluster",
-                SEVERITY.HIGH,
-                "Single Mongos",
-                f"Only one mongos `{active_mongos[0]}` is available in the cluster. No failover is possible."
-            )
+            test_result.append({
+                "host": "cluster",
+                "severity": SEVERITY.HIGH,
+                "title": "Single Mongos",
+                "description": f"Only one mongos `{active_mongos[0]}` is available in the cluster. No failover is possible."
+            })
+        self.append_test_results(test_result)
         raw_result = {
             mongos["host"]: {
                 "pingLatencySec": mongos["pingLatencySec"]
             } for mongos in all_mongos
         }
-        return raw_result
+        return test_result, raw_result
 
     def _check_rs_member(self, set_name, node):
         """
         Run the replica set member level checks
         """
+        test_result = []
         client = node["client"]
         # Gather oplog information
         stats = client.local.command("collStats", "oplog.rs")
@@ -89,15 +91,17 @@ class ClusterItem(BaseItem):
         # Check oplog information
         retention_hours = configured_retention_hours if configured_retention_hours > 0 else current_retention_hours
         if retention_hours < oplog_window_threshold:
-            self.append_item_result(
-                node["host"],
-                SEVERITY.HIGH,
-                "Oplog Window Too Small",
-                f"`Replica set `{set_name}` member {node['host']}` oplog window is `{retention_hours}` hours, below the recommended minimum `{oplog_window_threshold}` hours."
-            )
+            test_result.append({
+                "host": node["host"],
+                "severity": SEVERITY.HIGH,
+                "title": "Oplog Window Too Small",
+                "description": f"`Replica set `{set_name}` member {node['host']}` oplog window is `{retention_hours}` hours, below the recommended minimum `{oplog_window_threshold}` hours."
+            })
 
-        return {
-            "oplog_info": {
+        self.append_test_results(test_result)
+
+        return test_result, {
+            "oplogInfo": {
                 "minRetentionHours": configured_retention_hours,
                 "currentRetentionHours": current_retention_hours,
                 "oplogStats": {
@@ -119,12 +123,12 @@ class ClusterItem(BaseItem):
         parsed_uri = kwargs.get("parsed_uri")
 
         nodes = discover_nodes(client, parsed_uri)
-        sample_result = enum_all_nodes(nodes,
+        execution_result = enum_all_nodes(nodes,
                                        func_rs=self._check_rs,
                                        func_sh=self._check_sh,
                                        func_rs_member=self._check_rs_member)
 
-        self.captured_sample = sample_result
+        self.captured_sample = execution_result
 
 
 

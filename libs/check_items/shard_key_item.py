@@ -23,7 +23,7 @@ class ShardKeyItem(BaseItem):
                 key = c["key"]
                 v = key.get("_id", None)
                 if (v == 1 or v == -1) and len(key.keys()) == 1:
-                    self.append_item_result(
+                    self.append_test_result(
                         "cluster",
                         SEVERITY.INFO,
                         "Shard Key",

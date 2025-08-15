@@ -49,14 +49,14 @@ class CollInfoItem(BaseItem):
             coll_frag = coll_reusable / storage_size if storage_size else 0
             index_frag = index_reusable / total_index_size if total_index_size else 0
             if coll_frag > threshold:
-                self.append_item_result(
+                self.append_test_result(
                     "cluster",
                     SEVERITY.MEDIUM,
                     "High Collection Fragmentation",
                     f"Collection `{detail['id']}` has a higher fragmentation: `{coll_frag:.2%}` than threshold `{threshold:.2%}`."
                 )
             if index_frag > threshold:
-                self.append_item_result(
+                self.append_test_result(
                     "cluster",
                     SEVERITY.MEDIUM,
                     "High Index Fragmentation",
@@ -81,7 +81,7 @@ class CollInfoItem(BaseItem):
                 low = sorted_sizes[-1]
                 imbalance_percent = (high["size"] - low["size"]) / low["size"]
             if imbalance_percent > threshold:
-                self.append_item_result(
+                self.append_test_result(
                     "cluster",
                     SEVERITY.MEDIUM,
                     "Sharding Imbalance",
@@ -92,7 +92,7 @@ class CollInfoItem(BaseItem):
         """ Check for average object size in the collection.
         """
         if stats.get("avgObjSize", 0) > obj_size_bytes:
-            self.append_item_result(
+            self.append_test_result(
                 "cluster",
                 SEVERITY.LOW,
                 "Large Object Size",

@@ -20,7 +20,7 @@ class BuildInfoItem(BaseItem):
             return False
         if sample_version[0] < eol_version[0] or \
            (sample_version[0] == eol_version[0] and sample_version[1] < eol_version[1]):
-            self.append_item_result(
+            self.append_test_result(
                 "cluster",
                 SEVERITY.HIGH,
                 "Server Version EOL",
@@ -28,3 +28,7 @@ class BuildInfoItem(BaseItem):
             )
 
         self.captured_sample = result
+
+    @property
+    def review_result(self):
+        captured = self.captured_sample

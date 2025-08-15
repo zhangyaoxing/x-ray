@@ -1,7 +1,7 @@
 {
     "checksets":{
         "default": {
-            "items": ["ServerStatusItem", "ShardKeyItem", "HostInfoItem", "BuildInfoItem", "SecurityItem", "CollInfoItem", "IndexInfoItem", "ReplicaSetItem", "ShardedClusterItem"]
+            "items": ["ClusterItem"]
         }
     },
     "item_config": {
@@ -18,11 +18,7 @@
             "unused_index_days": 0,
             "num_indexes": 1
         },
-        "ReplicaSetItem": {
-            "replication_lag_seconds": 0,
-            "oplog_window_hours": 100000
-        },
-        "ShardedClusterItem": {
+        "ClusterItem": {
             "replication_lag_seconds": 0,
             "oplog_window_hours": 100000
         },

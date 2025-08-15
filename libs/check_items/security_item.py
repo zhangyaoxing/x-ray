@@ -19,7 +19,7 @@ class SecurityItem(BaseItem):
         security_settings = result.get("parsed", {}).get("security", {})
         authorization = security_settings.get("authorization", None)
         if authorization != "enabled":
-            self.append_item_result(
+            self.append_test_result(
                 "cluster",
                 SEVERITY.HIGH,
                 "Authorization Disabled",
@@ -28,7 +28,7 @@ class SecurityItem(BaseItem):
 
         redact_logs = security_settings.get("redactClientLogData", None)
         if redact_logs != True:
-            self.append_item_result(
+            self.append_test_result(
                 "cluster",
                 SEVERITY.MEDIUM,
                 "Log Redaction Disabled",
@@ -38,14 +38,14 @@ class SecurityItem(BaseItem):
         net = result.get("parsed", {}).get("net", {})
         tls_enabled = net.get("tls", {}).get("mode", None)
         if tls_enabled is None:
-            self.append_item_result(
+            self.append_test_result(
                 "cluster",
                 SEVERITY.HIGH,
                 "TLS Disabled",
                 "TLS is disabled, which may lead to unencrypted connections."
             )
         elif tls_enabled != "requireTLS":
-            self.append_item_result(
+            self.append_test_result(
                 "cluster",
                 SEVERITY.MEDIUM,
                 "Optional TLS",
@@ -55,7 +55,7 @@ class SecurityItem(BaseItem):
         # TODO: check each node.
         port = net.get("port", None)
         if port == 27017:
-            self.append_item_result(
+            self.append_test_result(
                 "cluster",
                 SEVERITY.LOW,
                 "Default Port Used",

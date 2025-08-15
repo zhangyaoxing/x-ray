@@ -1,4 +1,5 @@
 from enum import Enum
+from bson import json_util
 import logging
 import urllib.parse
 from libs.utils import *
@@ -39,6 +40,15 @@ RESERVED_CONN_OPTIONS = [
     "connectTimeoutMS",
     "socketTimeoutMS"
 ]
+
+def to_json(obj):
+    indent = 2 if env == "development" else None
+    def custom_json_serialize(obj):
+        if isinstance(obj, SEVERITY):
+            return obj.name
+        else:
+            return json_util._json_convert(obj)
+    return json_util.dumps(obj, default=custom_json_serialize, indent=2)
 
 nodes = {}
 def discover_nodes(client, parsed_uri):
@@ -145,67 +155,79 @@ def enum_all_nodes(nodes, **kwargs):
     - `set_name`: The replica set name if it's a replica set. Or "mongos" if it's a mongos node or sharded cluster.
     - `node`: The node information from `discover_nodes` output. Only the current and sub levels will be passed.
 
+    And is expected to return a Tuple:
+    - `test_result`: The problems found.
+    - `raw_result`: The raw data you captured, from which you get the `test_result`.
+
     Returns:
     A dictionary containing the results of applying the functions to the nodes. The returned structure will be similar to the discovered structure,
     to reflect the structure of the cluster. For example results, check out the `example_data_structure/result-rs.json,result-sh.json`.
     """
-    func_rs = kwargs.get("func_rs", lambda s, n: None)
-    func_sh = kwargs.get("func_sh", lambda s, n: None)
-    func_mongos = kwargs.get("func_mongos", lambda s, n: None)
-    func_rs_member = kwargs.get("func_rs_member", lambda s, n: None)
-    raw_result = {
+    func_rs = kwargs.get("func_rs", lambda s, n: (None, None))
+    func_sh = kwargs.get("func_sh", lambda s, n: (None, None))
+    func_mongos = kwargs.get("func_mongos", lambda s, n: (None, None))
+    func_rs_member = kwargs.get("func_rs_member", lambda s, n: (None, None))
+    result = {
         "type": nodes["type"]
     }
     if nodes["type"] == "RS":
         set_name = nodes["setName"]
-        raw_result["setName"] = set_name
-        raw_result["members"] = []
+        result["setName"] = set_name
+        result["members"] = []
         try:
-            raw_result["rawResult"] = func_rs(set_name, nodes)
+            result["testResult"], result["rawResult"] = func_rs(set_name, nodes)
         except Exception as e:
             logger.error(red(f"Failed to get execution result from replica set {set_name}: {str(e)}"))
-            raw_result["rawResult"] = None
+            result["testResult"], result["rawResult"] = (None, None)
         for member in nodes["members"]:
+            test_result, raw_result = None, None
             try:
-                func_result = func_rs_member(set_name, member)
+                test_result, raw_result = func_rs_member(set_name, member)
             except Exception as e:
                 logger.error(red(f"Failed to get execution result from replica set {set_name}, member {member['host']}: {str(e)}"))
-                func_result = None
-            raw_result["members"].append({
+
+            result["members"].append({
                 "host": member["host"],
-                "rawResult": func_result
+                "rawResult": raw_result,
+                "testResult": test_result
             })
     else:
-        raw_result["map"] = {}
+        result["map"] = {}
+        test_result, raw_result = None, None
         try:
-            raw_result["rawResult"] = func_sh("mongos", nodes)
+            test_result, raw_result = func_sh("mongos", nodes)
+            result["testResult"], result["rawResult"] = test_result, raw_result
         except Exception as e:
             logger.error(red(f"Failed to get execution result from sharded cluster: {str(e)}"))
-            raw_result["rawResult"] = None
         for component_name, host_info in nodes["map"].items():
             set_name = host_info["setName"]
-            raw_result["map"][component_name] = {
+            result["map"][component_name] = {
                 "setName": host_info["setName"],
                 "members": [],
-                "rawResult": None
+                "rawResult": None,
+                "testResult": None
             }
+            test_result, raw_result = None, None
             try:
-                raw_result["map"][component_name]["rawResult"] = func_rs(set_name, host_info) if component_name != "mongos" else None
+                test_result, raw_result = func_rs(set_name, host_info) if component_name != "mongos" else (None, None)
+                result["map"][component_name]["testResult"] = test_result
+                result["map"][component_name]["rawResult"] = raw_result
             except Exception as e:
                 logger.error(red(f"Failed to get execution result from {set_name}: {str(e)}"))
-                raw_result["map"][component_name]["rawResult"] = None
 
             for member in host_info["members"]:
+                test_result, raw_result = None, None
                 try:
-                    func_result = func_mongos(set_name, member) if component_name == "mongos" else func_rs_member(set_name, member)
+                    test_result, raw_result = func_mongos(set_name, member) if component_name == "mongos" else func_rs_member(set_name, member)
                 except Exception as e:
                     logger.error(red(f"Failed to get execution result from {set_name}, member {member['host']}: {str(e)}"))
-                    func_result = None
-                raw_result["map"][component_name]["members"].append({
+
+                result["map"][component_name]["members"].append({
                     "host": member["host"],
-                    "rawResult": func_result
+                    "rawResult": raw_result,
+                    "testResult": test_result
                 })
-    return raw_result
+    return result
 
 if __name__ == "__main__":
     from bson import json_util
