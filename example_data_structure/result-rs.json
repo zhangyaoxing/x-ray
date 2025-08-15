@@ -1,0 +1,31 @@
+{
+  "type": "RS",
+  "setName": "replset",
+  "members": [
+    {
+      "host": "localhost:27017",
+      "result": {
+        "setName": "replset",
+        "host": "localhost:27017"
+      }
+    },
+    {
+      "host": "localhost:27018",
+      "result": {
+        "setName": "replset",
+        "host": "localhost:27018"
+      }
+    },
+    {
+      "host": "localhost:27019",
+      "result": {
+        "setName": "replset",
+        "host": "localhost:27019"
+      }
+    }
+  ],
+  "result": {
+    "setName": "replset",
+    "uri": "mongodb://localhost:27017/test?tls=false"
+  }
+}

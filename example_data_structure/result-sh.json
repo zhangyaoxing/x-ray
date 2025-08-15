@@ -1,0 +1,108 @@
+{
+  "type": "SH",
+  "map": {
+    "shard01": {
+      "setName": "shard01",
+      "members": [
+        {
+          "host": "localhost:30018",
+          "result": {
+            "setName": "shard01",
+            "host": "localhost:30018"
+          }
+        },
+        {
+          "host": "localhost:30019",
+          "result": {
+            "setName": "shard01",
+            "host": "localhost:30019"
+          }
+        },
+        {
+          "host": "localhost:30020",
+          "result": {
+            "setName": "shard01",
+            "host": "localhost:30020"
+          }
+        }
+      ],
+      "result": {
+        "setName": "shard01",
+        "uri": "mongodb://localhost:30018,localhost:30019,localhost:30020/test?tls=false"
+      }
+    },
+    "shard02": {
+      "setName": "shard02",
+      "members": [
+        {
+          "host": "localhost:30021",
+          "result": {
+            "setName": "shard02",
+            "host": "localhost:30021"
+          }
+        },
+        {
+          "host": "localhost:30022",
+          "result": {
+            "setName": "shard02",
+            "host": "localhost:30022"
+          }
+        },
+        {
+          "host": "localhost:30023",
+          "result": {
+            "setName": "shard02",
+            "host": "localhost:30023"
+          }
+        }
+      ],
+      "result": {
+        "setName": "shard02",
+        "uri": "mongodb://localhost:30021,localhost:30022,localhost:30023/test?tls=false"
+      }
+    },
+    "config": {
+      "setName": "configRepl",
+      "members": [
+        {
+          "host": "localhost:30024",
+          "result": {
+            "setName": "configRepl",
+            "host": "localhost:30024"
+          }
+        }
+      ],
+      "result": {
+        "setName": "configRepl",
+        "uri": "mongodb://localhost:30024/test?tls=false"
+      }
+    },
+    "mongos": {
+      "setName": "mongos",
+      "members": [
+        {
+          "host": "M-QTFH0WFXLG:30017",
+          "result": {
+            "setName": "mongos",
+            "host": "M-QTFH0WFXLG:30017"
+          }
+        },
+        {
+          "host": "M-QTFH0WFXLG:30028",
+          "result": {
+            "setName": "mongos",
+            "host": "M-QTFH0WFXLG:30028"
+          }
+        }
+      ],
+      "result": {
+        "setName": "mongos",
+        "uri": "mongodb://M-QTFH0WFXLG:30017,M-QTFH0WFXLG:30028/test?tls=false"
+      }
+    }
+  },
+  "result": {
+    "setName": "mongos",
+    "uri": "mongodb://localhost:30017/test?tls=false"
+  }
+}
