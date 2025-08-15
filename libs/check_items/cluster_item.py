@@ -130,6 +130,73 @@ class ClusterItem(BaseItem):
 
         self.captured_sample = execution_result
 
+    @property
+    def review_result(self, ):
+        result = self.captured_sample
+        data = []
+        sh_overview = {
+            "type": "table",
+            "caption": f"Sharded Cluster Overview",
+            "columns": [
+                {"name": "Type", "type": "string"},
+                {"name": "#Shards", "type": "integer"},
+                {"name": "#Mongos", "type": "integer"},
+            ],
+            "rows": []
+        } 
+        rs_overview = {
+            "type": "table",
+            "caption": f"{'Components' if result['type'] == 'SH' else 'Replica Set'} Overview",
+            "columns": [
+                {"name": "Name", "type": "string"},
+                {"name": "#Members", "type": "integer"},
+                {"name": "#Voting Members", "type": "integer"},
+                {"name": "#Arbiters", "type": "integer"},
+                {"name": "#Hidden Members", "type": "integer"},
+            ],
+            "rows": []
+        }
+        data.append(sh_overview) if result["type"] == "SH" else None
+        data.append(rs_overview)
+        def func_sh(name, result):
+            component_names = result["map"].keys()
+            shards = sum(1 for name in component_names if name not in ["mongos", "config"])
+            mongos = len(result["map"]["mongos"]["members"])
+            sh_overview["rows"].append(["Sharded Cluster", shards, mongos])
+
+        def func_rs(set_name, result):
+            repl_status = result["rawResult"]["replsetConfig"]["config"]
+            members = repl_status["members"]
+            num_members = len(members)
+            num_voting = sum(1 for m in members if m["votes"] > 0)
+            num_arbiters = sum(1 for m in members if m["arbiterOnly"])
+            num_hidden = sum(1 for m in members if m["hidden"])
+            rs_overview["rows"].append([set_name, num_members, num_voting, num_arbiters, num_hidden])
+            table_details = {
+                "type": "table",
+                "caption": f"Component Details - `{set_name}`",
+                "columns": [
+                    {"name": "Host", "type": "string"},
+                    {"name": "_id", "type": "integer"},
+                    {"name": "Arbiter", "type": "boolean"},
+                    {"name": "Build Indexes", "type": "boolean"},
+                    {"name": "Hidden", "type": "boolean"},
+                    {"name": "Priority", "type": "integer"},
+                    {"name": "Votes", "type": "integer"},
+                    {"name": "Delay", "type": "integer"}
+                ],
+                "rows": [
+                    [m["host"], m["_id"], m["arbiterOnly"], m["buildIndexes"], m["hidden"], m["priority"], m["votes"], m.get("secondaryDelaySecs", m.get("slaveDelay", 0))] for m in members
+                ]
+            }
+            data.append(table_details)
+
+        enumerate_result_items(result, func_sh=func_sh, func_rs=func_rs)
+        return {
+            "name": self.name,
+            "description": self._description,
+            "data": data
+        }
 
 
 def check_replset_status(replset_status, config):

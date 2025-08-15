@@ -22,8 +22,8 @@
             "program": "x-ray",
             "console": "integratedTerminal",
             "args": [
-                "--uri", "mongodb://localhost:30017",
-                // "--uri", "mongodb://localhost:27017",
+                "--uri", "mongodb://localhost:30017/admin?tls=false&connectTimeoutMS=5000",
+                // "--uri", "mongodb://localhost:27017/admin?tls=false&connectTimeoutMS=5000",
                 "-f", "html",
                 "-c", "config_test.json"
             ],

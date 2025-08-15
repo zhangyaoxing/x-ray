@@ -229,6 +229,23 @@ def enum_all_nodes(nodes, **kwargs):
                 })
     return result
 
+def enumerate_result_items(result, **kwargs):
+    func_rs = kwargs.get("func_rs", lambda s, n: None)
+    func_sh = kwargs.get("func_sh", lambda s, n: None)
+    func_mongos = kwargs.get("func_mongos", lambda s, n: None)
+    func_rs_member = kwargs.get("func_rs_member", lambda s, n: None)
+    if result["type"] == "RS":
+        func_rs(result["setName"], result)
+        for member in result["members"]:
+            func_rs_member(result["setName"], member)
+    else:
+        func_sh("mongos", result)
+        for component_name, host_info in result["map"].items():
+            set_name = host_info["setName"]
+            func_rs(set_name, host_info) if set_name != "mongos" else None
+            for member in host_info["members"]:
+                func_mongos(set_name, member) if component_name == "mongos" else func_rs_member(set_name, member)
+
 if __name__ == "__main__":
     from bson import json_util
     parsed_uri = parse_uri("mongodb://localhost:30017?tls=false")
