@@ -124,9 +124,13 @@ class ClusterItem(BaseItem):
 
         nodes = discover_nodes(client, parsed_uri)
         execution_result = enum_all_nodes(nodes,
-                                       func_rs=self._check_rs,
-                                       func_sh=self._check_sh,
-                                       func_rs_member=self._check_rs_member)
+                                       func_rs_cluster=self._check_rs,
+                                       func_sh_cluster=self._check_sh,
+                                       func_rs_member=self._check_rs_member,
+                                       func_shard=self._check_rs,
+                                       func_shard_member=self._check_rs_member,
+                                       func_config=self._check_rs,
+                                       func_config_member=self._check_rs_member)
 
         self.captured_sample = execution_result
 
@@ -191,7 +195,11 @@ class ClusterItem(BaseItem):
             }
             data.append(table_details)
 
-        enum_result_items(result, func_sh=func_sh, func_rs=func_rs)
+        enum_result_items(result, 
+                          func_sh_cluster=func_sh, 
+                          func_rs_cluster=func_rs,
+                          func_shard=func_rs,
+                          func_config=func_rs)
         return {
             "name": self.name,
             "description": self.description,

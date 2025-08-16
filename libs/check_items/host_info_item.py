@@ -29,7 +29,11 @@ class HostInfoItem(BaseItem):
                 return None, None
             host_info = client.admin.command("hostInfo")
             return None, host_info
-        raw_result = enum_all_nodes(nodes, func_rs_member=func_single, func_mongos=func_single)
+        raw_result = enum_all_nodes(nodes,
+                                    func_rs_member=func_single,
+                                    func_mongos_member=func_single,
+                                    func_shard_member=func_single,
+                                    func_config_member=func_single)
 
         self.captured_sample = raw_result
 
@@ -74,7 +78,11 @@ class HostInfoItem(BaseItem):
                     system["numaEnabled"]
                 ])
 
-        enum_result_items(result, func_rs=func_component, func_all_mongos=func_component)
+        enum_result_items(result,
+                          func_rs_cluster=func_component,
+                          func_all_mongos=func_component,
+                          func_shard=func_component,
+                          func_config=func_component)
         return {
             "name": self.name,
             "description": self.description,

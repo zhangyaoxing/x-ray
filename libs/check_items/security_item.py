@@ -78,7 +78,11 @@ class SecurityItem(BaseItem):
 
             return test_result, raw_result
 
-        result = enum_all_nodes(nodes, func_rs_member=func_node, func_mongos=func_node)
+        result = enum_all_nodes(nodes, 
+                                func_rs_member=func_node, 
+                                func_mongos_member=func_node,
+                                func_shard_member=func_node,
+                                func_config_member=func_node)
 
         self.captured_sample = result
 
@@ -117,7 +121,11 @@ class SecurityItem(BaseItem):
             cluster_auth = security.get("clusterAuthMode", "disabled")
             table["rows"].append([name, host, f"{bind_ip}:{port}", tls, authorization, cluster_auth, log_redaction, eat])
 
-        enum_result_items(raw_result, func_rs_member=func_node, func_mongos=func_node)
+        enum_result_items(raw_result,
+                          func_rs_member=func_node,
+                          func_mongos_member=func_node,
+                          func_shard_member=func_node,
+                          func_config_member=func_node)
 
         return {
             "name": self.name,
