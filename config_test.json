@@ -1,7 +1,7 @@
 {
     "checksets":{
         "default": {
-            "items": ["ClusterItem", "HostInfoItem"]
+            "items": ["SecurityItem", "ClusterItem", "HostInfoItem"]
         }
     },
     "item_config": {

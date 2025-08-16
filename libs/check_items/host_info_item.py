@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, timezone
 from pymongo import MongoClient
 from pymongo.uri_parser import parse_uri
 from libs.check_items.base_item import BaseItem
-from libs.shared import discover_nodes, enum_all_nodes, enum_result_items
+from libs.shared import MAX_MONGOS_PING_LATENCY, discover_nodes, enum_all_nodes, enum_result_items
 from libs.utils import red, yellow
 
 
@@ -24,8 +24,8 @@ class HostInfoItem(BaseItem):
 
         def func_single(name, node):
             client = node["client"]
-            if "pingLatencySec" in node and node["pingLatencySec"] > 60:
-                self._logger.warning(yellow(f"Skip {node['host']} because its last heartbeat is earlier than 60s ago."))
+            if "pingLatencySec" in node and node["pingLatencySec"] > MAX_MONGOS_PING_LATENCY:
+                self._logger.warning(yellow(f"Skip {node['host']} because it has been irresponsive for {node['pingLatencySec'] / 60} minutes."))
                 return None, None
             host_info = client.admin.command("hostInfo")
             return None, host_info
