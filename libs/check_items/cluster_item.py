@@ -194,7 +194,7 @@ class ClusterItem(BaseItem):
         enum_result_items(result, func_sh=func_sh, func_rs=func_rs)
         return {
             "name": self.name,
-            "description": self._description,
+            "description": self.description,
             "data": data
         }
 

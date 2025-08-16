@@ -77,6 +77,6 @@ class HostInfoItem(BaseItem):
         enum_result_items(result, func_rs=func_component, func_all_mongos=func_component)
         return {
             "name": self.name,
-            "description": self._description,
+            "description": self.description,
             "data": data
         }
