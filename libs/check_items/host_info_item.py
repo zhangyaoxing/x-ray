@@ -45,13 +45,14 @@ class HostInfoItem(BaseItem):
             members = node["members"]
             table = {
                 "type": "table",
-                "caption": f"Hardware & OS Information ({name})",
+                "caption": f"Hardware & OS Information - `{name}`",
                 "columns": [
                     {"name": "Host", "type": "string"},
-                    {"name": "CPU", "type": "string"},
-                    {"name": "NUMA", "type": "boolean"},
+                    {"name": "CPU Family", "type": "string"},
+                    {"name": "CPU Cores", "type": "string"},
                     {"name": "Memory (GB)", "type": "string"},
                     {"name": "OS", "type": "string"},
+                    {"name": "NUMA", "type": "boolean"},
                 ],
                 "rows": []
             }
@@ -59,17 +60,18 @@ class HostInfoItem(BaseItem):
             for m in members:
                 info = m.get("rawResult", None)
                 if info is None:
-                    table["rows"].append([m["host"], "N/A", "N/A", "N/A", "N/A"])
+                    table["rows"].append([m["host"], "N/A", "N/A", "N/A", "N/A", "N/A"])
                     continue
                 system = info["system"]
                 os = info["os"]
                 extra = info["extra"]
                 table["rows"].append([
                     m["host"],
-                    f"{extra['cpuString']} ({system['cpuArch']}) {extra['cpuFrequencyMHz']} MHz {system['numCores']} cores",
-                    system["numaEnabled"],
+                    f"{extra['cpuString']} ({system['cpuArch']}) {extra['cpuFrequencyMHz']} MHz",
+                    f"{system['numCores']}c",
                     system["memSizeMB"] / 1024,
-                    f"{os['name']} {os['version']}"
+                    f"{os['name']} {os['version']}",
+                    system["numaEnabled"]
                 ])
 
         enum_result_items(result, func_rs=func_component, func_all_mongos=func_component)
