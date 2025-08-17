@@ -24,9 +24,10 @@ def main():
     client = MongoClient(args.uri)  # Initialize MongoDB client
     config = load_config(args.config)  # Load configuration from file
     checkset = args.checkset
+    output_folder = args.output if args.output.endswith("/") else f"{args.output}/"
     framework = Framework(config)
-    framework.run_checks(checkset, client=client, output_folder=args.output, parsed_uri=parsed_uri)
-    framework.output_results(output_folder=args.output, format=args.format)
+    framework.run_checks(checkset, client=client, output_folder=output_folder, parsed_uri=parsed_uri)
+    framework.output_results(output_folder=output_folder, format=args.format)
 
 if __name__ == "__main__":
     main()

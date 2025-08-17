@@ -187,14 +187,14 @@ def enum_all_nodes(nodes, **kwargs):
         try:
             result["testResult"], result["rawResult"] = func_rs_cluster(set_name, nodes)
         except Exception as e:
-            logger.error(red(f"Failed to get execution result from replica set {set_name}: {str(e)}"))
+            logger.error(red(f"Failed to get execution result from replica set {set_name}: {e.__class__.__name__} {str(e)}"))
             result["testResult"], result["rawResult"] = (None, None)
         for member in nodes["members"]:
             test_result, raw_result = None, None
             try:
                 test_result, raw_result = func_rs_member(set_name, member)
             except Exception as e:
-                logger.error(red(f"Failed to get execution result from replica set {set_name}, member {member['host']}: {str(e)}"))
+                logger.error(red(f"Failed to get execution result from replica set {set_name}, member {member['host']}: {e.__class__.__name__} {str(e)}"))
 
             result["members"].append({
                 "host": member["host"],
@@ -208,7 +208,7 @@ def enum_all_nodes(nodes, **kwargs):
             test_result, raw_result = func_sh_cluster("mongos", nodes)
             result["testResult"], result["rawResult"] = test_result, raw_result
         except Exception as e:
-            logger.error(red(f"Failed to get execution result from sharded cluster: {str(e)}"))
+            logger.error(red(f"Failed to get execution result from sharded cluster: {e.__class__.__name__} {str(e)}"))
         for component_name, host_info in nodes["map"].items():
             set_name = host_info["setName"]
             result["map"][component_name] = {
@@ -228,7 +228,7 @@ def enum_all_nodes(nodes, **kwargs):
                 result["map"][component_name]["testResult"] = test_result
                 result["map"][component_name]["rawResult"] = raw_result
             except Exception as e:
-                logger.error(red(f"Failed to get execution result from {set_name}: {str(e)}"))
+                logger.error(red(f"Failed to get execution result from {set_name}: {e.__class__.__name__} {str(e)}"))
 
             for member in host_info["members"]:
                 test_result, raw_result = None, None
@@ -240,7 +240,7 @@ def enum_all_nodes(nodes, **kwargs):
                     else:
                         test_result, raw_result = func_shard_member(set_name, member)
                 except Exception as e:
-                    logger.error(red(f"Failed to get execution result from {set_name}, member {member['host']}: {str(e)}"))
+                    logger.error(red(f"Failed to get execution result from {set_name}, member {member['host']}: {e.__class__.__name__} {str(e)}"))
 
                 result["map"][component_name]["members"].append({
                     "host": member["host"],
