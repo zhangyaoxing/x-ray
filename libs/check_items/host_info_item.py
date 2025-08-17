@@ -29,13 +29,13 @@ class HostInfoItem(BaseItem):
                 return None, None
             host_info = client.admin.command("hostInfo")
             return None, host_info
-        raw_result = enum_all_nodes(nodes,
+        result = enum_all_nodes(nodes,
                                     func_rs_member=func_single,
                                     func_mongos_member=func_single,
                                     func_shard_member=func_single,
                                     func_config_member=func_single)
 
-        self.captured_sample = raw_result
+        self.captured_sample = result
 
     @property
     def review_result(self):

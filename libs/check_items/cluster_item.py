@@ -123,7 +123,7 @@ class ClusterItem(BaseItem):
         parsed_uri = kwargs.get("parsed_uri")
 
         nodes = discover_nodes(client, parsed_uri)
-        execution_result = enum_all_nodes(nodes,
+        result = enum_all_nodes(nodes,
                                        func_rs_cluster=self._check_rs,
                                        func_sh_cluster=self._check_sh,
                                        func_rs_member=self._check_rs_member,
@@ -132,7 +132,7 @@ class ClusterItem(BaseItem):
                                        func_config=self._check_rs,
                                        func_config_member=self._check_rs_member)
 
-        self.captured_sample = execution_result
+        self.captured_sample = result
 
     @property
     def review_result(self, ):
