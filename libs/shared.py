@@ -41,14 +41,15 @@ RESERVED_CONN_OPTIONS = [
     "socketTimeoutMS"
 ]
 
-def to_json(obj):
-    indent = 2 if env == "development" else None
+def to_json(obj, indent=0):
+    if env == "development":
+        indent = 2
     def custom_json_serialize(obj):
         if isinstance(obj, SEVERITY):
             return obj.name
         else:
             return json_util._json_convert(obj)
-    return json_util.dumps(obj, default=custom_json_serialize, indent=2)
+    return json_util.dumps(obj, default=custom_json_serialize, indent=indent)
 
 nodes = {}
 def discover_nodes(client, parsed_uri):

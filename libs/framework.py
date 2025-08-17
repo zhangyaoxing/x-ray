@@ -71,14 +71,18 @@ class Framework:
             f.write("# Deployment Health Check\n\n")
             f.write("## 1 Check Results\n\n")
             for i, item in enumerate(self._items):
-                f.write(f"### 1.{i + 1} {item.name}\n\n")
-                f.write(f"*{item.description}*\n\n")
+                title = f"1.{i + 1} {item.name}"
+                review_title = f"2.{i + 1} Review {item.name}"
+                f.write(f"### <a name=\"{title.replace(' ', '-').lower()}\">{title}</a>\n\n")
+                f.write(f"*{item.description}* [Review Raw Results](#{review_title.replace(' ', '-').lower()})\n\n")
                 f.write(item.test_result_markdown)
             
-            f.write("## 2 Check Data Review\n\n")
+            f.write("## 2 Review Raw Results\n\n")
             for i, item in enumerate(self._items):
-                f.write(f"### 2.{i + 1} {item.name}\n\n")
-                f.write(f"*{item.description}*\n\n")
+                title = f"1.{i + 1} {item.name}"
+                review_title = f"2.{i + 1} Review {item.name}"
+                f.write(f"### <a name=\"{review_title.replace(' ', '-').lower()}\">{review_title}</a>\n\n")
+                f.write(f"*{item.description}* [Review Check Results](#{title.replace(' ', '-').lower()})\n\n")
                 f.write(item.review_result_markdown)
 
         if format == "html":
