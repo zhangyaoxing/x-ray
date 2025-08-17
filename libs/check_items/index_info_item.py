@@ -148,6 +148,7 @@ class IndexInfoItem(BaseItem):
     @property
     def review_result(self):
         result = self.captured_sample
+        # TODO: display index options? (Unique, sparse, partial...)
         table = {
             "type": "table",
             "caption": f"Index Review",
