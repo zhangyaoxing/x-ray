@@ -1,6 +1,5 @@
-
 from libs.check_items.base_item import BaseItem
-from libs.shared import SEVERITY
+from libs.shared import SEVERITY, discover_nodes, enum_all_nodes, enum_result_items, to_json
 from libs.utils import red
 from pymongo.errors import OperationFailure
 
@@ -16,20 +15,104 @@ class ShardKeyItem(BaseItem):
         """
         self._logger.info("Gathering shard key information...")
         client = kwargs.get("client")
+        parsed_uri = kwargs.get("parsed_uri")
+        nodes = discover_nodes(client, parsed_uri)
+        if nodes["type"] == "RS":
+            self._logger.info("Cluster is not a sharded cluster. Skip...")
+            return
         
-        try:
+        def func_sh_cluster(name, node):
+            client = node["client"]
+            imbalance_percentage = self._config["sharding_imbalance_percentage"]
             collections = list(client.config.collections.find({"_id": {"$ne": 'config.system.sessions'}}))
+            shards = [doc["_id"] for doc in client.config.shards.find()]
+            test_result = []
+            raw_result = {
+                "shardedCollections": collections,
+                "stats": {}
+            }
             for c in collections:
+                # Check if the collection is using `{_id: 1}` as shard key
+                ns = c["_id"]
                 key = c["key"]
                 v = key.get("_id", None)
                 if (v == 1 or v == -1) and len(key.keys()) == 1:
-                    self.append_test_result(
-                        "cluster",
-                        SEVERITY.INFO,
-                        "Shard Key",
-                        f"Collection `{c['_id']}` has the shard key set to `{{_id: {v}}}`. Make sure the value of `_id` is not monotonically increasing or decreasing."
-                    )
-        except OperationFailure as e:
-            self._logger.error(red(f"Error checking shard keys: {e}"))
+                    test_result.append({
+                        "host": "cluster",
+                        "severity": SEVERITY.LOW,
+                        "title": "Improper Shard Key",
+                        "description": f"Collection `{ns}` has the shard key set to `{{_id: {v}}}`. Make sure the value of `_id` is not monotonically increasing or decreasing."
+                    })
+                db_name, coll_name = ns.split(".")
+                stats = client[db_name].command("collStats", coll_name)
+                shard_stats = {s_name: {
+                    "size": s["size"],
+                    "count": s["count"],
+                    "avgObjSize": s.get("avgObjSize", 0),
+                    "storageSize": s["storageSize"],
+                    "nindexes": s["nindexes"],
+                    "totalIndexSize": s["totalIndexSize"],
+                    "totalSize": s["totalSize"]
+                } for s_name, s in stats["shards"].items()}
+                raw_result["stats"][ns] = shard_stats
+                # Check if collection is imbalanced.
+                sizes = [shard_stats.get(s_name, {}).get("size", 0) for s_name in shards]
+                max_size = max(sizes)
+                min_size = min(sizes)
+                if max_size > min_size * (1 + imbalance_percentage):
+                    test_result.append({
+                        "host": "cluster",
+                        "severity": SEVERITY.MEDIUM,
+                        "title": "Sharding Imbalance",
+                        "description": f"Collection `{ns}` is imbalanced across shards. The difference between the largest and smallest shard {(max_size - min_size) / 1024 / 1024:.2f} MB is more than {imbalance_percentage * 100:.2f}%.",
+                    })
+            self.append_test_results(test_result)
+            return test_result, raw_result
+        result = enum_all_nodes(nodes, func_sh_cluster=func_sh_cluster)
 
-        self.captured_sample = collections
+        self.captured_sample = result
+
+    @property
+    def review_result(self):
+        result = self.captured_sample
+        table = {
+            "type": "table",
+            "caption": f"Shard Keys",
+            "columns": [
+                {"name": "Namespace", "type": "string"},
+                {"name": "Shard Key", "type": "string"},
+                {"name": "Data Size (MB)", "type": "object"},
+                {"name": "Storage Size (MB)", "type": "object"},
+                {"name": "Index Size (MB)", "type": "object"},
+                {"name": "Docs Count", "type": "object"}
+            ],
+            "rows": []
+        }
+        def review_cluster(name, node):
+            raw_result = node["rawResult"]
+            collections = raw_result["shardedCollections"]
+            all_stats = raw_result["stats"]
+            for coll in collections:
+                ns = coll["_id"]
+                key = coll["key"]
+                stats = all_stats.get(ns, {})
+                data_size = sum(s["size"] for s in stats.values()) / 1024 / 1024
+                data_size_detail = "<br/>".join([f"{s_name}: {round(s['size'] / 1024 / 1024, 2)}" for s_name, s in stats.items()])
+                storage_size = sum(s["storageSize"] for s in stats.values()) / 1024 / 1024
+                storage_size_detail = "<br/>".join([f"{s_name}: {round(s['storageSize'] / 1024 / 1024, 2)}" for s_name, s in stats.items()])
+                index_size = sum(s["totalIndexSize"] for s in stats.values()) / 1024 / 1024
+                index_size_detail = "<br/>".join([f"{s_name}: {round(s['totalIndexSize'] / 1024 / 1024, 2)}" for s_name, s in stats.items()])
+                docs_count = sum(s["count"] for s in stats.values())
+                docs_count_detail = "<br/>".join([f"{s_name}: {s['count']}" for s_name, s in stats.items()])
+                table["rows"].append([ns, key, 
+                                      f"{data_size:,.2f}<br/><pre>{data_size_detail}</pre>", 
+                                      f"{storage_size:,.2f}<br/><pre>{storage_size_detail}</pre>", 
+                                      f"{index_size:,.2f}<br/><pre>{index_size_detail}</pre>", 
+                                      f"{docs_count:,}<br/><pre>{docs_count_detail}</pre>"
+                ])
+        enum_result_items(result, func_sh_cluster=review_cluster)
+        return {
+            "name": self.name,
+            "description": self.description,
+            "data": [table]
+        }

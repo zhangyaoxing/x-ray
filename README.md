@@ -8,4 +8,4 @@
 | HostInfoItem  | `hostInfo`                                                          |
 | SecurityItem  | `getCmdLineOpts`                                                    |
 | IndexInfoItem | `listDatabases`, `listCollections`, `indexStats`                    |
-| ShardKeyItem  | `find` against `config.collections`                                 |
+| ShardKeyItem  | `find` against `config.collections`, `config.shards`                |
