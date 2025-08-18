@@ -6,8 +6,14 @@ from libs.utils import *
 class ClusterItem(BaseItem):
     def __init__(self, output_folder, config=None):
         super().__init__(output_folder, config)
-        self._name = "Sharded Cluster Information"
-        self._description = "Collects and reviews sharded cluster configuration and status."
+        self._name = "Cluster Information"
+        self._description = "Collects and reviews cluster configuration and status.\n\n"
+        self._description += "- The following items apply to replica set, shards and CSRS:\n"
+        self._description += "    - Replication status check.\n"
+        self._description += "    - Replication config check.\n"
+        self._description += "    - Oplog window check (Both `minRetentionHours` and oplog size are considered).\n"
+        self._description += "- Whether there are irresponsive mongos nodes.\n"
+        self._description += "- Whether active mongos nodes are enough.\n"
 
     def _check_rs(self, set_name, node):
         """
@@ -175,6 +181,10 @@ class ClusterItem(BaseItem):
             num_arbiters = sum(1 for m in members if m["arbiterOnly"])
             num_hidden = sum(1 for m in members if m["hidden"])
             rs_overview["rows"].append([set_name, num_members, num_voting, num_arbiters, num_hidden])
+            oplog_info = {m["host"]: {
+                "min_retention_hours": round(m.get("rawResult", {}).get("oplogInfo", {}).get("minRetentionHours", 0), 2),
+                "current_retention_hours": round(m.get("rawResult", {}).get("oplogInfo", {}).get("currentRetentionHours", 0), 2)
+            } for m in result["members"]}
             table_details = {
                 "type": "table",
                 "caption": f"Component Details - `{set_name}`",
@@ -186,10 +196,14 @@ class ClusterItem(BaseItem):
                     {"name": "Hidden", "type": "boolean"},
                     {"name": "Priority", "type": "integer"},
                     {"name": "Votes", "type": "integer"},
-                    {"name": "Delay", "type": "integer"}
+                    {"name": "Delay", "type": "integer"},
+                    {"name": "Oplog Window", "type": "integer"}
                 ],
                 "rows": [
-                    [m["host"], m["_id"], m["arbiterOnly"], m["buildIndexes"], m["hidden"], m["priority"], m["votes"], m.get("secondaryDelaySecs", m.get("slaveDelay", 0))] for m in members
+                    [m["host"], m["_id"], m["arbiterOnly"], m["buildIndexes"], 
+                     m["hidden"], m["priority"], m["votes"], m.get("secondaryDelaySecs", m.get("slaveDelay", 0)),
+                     oplog_info[m["host"]]["min_retention_hours"] if oplog_info[m["host"]]["min_retention_hours"] > 0 else oplog_info[m["host"]]["current_retention_hours"]
+                     ] for m in members
                 ]
             }
             data.append(table_details)
