@@ -1,7 +1,7 @@
 {
     "checksets":{
         "default": {
-            "items": ["BuildInfoItem", "CollInfoItem", "ShardKeyItem", "IndexInfoItem","SecurityItem", "ClusterItem", "HostInfoItem"]
+            "items": ["ServerStatusItem", "BuildInfoItem", "CollInfoItem", "ShardKeyItem", "IndexInfoItem","SecurityItem", "ClusterItem", "HostInfoItem"]
         }
     },
     "item_config": {
