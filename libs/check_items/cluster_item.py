@@ -180,12 +180,15 @@ class ClusterItem(BaseItem):
         data.append(rs_overview)
         data.append(mongos_details) if result["type"] == "SH" else None
         def func_sh(name, result, **kwargs):
-            raw = result["rawResult"]
+            raw_result = result["rawResult"]
+            if raw_result is None:
+                mongos_details["rows"].append(["n/a", "n/a", "n/a"])
+                return
             component_names = result["map"].keys()
             shards = sum(1 for name in component_names if name not in ["mongos", "config"])
             mongos = len(result["map"]["mongos"]["members"])
             active_mongos = 0
-            for host, info in raw.items():
+            for host, info in raw_result.items():
                 ping_latency = info.get("pingLatencySec", 0)
                 last_ping = info.get("lastPing", False)
                 mongos_details["rows"].append([host, ping_latency, last_ping])
@@ -195,17 +198,29 @@ class ClusterItem(BaseItem):
 
 
         def func_rs(set_name, result, **kwargs):
-            repl_config = result["rawResult"]["replsetConfig"]["config"]
+            raw_result = result["rawResult"]
+            if raw_result is None:
+                return
+            repl_config = raw_result["replsetConfig"]["config"]
             members = repl_config["members"]
             num_members = len(members)
             num_voting = sum(1 for m in members if m["votes"] > 0)
             num_arbiters = sum(1 for m in members if m["arbiterOnly"])
             num_hidden = sum(1 for m in members if m["hidden"])
             rs_overview["rows"].append([escape_markdown(set_name), num_members, num_voting, num_arbiters, num_hidden])
-            oplog_info = {m["host"]: {
-                "min_retention_hours": round(m.get("rawResult", {}).get("oplogInfo", {}).get("minRetentionHours", 0), 2),
-                "current_retention_hours": round(m.get("rawResult", {}).get("oplogInfo", {}).get("currentRetentionHours", 0), 2)
-            } for m in result["members"]}
+            oplog_info = {}
+            for m in result["members"]:
+                r_result = m.get("rawResult", {})
+                if r_result is None:
+                    oplog_info[m["host"]] = {
+                        "min_retention_hours": "n/a",
+                        "current_retention_hours": "n/a"
+                    }
+                else:
+                    oplog_info[m["host"]] = {
+                        "min_retention_hours": round(r_result.get("oplogInfo", {}).get("minRetentionHours", 0), 2),
+                        "current_retention_hours": round(r_result.get("oplogInfo", {}).get("currentRetentionHours", 0), 2)
+                    }
 
             repl_status = result["rawResult"]["replsetStatus"]
             latest_optime = max(m["optime"]["ts"] for m in repl_status["members"])
@@ -228,7 +243,7 @@ class ClusterItem(BaseItem):
                 "rows": [
                     [m["host"], m["_id"], m["arbiterOnly"], m["buildIndexes"], 
                      m["hidden"], m["priority"], m["votes"], m.get("secondaryDelaySecs", m.get("slaveDelay", 0)),
-                     member_delay[m["host"]] if m["host"] in member_delay else "N/A",
+                     member_delay[m["host"]] if m["host"] in member_delay else "n/a",
                      oplog_info[m["host"]]["min_retention_hours"] if oplog_info[m["host"]]["min_retention_hours"] > 0 else oplog_info[m["host"]]["current_retention_hours"]
                      ] for m in members
                 ]

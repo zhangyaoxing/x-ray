@@ -62,9 +62,9 @@ class HostInfoItem(BaseItem):
             }
             data.append(table)
             for m in members:
-                info = m.get("rawResult", None)
+                info = m["rawResult"]
                 if info is None:
-                    table["rows"].append([m["host"], "N/A", "N/A", "N/A", "N/A", "N/A"])
+                    table["rows"].append([m["host"], "n/a", "n/a", "n/a", "n/a", "n/a"])
                     continue
                 system = info["system"]
                 os = info["os"]

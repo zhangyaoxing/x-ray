@@ -170,8 +170,11 @@ class CollInfoItem(BaseItem):
         }
         data.append(stats_table)
         def func_overview(set_name, node, **kwargs):
-            all_stats = node["rawResult"]
-            for stats in all_stats:
+            raw_result = node["rawResult"]
+            if raw_result is None:
+                stats_table["rows"].append(["n/a", "n/a", "n/a", "n/a", "n/a", "n/a"])
+                return
+            for stats in raw_result:
                 ns = stats["ns"]
                 storage_stats = stats.get("storageStats", {})
                 size = storage_stats.get("size", 0)
@@ -198,9 +201,12 @@ class CollInfoItem(BaseItem):
         }
         data.append(frag_table)
         def func_node(set_name, node, **kwargs):
-            all_stats = node["rawResult"]
+            raw_result = node["rawResult"]
             host = node["host"]
-            for stats in all_stats:
+            if raw_result is None:
+                frag_table["rows"].append([host, "n/a", "n/a", "n/a"])
+                return
+            for stats in raw_result:
                 ns = stats["ns"]
                 coll_frag = stats.get("collFragmentation", {}).get("fragmentation", 0)
                 index_frags = stats.get("indexFragmentation", [])

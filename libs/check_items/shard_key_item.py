@@ -89,8 +89,11 @@ class ShardKeyItem(BaseItem):
             ],
             "rows": []
         }
-        def review_cluster(name, node, **kwargs):
+        def func_cluster(name, node, **kwargs):
             raw_result = node["rawResult"]
+            if raw_result is None:
+                table["rows"].append(["n/a", "n/a", "n/a", "n/a", "n/a", "n/a"])
+                return
             collections = raw_result["shardedCollections"]
             all_stats = raw_result["stats"]
             for coll in collections:
@@ -111,7 +114,7 @@ class ShardKeyItem(BaseItem):
                                       f"{format_size(index_size)}<br/><pre>{index_size_detail}</pre>", 
                                       f"{docs_count}<br/><pre>{docs_count_detail}</pre>"
                 ])
-        enum_result_items(result, func_sh_cluster=review_cluster)
+        enum_result_items(result, func_sh_cluster=func_cluster)
         return {
             "name": self.name,
             "description": self.description,

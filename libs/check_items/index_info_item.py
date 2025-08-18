@@ -162,9 +162,12 @@ class IndexInfoItem(BaseItem):
             ],
             "rows": []
         }
-        def review_cluster(set_name, node, **kwargs):
-            raw = node.get("rawResult", [])
-            for item in raw:
+        def func_cluster(set_name, node, **kwargs):
+            raw_result = node.get("rawResult", [])
+            if raw_result is None:
+                table["rows"].append(["n/a", "n/a", "n/a", "n/a", "n/a"])
+                return
+            for item in raw_result:
                 ns = item["ns"]
                 capture_time = item["captureTime"]
                 for stats in item["indexStats"]:
@@ -177,7 +180,7 @@ class IndexInfoItem(BaseItem):
                         [escape_markdown(ns), escape_markdown(shard), escape_markdown(stats["name"]), escape_markdown(stats["key"]), access_per_hour]
                     )
 
-        enum_result_items(result, func_sh_cluster=review_cluster, func_rs_cluster=review_cluster)
+        enum_result_items(result, func_sh_cluster=func_cluster, func_rs_cluster=func_cluster)
         return {
             "name": self.name,
             "description": self.description,

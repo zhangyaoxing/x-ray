@@ -123,12 +123,13 @@ class SecurityItem(BaseItem):
             "rows": []
         }
         def func_node(name, node, **kwargs):
-            raw = node["rawResult"]
-            if raw is None:
+            raw_result = node["rawResult"]
+            host = node["host"]
+            if raw_result is None:
+                table["rows"].append([escape_markdown(name), host, "N/A", "N/A", "N/A", "N/A", "N/A", "N/A", "N/A"])
                 return
 
-            host = node["host"]
-            parsed = raw.get("parsed", {})
+            parsed = raw_result.get("parsed", {})
             net = parsed.get("net", {})
             security = parsed.get("security", {})
             audit_log = parsed.get("auditLog", {})
