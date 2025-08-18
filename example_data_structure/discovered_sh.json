@@ -68,13 +68,15 @@
                     "host": "M-QTFH0WFXLG:30017",
                     "uri": "mongodb://M-QTFH0WFXLG:30017/?authSource=admin&connectTimeoutMS=5000",
                     "client": "<MongoClient object that connects to the above URI>",
-                    "pingLatencySec": 3.480887
+                    "pingLatencySec": 3.480887,
+                    "lastPing": {"$date": "2025-08-18T18:47:09.593Z"}
                 },
                 {
                     "host": "M-QTFH0WFXLG:30028",
                     "uri": "mongodb://M-QTFH0WFXLG:30028/?authSource=admin&connectTimeoutMS=5000",
                     "client": "<MongoClient object that connects to the above URI>",
-                    "pingLatencySec": 67086.035915
+                    "pingLatencySec": 67086.035915,
+                    "lastPing": {"$date": "2025-08-18T18:47:09.593Z"}
                 }
             ]
         }
