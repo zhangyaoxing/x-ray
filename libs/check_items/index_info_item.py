@@ -151,6 +151,7 @@ class IndexInfoItem(BaseItem):
     def review_result(self):
         result = self.captured_sample
         # TODO: display index options? (Unique, sparse, partial...)
+        # TODO: display access/hour for each node.
         table = {
             "type": "table",
             "caption": f"Index Review",
