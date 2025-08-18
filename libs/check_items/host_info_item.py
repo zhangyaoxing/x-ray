@@ -17,7 +17,6 @@ class HostInfoItem(BaseItem):
         """
         Main test method to gather host information.
         """
-        self._logger.info(f"Gathering host info...")
         client = kwargs.get("client")
         parsed_uri = kwargs.get("parsed_uri")
         nodes = discover_nodes(client, parsed_uri)

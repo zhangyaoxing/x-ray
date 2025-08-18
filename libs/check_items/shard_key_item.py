@@ -7,13 +7,14 @@ class ShardKeyItem(BaseItem):
     def __init__(self, output_folder, config=None):
         super().__init__(output_folder, config)
         self._name = "Shard Key Information"
-        self._description = "Collects and reviews shard key configuration for collections in a sharded cluster."
+        self._description = "Collects and reviews shard key configuration for collections in a sharded cluster. Including: \n\n"
+        self._description += "- Check if the shard key is set to `{_id: 1}` or `{_id: -1}`.\n"
+        self._description += "- Check for sharding imbalance across shards."
 
     def test(self, *args, **kwargs):
         """
         Main test method to gather shard key information.
         """
-        self._logger.info("Gathering shard key information...")
         client = kwargs.get("client")
         parsed_uri = kwargs.get("parsed_uri")
         nodes = discover_nodes(client, parsed_uri)

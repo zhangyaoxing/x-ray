@@ -1,5 +1,7 @@
 
 from datetime import datetime
+import re
+from libs.shared import to_markdown_id
 from libs.utils import *
 import logging
 import importlib
@@ -57,7 +59,7 @@ class Framework:
             # The config for the item can be specified in the `item_config` section, under the item class name.
             item_config = self._config.get("item_config", {}).get(item_name, {})
             item = item_cls(batch_folder, item_config)
-            self._logger.info(f"Running check item: {bold(green(item.name))} - {item.description}")
+            self._logger.info(f"Running check item: {bold(green(item.name))}")
             item.test(**kwargs)
             self._items.append(item)
 
@@ -69,20 +71,23 @@ class Framework:
 
         with open(output_file, "w") as f:
             f.write("# Deployment Health Check\n\n")
-            f.write("## 1 Check Results\n\n")
+            f.write("## 1 Review Test Results\n\n")
             for i, item in enumerate(self._items):
                 title = f"1.{i + 1} {item.name}"
                 review_title = f"2.{i + 1} Review {item.name}"
-                f.write(f"### <a name=\"{title.replace(' ', '-').lower()}\">{title}</a>\n\n")
-                f.write(f"*{item.description}* [Review Raw Results](#{review_title.replace(' ', '-').lower()})\n\n")
+                review_title_id = to_markdown_id(review_title)
+                f.write(f"### {title}\n\n")
+                f.write(f"{item.description}\n\n")
+                f.write(f"[Review Raw Results](#{review_title_id})\n\n")
                 f.write(item.test_result_markdown)
             
             f.write("## 2 Review Raw Results\n\n")
             for i, item in enumerate(self._items):
                 title = f"1.{i + 1} {item.name}"
+                title_id = to_markdown_id(title)
                 review_title = f"2.{i + 1} Review {item.name}"
-                f.write(f"### <a name=\"{review_title.replace(' ', '-').lower()}\">{review_title}</a>\n\n")
-                f.write(f"*{item.description}* [Review Check Results](#{title.replace(' ', '-').lower()})\n\n")
+                f.write(f"### {review_title}\n\n")
+                f.write(f"[Review Test Results](#{title_id})\n\n")
                 f.write(item.review_result_markdown)
 
         if format == "html":
@@ -90,7 +95,7 @@ class Framework:
             with open(f"{batch_folder}/results.html", "w") as f:
                 with open(output_file, "r") as md_file:
                     md_text = md_file.read()
-                html = markdown.markdown(md_text, extensions=["tables"])
+                html = markdown.markdown(md_text, extensions=["tables", "toc"])
                 f.write('<!DOCTYPE html>\n')
                 f.write('<html lang="en">\n')
                 f.write('<head>\n')

@@ -10,7 +10,6 @@ class SecurityItem(BaseItem):
         self._description = "Collects & review security related information."
 
     def test(self, *args, **kwargs):
-        self._logger.info(f"Gathering security information...")
         client = kwargs.get("client")
         parsed_uri = kwargs.get("parsed_uri")
 

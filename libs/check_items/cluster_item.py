@@ -118,7 +118,6 @@ class ClusterItem(BaseItem):
         """
         Main test method to gather sharded cluster information.
         """
-        self._logger.info(f"Gathering sharded cluster info...")
         client = kwargs.get("client")
         parsed_uri = kwargs.get("parsed_uri")
 

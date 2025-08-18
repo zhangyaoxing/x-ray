@@ -1,4 +1,5 @@
 from enum import Enum
+import re
 from bson import json_util
 import logging
 import urllib.parse
@@ -50,6 +51,14 @@ def to_json(obj, indent=0):
         else:
             return json_util._json_convert(obj)
     return json_util.dumps(obj, default=custom_json_serialize, indent=indent)
+
+def to_markdown_id(str):
+    id = str.lower()
+    id = id.replace(' ', '-')
+    id = re.sub(r'[^a-z0-9\-]', '', id)
+    id = re.sub(r'\-+', '-', id)
+    id = id.strip('-')
+    return id
 
 nodes = {}
 def discover_nodes(client, parsed_uri):
