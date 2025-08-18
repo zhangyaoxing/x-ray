@@ -8,7 +8,9 @@ class ServerStatusItem(BaseItem):
     def __init__(self, output_folder, config=None):
         super().__init__(output_folder, config)
         self._name = "Server Status Information"
-        self._description = "Collects and reviews server status metrics."
+        self._description = "Collects and reviews server status metrics.\n\n"
+        self._description += "- Whether used/total connection ratio is too high.\n"
+        self._description += "- Whether query targeting is poor.\n"
 
     def _check_connections(self, server_status):
         """

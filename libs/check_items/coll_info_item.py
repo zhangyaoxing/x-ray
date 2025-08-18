@@ -9,10 +9,10 @@ class CollInfoItem(BaseItem):
     def __init__(self, output_folder, config = None):
         super().__init__(output_folder, config)
         self._name = "Collection Information"
-        self._description = "Collects & review collection statistics."
-        self._description += "- Whether average object size is too big."
-        self._description += "- Whether collections are big enough for sharding."
-        self._description += "- Whether collections are fragmented."
+        self._description = "Collects & review collection statistics.\n\n"
+        self._description += "- Whether average object size is too big.\n"
+        self._description += "- Whether collections are big enough for sharding.\n"
+        self._description += "- Whether collections are fragmented.\n"
 
     def test(self, *args, **kwargs):
         client = kwargs.get("client")
