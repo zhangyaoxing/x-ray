@@ -123,10 +123,12 @@ class ServerStatusItem(BaseItem):
         data.append(conn_table)
         data.append(qt_table)
         def func_all_members(set_name, node, **kwargs):
-            raw_result = node["rawResult"]
-            host = node["host"]
-            if raw_result is None:
+            raw_result = node.get("rawResult", {})
+            if not raw_result:
+                conn_table["rows"].append([escape_markdown(set_name), node["host"], "n/a", "n/a", "n/a", "n/a"])
+                qt_table["rows"].append([escape_markdown(set_name), node["host"], "n/a", "n/a"])
                 return
+            host = node["host"]
             connections = raw_result.get("connections", {})
             query_targeting = raw_result.get("query_targeting", {})
             conn_table["rows"].append([

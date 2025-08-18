@@ -1,5 +1,5 @@
 from libs.check_items.base_item import BaseItem
-from libs.shared import SEVERITY, discover_nodes, enum_all_nodes, enum_result_items
+from libs.shared import MAX_MONGOS_PING_LATENCY, SEVERITY, discover_nodes, enum_all_nodes, enum_result_items
 from libs.utils import *
 
 class BuildInfoItem(BaseItem):
@@ -14,13 +14,13 @@ class BuildInfoItem(BaseItem):
         parsed_uri = kwargs.get("parsed_uri")
         nodes = discover_nodes(client, parsed_uri)
         def func_node(set_name, node, **kwargs):
+            if "pingLatencySec" in node and node["pingLatencySec"] > MAX_MONGOS_PING_LATENCY:
+                return [], None
+            client = node["client"]
             raw_result = client.admin.command("buildInfo")
             test_result = []
             eol_version = self._config.get("eol_version", [4, 4, 0])
             running_version = raw_result.get("versionArray", None)
-            if not running_version:
-                self._logger.warning(yellow("Failed to retrieve server build information."))
-                return False
             if running_version[0] < eol_version[0] or \
             (running_version[0] == eol_version[0] and running_version[1] < eol_version[1]):
                 test_result.append({
@@ -54,11 +54,15 @@ class BuildInfoItem(BaseItem):
             "rows": []
         }
         def func_node(name, node, **kwargs):
-            result = node["rawResult"]
-            build_env = result.get("buildEnvironment", {})
-            table["rows"].append([name, node["host"], 
-                                  result.get("version", ""),
-                                  result.get("openssl", {}).get("running", ""),
+            raw_result = node.get("rawResult", {})
+            host = node["host"]
+            if raw_result is None:
+                table["rows"].append([name, host, "n/a", "n/a", "n/a", "n/a"])
+                return
+            build_env = raw_result.get("buildEnvironment", {})
+            table["rows"].append([name, host, 
+                                  raw_result.get("version", ""),
+                                  raw_result.get("openssl", {}).get("running", ""),
                                   build_env.get("target_arch", ""),
                                   build_env.get("target_os", "")])
         enum_result_items(result, func_mongos_member=func_node, func_rs_member=func_node, func_shard_member=func_node, func_config_member=func_node)
