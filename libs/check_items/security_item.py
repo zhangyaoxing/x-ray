@@ -1,6 +1,6 @@
 from pymongo import MongoClient
 from libs.check_items.base_item import BaseItem
-from libs.shared import MAX_MONGOS_PING_LATENCY, SEVERITY, discover_nodes, enum_all_nodes, enum_result_items
+from libs.shared import *
 from libs.utils import *
 
 class SecurityItem(BaseItem):
@@ -140,7 +140,7 @@ class SecurityItem(BaseItem):
             bind_ip = net.get("bindIp", "127.0.0.1")
             cluster_auth = security.get("clusterAuthMode", "disabled")
             audit = "enabled" if audit_log.get("destination", None) is not None else "disabled"
-            table["rows"].append([name, host, f"{bind_ip}:{port}", tls, authorization, cluster_auth, log_redaction, eat, audit])
+            table["rows"].append([escape_markdown(name), host, f"{bind_ip}:{port}", tls, authorization, cluster_auth, log_redaction, eat, audit])
 
         enum_result_items(raw_result,
                           func_rs_member=func_node,

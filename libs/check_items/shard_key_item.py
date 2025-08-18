@@ -1,5 +1,5 @@
 from libs.check_items.base_item import BaseItem
-from libs.shared import SEVERITY, discover_nodes, enum_all_nodes, enum_result_items, format_size, to_json
+from libs.shared import SEVERITY, discover_nodes, enum_all_nodes, enum_result_items, escape_markdown, format_size, to_json
 from libs.utils import red
 from pymongo.errors import OperationFailure
 
@@ -82,10 +82,10 @@ class ShardKeyItem(BaseItem):
             "columns": [
                 {"name": "Namespace", "type": "string"},
                 {"name": "Shard Key", "type": "string"},
-                {"name": "Data Size", "type": "object"},
-                {"name": "Storage Size", "type": "object"},
-                {"name": "Index Size", "type": "object"},
-                {"name": "Docs Count", "type": "object"}
+                {"name": "Data Size", "type": "object", "align": "left"},
+                {"name": "Storage Size", "type": "object", "align": "left"},
+                {"name": "Index Size", "type": "object", "align": "left"},
+                {"name": "Docs Count", "type": "object", "align": "left"}
             ],
             "rows": []
         }
@@ -98,14 +98,14 @@ class ShardKeyItem(BaseItem):
                 key = coll["key"]
                 stats = all_stats.get(ns, {})
                 data_size = sum(s["size"] for s in stats.values())
-                data_size_detail = "<br/>".join([f"{s_name}: {format_size(s['size'])}" for s_name, s in stats.items()])
+                data_size_detail = "<br/>".join([f"{escape_markdown(s_name)}: {format_size(s['size'])}" for s_name, s in stats.items()])
                 storage_size = sum(s["storageSize"] for s in stats.values())
-                storage_size_detail = "<br/>".join([f"{s_name}: {format_size(s['storageSize'])}" for s_name, s in stats.items()])
+                storage_size_detail = "<br/>".join([f"{escape_markdown(s_name)}: {format_size(s['storageSize'])}" for s_name, s in stats.items()])
                 index_size = sum(s["totalIndexSize"] for s in stats.values())
-                index_size_detail = "<br/>".join([f"{s_name}: {format_size(s['totalIndexSize'])}" for s_name, s in stats.items()])
+                index_size_detail = "<br/>".join([f"{escape_markdown(s_name)}: {format_size(s['totalIndexSize'])}" for s_name, s in stats.items()])
                 docs_count = sum(s["count"] for s in stats.values())
-                docs_count_detail = "<br/>".join([f"{s_name}: {s['count']}" for s_name, s in stats.items()])
-                table["rows"].append([ns, key, 
+                docs_count_detail = "<br/>".join([f"{escape_markdown(s_name)}: {s['count']}" for s_name, s in stats.items()])
+                table["rows"].append([escape_markdown(ns), escape_markdown(key), 
                                       f"{format_size(data_size)}<br/><pre>{data_size_detail}</pre>", 
                                       f"{format_size(storage_size)}<br/><pre>{storage_size_detail}</pre>", 
                                       f"{format_size(index_size)}<br/><pre>{index_size_detail}</pre>", 

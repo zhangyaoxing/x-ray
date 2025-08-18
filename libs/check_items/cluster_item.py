@@ -201,7 +201,7 @@ class ClusterItem(BaseItem):
             num_voting = sum(1 for m in members if m["votes"] > 0)
             num_arbiters = sum(1 for m in members if m["arbiterOnly"])
             num_hidden = sum(1 for m in members if m["hidden"])
-            rs_overview["rows"].append([set_name, num_members, num_voting, num_arbiters, num_hidden])
+            rs_overview["rows"].append([escape_markdown(set_name), num_members, num_voting, num_arbiters, num_hidden])
             oplog_info = {m["host"]: {
                 "min_retention_hours": round(m.get("rawResult", {}).get("oplogInfo", {}).get("minRetentionHours", 0), 2),
                 "current_retention_hours": round(m.get("rawResult", {}).get("oplogInfo", {}).get("currentRetentionHours", 0), 2)
@@ -223,7 +223,7 @@ class ClusterItem(BaseItem):
                     {"name": "Votes", "type": "integer"},
                     {"name": "Configured Delay", "type": "integer"},
                     {"name": "Current Delay", "type": "integer"},
-                    {"name": "Oplog Window", "type": "integer"}
+                    {"name": "Oplog Window Hours", "type": "integer"}
                 ],
                 "rows": [
                     [m["host"], m["_id"], m["arbiterOnly"], m["buildIndexes"], 

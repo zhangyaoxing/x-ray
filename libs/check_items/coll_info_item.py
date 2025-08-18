@@ -169,7 +169,7 @@ class CollInfoItem(BaseItem):
             "rows": []
         }
         data.append(stats_table)
-        def func_overview(host, node, **kwargs):
+        def func_overview(set_name, node, **kwargs):
             all_stats = node["rawResult"]
             for stats in all_stats:
                 ns = stats["ns"]
@@ -179,7 +179,7 @@ class CollInfoItem(BaseItem):
                 avg_obj_size = storage_stats.get("avgObjSize", 0)
                 total_index_size = storage_stats.get("totalIndexSize", 0)
                 index_data_ratio = round(total_index_size / storage_size, 4) if size > 0 else 0
-                stats_table["rows"].append([ns,
+                stats_table["rows"].append([escape_markdown(ns),
                                       format_size(size),
                                       format_size(storage_size),
                                       format_size(avg_obj_size),
@@ -192,13 +192,14 @@ class CollInfoItem(BaseItem):
                 {"name": "Host", "type": "string"},
                 {"name": "Namespace", "type": "string"},
                 {"name": "Collection Fragmentation", "type": "string"},
-                {"name": "Index Fragmentation", "type": "decimal"},
+                {"name": "Index Fragmentation", "type": "decimal", "align": "left"},
             ],
             "rows": []
         }
         data.append(frag_table)
-        def func_node(host, node, **kwargs):
+        def func_node(set_name, node, **kwargs):
             all_stats = node["rawResult"]
+            host = node["host"]
             for stats in all_stats:
                 ns = stats["ns"]
                 coll_frag = stats.get("collFragmentation", {}).get("fragmentation", 0)
@@ -209,11 +210,11 @@ class CollInfoItem(BaseItem):
                 for index in index_frags:
                     total_reusable_size += index.get("reusable", 0)
                     total_index_size += index.get("totalSize", 0)
-                    index_name = index.get("indexName", "")
+                    index_name = escape_markdown(index.get("indexName", ""))
                     fragmentation = index.get("fragmentation", 0)
                     index_details.append(f"{index_name}: {fragmentation:.2%}")
                 index_frag = round(total_reusable_size / total_index_size, 4) if total_index_size > 0 else 0
-                row = [host, ns, f"{coll_frag:.2%}",
+                row = [host, escape_markdown(ns), f"{coll_frag:.2%}",
                        f"{index_frag:.2%}<br/><pre>{'<br/>'.join(index_details)}</pre>"]
                 frag_table["rows"].append(row)
         enum_result_items(result, func_sh_cluster=func_overview, func_rs_cluster=func_overview, func_rs_member=func_node, func_shard_member=func_node)

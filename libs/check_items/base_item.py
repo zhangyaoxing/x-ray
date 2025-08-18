@@ -14,6 +14,11 @@ def colorize_severity(severity: SEVERITY) -> str:
     elif severity == SEVERITY.INFO:
         return "gray"
 
+TABLE_ALIGNMENT = {
+    "left": ":----------",
+    "right": "----------:",
+    "center": ":----------:"
+}
 class BaseItem:
     def __init__(self, output_folder: str, config: dict = None):
         self._name = "BaseItem"
@@ -79,10 +84,12 @@ class BaseItem:
             caption = block.get("caption")
             if type == "table":
                 result += f"#### ({i + 1}) {caption}\n"
-                result += "| " + " | ".join(col.get("name") for col in block.get("columns", [])) + " |\n"
-                result += "|:----------:" * len(block["columns"]) + "|\n"
+                header = [col.get('name', '(NOT SET)') for col in block.get("columns", [])]
+                align = [TABLE_ALIGNMENT.get(col.get("align", "center"), TABLE_ALIGNMENT["center"]) for col in block.get("columns", [])]
+                result += f"|{'|'.join(header)}|\n"
+                result += f"|{'|'.join(align)}|\n"
                 for row in block.get("rows", []):
-                    result += "| " + " | ".join(str(cell) for cell in row) + " |\n"
+                    result += "|" + "|".join(str(cell) for cell in row) + "|\n"
                 result += "\n"
             # TODO: support other types.
         return result

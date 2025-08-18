@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from libs.check_items.base_item import BaseItem
-from libs.shared import SEVERITY, discover_nodes, enum_all_nodes, enum_result_items
+from libs.shared import SEVERITY, discover_nodes, enum_all_nodes, enum_result_items, escape_markdown
 from libs.utils import *
 from pymongo.uri_parser import parse_uri
 
@@ -174,7 +174,7 @@ class IndexInfoItem(BaseItem):
                     since = access.get("since", None)
                     access_per_hour = ops / (capture_time - since).total_seconds() / 3600
                     table["rows"].append(
-                        [ns, shard, stats["name"], stats["key"], access_per_hour]
+                        [escape_markdown(ns), escape_markdown(shard), escape_markdown(stats["name"]), escape_markdown(stats["key"]), access_per_hour]
                     )
 
         enum_result_items(result, func_sh_cluster=review_cluster, func_rs_cluster=review_cluster)

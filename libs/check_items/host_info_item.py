@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, timezone
 from pymongo import MongoClient
 from pymongo.uri_parser import parse_uri
 from libs.check_items.base_item import BaseItem
-from libs.shared import MAX_MONGOS_PING_LATENCY, discover_nodes, enum_all_nodes, enum_result_items
+from libs.shared import MAX_MONGOS_PING_LATENCY, discover_nodes, enum_all_nodes, enum_result_items, format_size
 from libs.utils import red, yellow
 
 
@@ -54,7 +54,7 @@ class HostInfoItem(BaseItem):
                     {"name": "Host", "type": "string"},
                     {"name": "CPU Family", "type": "string"},
                     {"name": "CPU Cores", "type": "string"},
-                    {"name": "Memory (GB)", "type": "string"},
+                    {"name": "Memory", "type": "string"},
                     {"name": "OS", "type": "string"},
                     {"name": "NUMA", "type": "boolean"},
                 ],
@@ -73,7 +73,7 @@ class HostInfoItem(BaseItem):
                     m["host"],
                     f"{extra['cpuString']} ({system['cpuArch']}) {extra['cpuFrequencyMHz']} MHz",
                     f"{system['numCores']}c",
-                    system["memSizeMB"] / 1024,
+                    format_size(system["memSizeMB"] * 1024**2),
                     f"{os['name']} {os['version']}",
                     system["numaEnabled"]
                 ])

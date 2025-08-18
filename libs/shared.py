@@ -330,6 +330,16 @@ def format_size(bytes, decimal=2):
         bytes /= 1024
     return f"{bytes:.{decimal}f} PB"
 
+def escape_markdown(text):
+    """
+    Escape markdown special characters.
+    """
+    if not isinstance(text, str):
+        text = str(text)
+    # Escape underscores, asterisks, backticks, and other special characters
+    return text.replace('_', '\\_').replace('*', '\\*').replace('`', '\\`')
+
+
 if __name__ == "__main__":
     from bson import json_util
     parsed_uri = parse_uri("mongodb://localhost:30017?tls=false")
