@@ -12,12 +12,11 @@ class ServerStatusItem(BaseItem):
         self._description += "- Whether used/total connection ratio is too high.\n"
         self._description += "- Whether query targeting is poor.\n"
 
-    def _check_connections(self, server_status):
+    def _check_connections(self, host, server_status):
         """
         Check the connections metrics.
         """
         test_result = []
-        host = server_status.get("host", "unknown")
         connections = server_status.get("connections", {})
         used_connection_ratio = self._config.get("used_connection_ratio", 0.8)
         available = connections.get("available", 0)
@@ -33,12 +32,11 @@ class ServerStatusItem(BaseItem):
             
         return test_result, connections
 
-    def _check_query_targeting(self, server_status):
+    def _check_query_targeting(self, host, server_status):
         """
         Check query targeting metrics.
         """
         test_result = []
-        host = server_status.get("host", "unknown")
         query_executor = server_status["metrics"].get("queryExecutor", {})
         document = server_status["metrics"].get("document", {})
         scanned_returned = (query_executor["scanned"] / document["returned"]) if document["returned"] > 0 else 0
@@ -79,8 +77,8 @@ class ServerStatusItem(BaseItem):
                 return None, None
             client = node["client"]
             server_status = client.admin.command("serverStatus")
-            test_result1, raw_result1 = self._check_connections(server_status)
-            test_result2, raw_result2 = self._check_query_targeting(server_status) if set_name != "mongos" else ([], {})
+            test_result1, raw_result1 = self._check_connections(host, server_status)
+            test_result2, raw_result2 = self._check_query_targeting(host, server_status) if set_name != "mongos" else ([], {})
             test_result = test_result1 + test_result2
             self.append_test_results(test_result)
             raw_result = {
