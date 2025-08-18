@@ -240,14 +240,28 @@ class ClusterItem(BaseItem):
                     {"name": "Current Delay", "type": "integer"},
                     {"name": "Oplog Window Hours", "type": "integer"}
                 ],
-                "rows": [
-                    [m["host"], m["_id"], m["arbiterOnly"], m["buildIndexes"], 
-                     m["hidden"], m["priority"], m["votes"], m.get("secondaryDelaySecs", m.get("slaveDelay", 0)),
-                     member_delay[m["host"]] if m["host"] in member_delay else "n/a",
-                     oplog_info[m["host"]]["min_retention_hours"] if oplog_info[m["host"]]["min_retention_hours"] > 0 else oplog_info[m["host"]]["current_retention_hours"]
-                     ] for m in members
-                ]
+                "rows": []
             }
+            for m in members:
+                member_host = m["host"]
+                min_retention_hours = oplog_info[member_host]["min_retention_hours"]
+                current_retention_hours = oplog_info[member_host]["current_retention_hours"]
+                if min_retention_hours == "n/a" or min_retention_hours == 0:
+                    retention_hours = current_retention_hours
+                else:
+                    retention_hours = min_retention_hours
+                table_details["rows"].append([
+                    member_host,
+                    m["_id"],
+                    m["arbiterOnly"],
+                    m["buildIndexes"],
+                    m["hidden"],
+                    m["priority"],
+                    m["votes"],
+                    m.get("secondaryDelaySecs", m.get("slaveDelay", 0)),
+                    member_delay[member_host] if member_host in member_delay else "n/a",
+                    retention_hours
+                ])
             data.append(table_details)
 
         enum_result_items(result, 
