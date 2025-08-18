@@ -138,7 +138,7 @@ def discover_nodes(client, parsed_uri):
             for host in all_mongos:
                 ping = host.get("ping", datetime.now()).replace(tzinfo=timezone.utc)
                 uri = f"mongodb://{credential}{host['_id']}/{database}?{options_str_direct}"
-                latency = (datetime.now(timezone.utc) - ping).total_seconds()
+                latency = round((datetime.now(timezone.utc) - ping).total_seconds())
                 parsed_map["mongos"]["members"].append({
                     "host": host["_id"],
                     "uri": uri,

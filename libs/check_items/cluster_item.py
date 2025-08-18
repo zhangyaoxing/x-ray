@@ -73,7 +73,8 @@ class ClusterItem(BaseItem):
         self.append_test_results(test_result)
         raw_result = {
             mongos["host"]: {
-                "pingLatencySec": mongos["pingLatencySec"]
+                "pingLatencySec": mongos["pingLatencySec"],
+                "lastPing": mongos["lastPing"]
             } for mongos in all_mongos
         }
         return test_result, raw_result
@@ -147,9 +148,9 @@ class ClusterItem(BaseItem):
             "type": "table",
             "caption": f"Sharded Cluster Overview",
             "columns": [
-                {"name": "Type", "type": "string"},
                 {"name": "#Shards", "type": "integer"},
                 {"name": "#Mongos", "type": "integer"},
+                {"name": "#Active mongos", "type": "integer"}
             ],
             "rows": []
         } 
@@ -165,13 +166,33 @@ class ClusterItem(BaseItem):
             ],
             "rows": []
         }
+        mongos_details = {
+            "type": "table",
+            "caption": f"Component Details - `mongos`",
+            "columns": [
+                {"name": "Host", "type": "string"},
+                {"name": "Ping Latency (sec)", "type": "integer"},
+                {"name": "Last Ping", "type": "boolean"}
+            ],
+            "rows": []
+        }
         data.append(sh_overview) if result["type"] == "SH" else None
         data.append(rs_overview)
+        data.append(mongos_details) if result["type"] == "SH" else None
         def func_sh(name, result):
+            raw = result["rawResult"]
             component_names = result["map"].keys()
             shards = sum(1 for name in component_names if name not in ["mongos", "config"])
             mongos = len(result["map"]["mongos"]["members"])
-            sh_overview["rows"].append(["Sharded Cluster", shards, mongos])
+            active_mongos = 0
+            for host, info in raw.items():
+                ping_latency = info.get("pingLatencySec", 0)
+                last_ping = info.get("lastPing", False)
+                mongos_details["rows"].append([host, ping_latency, last_ping])
+                if ping_latency < MAX_MONGOS_PING_LATENCY:
+                    active_mongos += 1
+            sh_overview["rows"].append([shards, mongos, active_mongos])
+
 
         def func_rs(set_name, result):
             repl_config = result["rawResult"]["replsetConfig"]["config"]
