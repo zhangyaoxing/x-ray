@@ -78,7 +78,7 @@ class Framework:
                 review_title_id = to_markdown_id(review_title)
                 f.write(f"### {title}\n\n")
                 f.write(f"{item.description}\n\n")
-                f.write(f"[Review Raw Results](#{review_title_id})\n\n")
+                f.write(f"[Review Raw Results &rarr;](#{review_title_id})\n\n")
                 f.write(item.test_result_markdown)
             
             f.write("## 2 Review Raw Results\n\n")
@@ -87,7 +87,7 @@ class Framework:
                 title_id = to_markdown_id(title)
                 review_title = f"2.{i + 1} Review {item.name}"
                 f.write(f"### {review_title}\n\n")
-                f.write(f"[Review Test Results](#{title_id})\n\n")
+                f.write(f"[&larr; Review Test Results](#{title_id})\n\n")
                 f.write(item.review_result_markdown)
 
         if format == "html":
