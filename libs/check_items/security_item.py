@@ -21,7 +21,7 @@ class SecurityItem(BaseItem):
         parsed_uri = kwargs.get("parsed_uri")
 
         nodes = discover_nodes(client, parsed_uri)
-        def func_node(name, node):
+        def func_node(name, node, **kwargs):
             client = node["client"]
             host = node["host"]
             if "pingLatencySec" in node and node["pingLatencySec"] > MAX_MONGOS_PING_LATENCY:
@@ -122,7 +122,7 @@ class SecurityItem(BaseItem):
             ],
             "rows": []
         }
-        def func_node(name, node):
+        def func_node(name, node, **kwargs):
             raw = node["rawResult"]
             if raw is None:
                 return

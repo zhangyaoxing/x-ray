@@ -170,6 +170,7 @@ def enum_all_nodes(nodes, **kwargs):
     Each function above will be passed 2 arguments: 
     - `set_name`: The replica set name if it's a replica set. Or "mongos" if it's a mongos node or sharded cluster.
     - `node`: The node information from `discover_nodes` output. Only the current and sub levels will be passed.
+    - Named argument `level`: The level of the node in the cluster hierarchy (e.g., "sh_cluster", "rs_cluster", "rs_member").
 
     And is expected to return a Tuple:
     - `test_result`: The problems found.
@@ -179,15 +180,15 @@ def enum_all_nodes(nodes, **kwargs):
     A dictionary containing the results of applying the functions to the nodes. The returned structure will be similar to the discovered structure,
     to reflect the structure of the cluster. For example results, check out the `example_data_structure/result-rs.json,result-sh.json`.
     """
-    func_rs_cluster = kwargs.get("func_rs_cluster", lambda s, n: (None, None))
-    func_rs_member = kwargs.get("func_rs_member", lambda s, n: (None, None))
-    func_sh_cluster = kwargs.get("func_sh_cluster", lambda s, n: (None, None))
-    func_all_mongos = kwargs.get("func_all_mongos", lambda s, n: (None, None))
-    func_mongos_member = kwargs.get("func_mongos_member", lambda s, n: (None, None))
-    func_shard = kwargs.get("func_shard", lambda s, n: (None, None))
-    func_shard_member = kwargs.get("func_shard_member", lambda s, n: (None, None))
-    func_config = kwargs.get("func_config", lambda s, n: (None, None))
-    func_config_member = kwargs.get("func_config_member", lambda s, n: (None, None))
+    func_rs_cluster = kwargs.get("func_rs_cluster", lambda s, n, **kwargs: (None, None))
+    func_rs_member = kwargs.get("func_rs_member", lambda s, n, **kwargs: (None, None))
+    func_sh_cluster = kwargs.get("func_sh_cluster", lambda s, n, **kwargs: (None, None))
+    func_all_mongos = kwargs.get("func_all_mongos", lambda s, n, **kwargs: (None, None))
+    func_mongos_member = kwargs.get("func_mongos_member", lambda s, n, **kwargs: (None, None))
+    func_shard = kwargs.get("func_shard", lambda s, n, **kwargs: (None, None))
+    func_shard_member = kwargs.get("func_shard_member", lambda s, n, **kwargs: (None, None))
+    func_config = kwargs.get("func_config", lambda s, n, **kwargs: (None, None))
+    func_config_member = kwargs.get("func_config_member", lambda s, n, **kwargs: (None, None))
     result = {
         "type": nodes["type"]
     }
@@ -196,14 +197,14 @@ def enum_all_nodes(nodes, **kwargs):
         result["setName"] = set_name
         result["members"] = []
         try:
-            result["testResult"], result["rawResult"] = func_rs_cluster(set_name, nodes)
+            result["testResult"], result["rawResult"] = func_rs_cluster(set_name, nodes, level="rs_cluster")
         except Exception as e:
             logger.error(red(f"Failed to get execution result from replica set {set_name}: {e.__class__.__name__} {str(e)}"))
             result["testResult"], result["rawResult"] = (None, None)
         for member in nodes["members"]:
             test_result, raw_result = None, None
             try:
-                test_result, raw_result = func_rs_member(set_name, member)
+                test_result, raw_result = func_rs_member(set_name, member, level="rs_member")
             except Exception as e:
                 logger.error(red(f"Failed to get execution result from replica set {set_name}, member {member['host']}: {e.__class__.__name__} {str(e)}"))
 
@@ -216,7 +217,7 @@ def enum_all_nodes(nodes, **kwargs):
         result["map"] = {}
         test_result, raw_result = None, None
         try:
-            test_result, raw_result = func_sh_cluster("mongos", nodes)
+            test_result, raw_result = func_sh_cluster("mongos", nodes, level="sh_cluster")
             result["testResult"], result["rawResult"] = test_result, raw_result
         except Exception as e:
             logger.error(red(f"Failed to get execution result from sharded cluster: {e.__class__.__name__} {str(e)}"))
@@ -231,11 +232,11 @@ def enum_all_nodes(nodes, **kwargs):
             test_result, raw_result = None, None
             try:
                 if component_name == "mongos":
-                    test_result, raw_result = func_all_mongos(set_name, host_info)
+                    test_result, raw_result = func_all_mongos(set_name, host_info, level="all_mongos")
                 elif component_name == "config":
-                    test_result, raw_result = func_config(set_name, host_info)
+                    test_result, raw_result = func_config(set_name, host_info, level="config")
                 else:
-                    test_result, raw_result = func_shard(set_name, host_info)
+                    test_result, raw_result = func_shard(set_name, host_info, level="shard")
                 result["map"][component_name]["testResult"] = test_result
                 result["map"][component_name]["rawResult"] = raw_result
             except Exception as e:
@@ -245,11 +246,11 @@ def enum_all_nodes(nodes, **kwargs):
                 test_result, raw_result = None, None
                 try:
                     if component_name == "mongos":
-                        test_result, raw_result = func_mongos_member(set_name, member)
+                        test_result, raw_result = func_mongos_member(set_name, member, level="mongos_member")
                     elif component_name == "config":
-                        test_result, raw_result = func_config_member(set_name, member)
+                        test_result, raw_result = func_config_member(set_name, member, level="config_member")
                     else:
-                        test_result, raw_result = func_shard_member(set_name, member)
+                        test_result, raw_result = func_shard_member(set_name, member, level="shard_member")
                 except Exception as e:
                     logger.error(red(f"Failed to get execution result from {set_name}, member {member['host']}: {e.__class__.__name__} {str(e)}"))
 
@@ -276,40 +277,58 @@ def enum_result_items(result, **kwargs):
     Arguments passed to the functions:
     - `set_name`: The replica set name if it's a replica set. Or "mongos" if it's a mongos node or sharded cluster.
     - `node`: The node information, including the results, from `discover_nodes` output.
+    - Named argument `level`: The level of the node in the cluster hierarchy (e.g., "sh_cluster", "rs_cluster", "rs_member").
 
     Returns:
     Nothing returned.
     """
-    func_rs_cluster = kwargs.get("func_rs_cluster", lambda s, n: None)
-    func_rs_member = kwargs.get("func_rs_member", lambda s, n: None)
-    func_sh_cluster = kwargs.get("func_sh_cluster", lambda s, n: None)
-    func_all_mongos = kwargs.get("func_all_mongos", lambda s, n: None)
-    func_mongos_member = kwargs.get("func_mongos_member", lambda s, n: None)
-    func_shard = kwargs.get("func_shard", lambda s, n: None)
-    func_shard_member = kwargs.get("func_shard_member", lambda s, n: None)
-    func_config = kwargs.get("func_config", lambda s, n: None)
-    func_config_member = kwargs.get("func_config_member", lambda s, n: None)
+    func_rs_cluster = kwargs.get("func_rs_cluster", lambda s, n, **kwargs: None)
+    func_rs_member = kwargs.get("func_rs_member", lambda s, n, **kwargs: None)
+    func_sh_cluster = kwargs.get("func_sh_cluster", lambda s, n, **kwargs: None)
+    func_all_mongos = kwargs.get("func_all_mongos", lambda s, n, **kwargs: None)
+    func_mongos_member = kwargs.get("func_mongos_member", lambda s, n, **kwargs: None)
+    func_shard = kwargs.get("func_shard", lambda s, n, **kwargs: None)
+    func_shard_member = kwargs.get("func_shard_member", lambda s, n, **kwargs: None)
+    func_config = kwargs.get("func_config", lambda s, n, **kwargs: None)
+    func_config_member = kwargs.get("func_config_member", lambda s, n, **kwargs: None)
     if result["type"] == "RS":
-        func_rs_cluster(result["setName"], result)
+        func_rs_cluster(result["setName"], result, level="rs_cluster")
         for member in result["members"]:
-            func_rs_member(result["setName"], member)
+            func_rs_member(result["setName"], member, level="rs_member")
     else:
-        func_sh_cluster("mongos", result)
+        func_sh_cluster("mongos", result, level="sh_cluster")
         for component_name, host_info in result["map"].items():
             set_name = host_info["setName"]
             if set_name == "mongos":
-                func_all_mongos(set_name, host_info)
+                func_all_mongos(set_name, host_info, level="all_mongos")
             elif set_name == "config":
-                func_config(set_name, host_info)
+                func_config(set_name, host_info, level="config")
             else:
-                func_shard(set_name, host_info)
+                func_shard(set_name, host_info, level="shard")
             for member in host_info["members"]:
                 if component_name == "mongos":
-                    func_mongos_member(set_name, member)
+                    func_mongos_member(set_name, member, level="mongos_member")
                 elif component_name == "config":
-                    func_config_member(set_name, member)
+                    func_config_member(set_name, member, level="config_member")
                 else:
-                    func_shard_member(set_name, member)
+                    func_shard_member(set_name, member, level="shard_member")
+
+def format_size(bytes, decimal=2):
+    """
+    Format the size in bytes to a human-readable string.
+
+    Args:
+        bytes (int): The size in bytes.
+        decimal (int): The number of decimal places to include.
+
+    Returns:
+        str: The formatted size string.
+    """
+    for unit in ["B", "KB", "MB", "GB", "TB"]:
+        if bytes < 1024:
+            return f"{bytes:.{decimal}f} {unit}"
+        bytes /= 1024
+    return f"{bytes:.{decimal}f} PB"
 
 if __name__ == "__main__":
     from bson import json_util

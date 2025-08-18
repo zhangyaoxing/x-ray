@@ -22,7 +22,7 @@ class ShardKeyItem(BaseItem):
             self._logger.info("Cluster is not a sharded cluster. Skip...")
             return
         
-        def func_sh_cluster(name, node):
+        def func_sh_cluster(name, node, **kwargs):
             client = node["client"]
             imbalance_percentage = self._config["sharding_imbalance_percentage"]
             collections = list(client.config.collections.find({"_id": {"$ne": 'config.system.sessions'}}))
@@ -89,7 +89,7 @@ class ShardKeyItem(BaseItem):
             ],
             "rows": []
         }
-        def review_cluster(name, node):
+        def review_cluster(name, node, **kwargs):
             raw_result = node["rawResult"]
             collections = raw_result["shardedCollections"]
             all_stats = raw_result["stats"]

@@ -98,7 +98,8 @@ class IndexInfoItem(BaseItem):
         def node_check(host, ns, index_stats):
             unused_index_days = self._config.get("unused_index_days", 7)
             return self._unused_indexes_check(ns, index_stats, unused_index_days, host)
-        def enum_namespaces(node, func):
+        def enum_namespaces(node, func, **kwargs):
+            level = kwargs.get("level")
             client = node["client"]
             dbs = client.admin.command("listDatabases").get("databases", [])
             test_result, raw_result = [], []
@@ -106,7 +107,7 @@ class IndexInfoItem(BaseItem):
             for db_obj in dbs:
                 db_name = db_obj.get("name")
                 if db_name in ["admin", "local", "config"]:
-                    self._logger.info(f"Skipping system database: {db_name}")
+                    self._logger.debug(f"Skipping system database: {db_name}")
                     continue
                 db = client[db_name]
                 collections = db.list_collections()
@@ -120,30 +121,27 @@ class IndexInfoItem(BaseItem):
                     if coll_name.startswith("system."):
                         self._logger.debug(f"Skipping system collection: {db_name}.{coll_name}")
                         continue
-                    self._logger.info(f"Gathering index stats of collection `{db_name}.{coll_name}` {'on cluster level' if 'type' in node else 'on node level'}...")
+                    self._logger.debug(f"Gathering index stats of collection `{db_name}.{coll_name}` on {level} level...")
                     ns = f"{db_name}.{coll_name}"
                     
-                    try:
-                        # Check for number of indexes
-                        index_stats = list(db[coll_name].aggregate([
-                            {"$indexStats": {}}
-                        ]))
-                        result = func(host, ns, index_stats)
-                        test_result.extend(result)
-                        raw_result.append({
-                            "ns": ns,
-                            "captureTime": datetime.now(timezone.utc),
-                            "indexStats": index_stats
-                        })
-                    except Exception as e:
-                        self._logger.error(red(f"Failed to gather index info of collection '{ns}': {str(e)}"))
+                    # Check for number of indexes
+                    index_stats = list(db[coll_name].aggregate([
+                        {"$indexStats": {}}
+                    ]))
+                    result = func(host, ns, index_stats)
+                    test_result.extend(result)
+                    raw_result.append({
+                        "ns": ns,
+                        "captureTime": datetime.now(timezone.utc),
+                        "indexStats": index_stats
+                    })
             self.append_test_results(test_result)
             return test_result, raw_result
         result = enum_all_nodes(nodes, 
-                                func_rs_cluster=lambda name, node: enum_namespaces(node, cluster_check),
-                                func_sh_cluster=lambda name, node: enum_namespaces(node, cluster_check),
-                                func_rs_member=lambda name, node: enum_namespaces(node, node_check),
-                                func_shard_member=lambda name, node: enum_namespaces(node, node_check))
+                                func_rs_cluster=lambda name, node, **kwargs: enum_namespaces(node, cluster_check, **kwargs),
+                                func_sh_cluster=lambda name, node, **kwargs: enum_namespaces(node, cluster_check, **kwargs),
+                                func_rs_member=lambda name, node, **kwargs: enum_namespaces(node, node_check, **kwargs),
+                                func_shard_member=lambda name, node, **kwargs: enum_namespaces(node, node_check, **kwargs))
 
         self.captured_sample = result
         
@@ -164,7 +162,7 @@ class IndexInfoItem(BaseItem):
             ],
             "rows": []
         }
-        def review_cluster(set_name, node):
+        def review_cluster(set_name, node, **kwargs):
             raw = node.get("rawResult", [])
             for item in raw:
                 ns = item["ns"]

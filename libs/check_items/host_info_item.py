@@ -22,7 +22,7 @@ class HostInfoItem(BaseItem):
         parsed_uri = kwargs.get("parsed_uri")
         nodes = discover_nodes(client, parsed_uri)
 
-        def func_single(name, node):
+        def func_single(name, node, **kwargs):
             client = node["client"]
             if "pingLatencySec" in node and node["pingLatencySec"] > MAX_MONGOS_PING_LATENCY:
                 self._logger.warning(yellow(f"Skip {node['host']} because it has been irresponsive for {node['pingLatencySec'] / 60} minutes."))
@@ -45,7 +45,7 @@ class HostInfoItem(BaseItem):
         result = self.captured_sample
         data = []
 
-        def func_component(name, node):
+        def func_component(name, node, **kwargs):
             members = node["members"]
             table = {
                 "type": "table",

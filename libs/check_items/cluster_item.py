@@ -15,7 +15,7 @@ class ClusterItem(BaseItem):
         self._description += "- Whether there are irresponsive mongos nodes.\n"
         self._description += "- Whether active mongos nodes are enough.\n"
 
-    def _check_rs(self, set_name, node):
+    def _check_rs(self, set_name, node, **kwargs):
         """
         Run the cluster level checks
         """
@@ -38,7 +38,7 @@ class ClusterItem(BaseItem):
 
         return test_result, raw_result
 
-    def _check_sh(self, set_name, node):
+    def _check_sh(self, set_name, node, **kwargs):
         """
         Check if the sharded cluster is available and connected.
         """
@@ -79,7 +79,7 @@ class ClusterItem(BaseItem):
         }
         return test_result, raw_result
 
-    def _check_rs_member(self, set_name, node):
+    def _check_rs_member(self, set_name, node, **kwargs):
         """
         Run the replica set member level checks
         """
@@ -179,7 +179,7 @@ class ClusterItem(BaseItem):
         data.append(sh_overview) if result["type"] == "SH" else None
         data.append(rs_overview)
         data.append(mongos_details) if result["type"] == "SH" else None
-        def func_sh(name, result):
+        def func_sh(name, result, **kwargs):
             raw = result["rawResult"]
             component_names = result["map"].keys()
             shards = sum(1 for name in component_names if name not in ["mongos", "config"])
@@ -194,7 +194,7 @@ class ClusterItem(BaseItem):
             sh_overview["rows"].append([shards, mongos, active_mongos])
 
 
-        def func_rs(set_name, result):
+        def func_rs(set_name, result, **kwargs):
             repl_config = result["rawResult"]["replsetConfig"]["config"]
             members = repl_config["members"]
             num_members = len(members)
