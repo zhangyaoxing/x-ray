@@ -143,7 +143,8 @@ def discover_nodes(client, parsed_uri):
                     "host": host["_id"],
                     "uri": uri,
                     "client": MongoClient(uri) if latency < MAX_MONGOS_PING_LATENCY else None,
-                    "pingLatencySec": latency
+                    "pingLatencySec": latency,
+                    "lastPing": ping
                 })
             nodes["map"] = parsed_map
 
