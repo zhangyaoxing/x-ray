@@ -126,7 +126,7 @@ class SecurityItem(BaseItem):
             raw_result = node["rawResult"]
             host = node["host"]
             if raw_result is None:
-                table["rows"].append([escape_markdown(name), host, "N/A", "N/A", "N/A", "N/A", "N/A", "N/A", "N/A"])
+                table["rows"].append([escape_markdown(name), host, "n/a", "n/a", "n/a", "n/a", "n/a", "n/a", "n/a"])
                 return
 
             parsed = raw_result.get("parsed", {})

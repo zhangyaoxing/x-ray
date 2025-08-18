@@ -71,8 +71,10 @@ class ServerStatusItem(BaseItem):
         parsed_uri = kwargs.get("parsed_uri")
 
         def func_all_members(set_name, node, **kwargs):
+            host = node["host"]
             if "pingLatencySec" in node and node["pingLatencySec"] > MAX_MONGOS_PING_LATENCY:
-                return [], None
+                self._logger.warning(yellow(f"Skip {host} because it has been irresponsive for {node['pingLatencySec'] / 60} minutes."))
+                return None, None
             client = node["client"]
             server_status = client.admin.command("serverStatus")
             test_result1, raw_result1 = self._check_connections(server_status)
