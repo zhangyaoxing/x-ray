@@ -7,7 +7,14 @@ class SecurityItem(BaseItem):
     def __init__(self, output_folder, config = None):
         super().__init__(output_folder, config)
         self._name = "Authentication & Security"
-        self._description = "Collects & review security related information."
+        self._description = "Collects & review security related information.\n\n"
+        self._description += "- Whether authorization is enabled.\n"
+        self._description += "- Whether log redaction is enabled.\n"
+        self._description += "- Whether TLS is enabled and required.\n"
+        self._description += "- Whether the bind IP is too permissive.\n"
+        self._description += "- Whether the default port is used.\n"
+        self._description += "- Whether auditing is enabled.\n"
+        self._description += "- Whether encryption at rest is enabled.\n"
 
     def test(self, *args, **kwargs):
         client = kwargs.get("client")
@@ -24,13 +31,16 @@ class SecurityItem(BaseItem):
             test_result = []
 
             # Check for security settings
-            security_settings = raw_result.get("parsed", {}).get("security", {})
+            parsed = raw_result.get("parsed", {})
+            security_settings = parsed.get("security", {})
+            net = parsed.get("net", {})
+            audit_log = parsed.get("auditLog", {})
             authorization = security_settings.get("authorization", None)
             redact_logs = security_settings.get("redactClientLogData", None)
-            net = raw_result.get("parsed", {}).get("net", {})
             bind_ip = net.get("bindIp", "127.0.0.1")
             port = net.get("port", None)
             tls_enabled = net.get("tls", {}).get("mode", None)
+            audit = "enabled" if audit_log.get("destination", None) is not None else "disabled"
             if authorization != "enabled":
                 test_result.append({
                     "host": host,
@@ -73,6 +83,14 @@ class SecurityItem(BaseItem):
                     "title": "Default Port Used",
                     "description": "Default port `27017` is used, which may expose the server to unnecessary risks."
                 })
+            
+            if audit == "disabled":
+                test_result.append({
+                    "host": host,
+                    "severity": SEVERITY.HIGH,
+                    "title": "Auditing Disabled",
+                    "description": "Auditing is disabled, which may lead to unmonitored access."
+                })
             self.append_test_results(test_result)
 
             return test_result, raw_result
@@ -99,7 +117,8 @@ class SecurityItem(BaseItem):
                 {"name": "Authorization", "type": "string"},
                 {"name": "Cluster Auth", "type": "string"},
                 {"name": "Log Redaction", "type": "string"},
-                {"name": "EAT", "type": "boolean"}
+                {"name": "EAT", "type": "string"},
+                {"name": "Auditing", "type": "string"}
             ],
             "rows": []
         }
@@ -109,8 +128,10 @@ class SecurityItem(BaseItem):
                 return
 
             host = node["host"]
-            net = raw.get("parsed", {}).get("net", {})
-            security = raw.get("parsed", {}).get("security", {})
+            parsed = raw.get("parsed", {})
+            net = parsed.get("net", {})
+            security = parsed.get("security", {})
+            audit_log = parsed.get("auditLog", {})
             port = net.get("port", 27017)
             tls = net.get("tls", {}).get("mode", "disabled")
             authorization = security.get("authorization", "disabled")
@@ -118,7 +139,8 @@ class SecurityItem(BaseItem):
             eat = security.get("enableEncryption", "false")
             bind_ip = net.get("bindIp", "127.0.0.1")
             cluster_auth = security.get("clusterAuthMode", "disabled")
-            table["rows"].append([name, host, f"{bind_ip}:{port}", tls, authorization, cluster_auth, log_redaction, eat])
+            audit = "enabled" if audit_log.get("destination", None) is not None else "disabled"
+            table["rows"].append([name, host, f"{bind_ip}:{port}", tls, authorization, cluster_auth, log_redaction, eat, audit])
 
         enum_result_items(raw_result,
                           func_rs_member=func_node,
