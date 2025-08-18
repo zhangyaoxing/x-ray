@@ -14,8 +14,10 @@ class BuildInfoItem(BaseItem):
         parsed_uri = kwargs.get("parsed_uri")
         nodes = discover_nodes(client, parsed_uri)
         def func_node(set_name, node, **kwargs):
+            host = node["host"]
             if "pingLatencySec" in node and node["pingLatencySec"] > MAX_MONGOS_PING_LATENCY:
-                return [], None
+                self._logger.warning(yellow(f"Skip {host} because it has been irresponsive for {node['pingLatencySec'] / 60} minutes."))
+                return None, None
             client = node["client"]
             raw_result = client.admin.command("buildInfo")
             test_result = []
@@ -24,7 +26,7 @@ class BuildInfoItem(BaseItem):
             if running_version[0] < eol_version[0] or \
             (running_version[0] == eol_version[0] and running_version[1] < eol_version[1]):
                 test_result.append({
-                    "host": "cluster",
+                    "host": host,
                     "severity": SEVERITY.HIGH,
                     "title": "Server Version EOL",
                     "description": f"Server version {running_version} is below EOL version {eol_version}. Consider upgrading to the latest version."
