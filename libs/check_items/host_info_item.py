@@ -11,11 +11,8 @@ class HostInfoItem(BaseItem):
     def __init__(self, output_folder, config=None):
         super().__init__(output_folder, config)
         self._name = "Host Information"
-        self._description = "Collects and reviews host hardware and OS information. Including: \n\n"
-        self._description += "- CPU information\n"
-        self._description += "- Memory information\n"
-        self._description += "- Disk information\n"
-        self._description += "- Network information\n"
+        self._description = "Collects and reviews host hardware and OS information.  \n"
+        self._description += "*This item is to gather information. No test is performed.*\n\n"
 
     def test(self, *args, **kwargs):
         """
