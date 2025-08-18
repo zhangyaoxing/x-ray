@@ -1,5 +1,5 @@
 from libs.check_items.base_item import BaseItem
-from libs.shared import SEVERITY, discover_nodes, enum_all_nodes, enum_result_items, to_json
+from libs.shared import SEVERITY, discover_nodes, enum_all_nodes, enum_result_items, format_size, to_json
 from libs.utils import red
 from pymongo.errors import OperationFailure
 
@@ -82,9 +82,9 @@ class ShardKeyItem(BaseItem):
             "columns": [
                 {"name": "Namespace", "type": "string"},
                 {"name": "Shard Key", "type": "string"},
-                {"name": "Data Size (MB)", "type": "object"},
-                {"name": "Storage Size (MB)", "type": "object"},
-                {"name": "Index Size (MB)", "type": "object"},
+                {"name": "Data Size", "type": "object"},
+                {"name": "Storage Size", "type": "object"},
+                {"name": "Index Size", "type": "object"},
                 {"name": "Docs Count", "type": "object"}
             ],
             "rows": []
@@ -97,19 +97,19 @@ class ShardKeyItem(BaseItem):
                 ns = coll["_id"]
                 key = coll["key"]
                 stats = all_stats.get(ns, {})
-                data_size = sum(s["size"] for s in stats.values()) / 1024 / 1024
-                data_size_detail = "<br/>".join([f"{s_name}: {round(s['size'] / 1024 / 1024, 2)}" for s_name, s in stats.items()])
-                storage_size = sum(s["storageSize"] for s in stats.values()) / 1024 / 1024
-                storage_size_detail = "<br/>".join([f"{s_name}: {round(s['storageSize'] / 1024 / 1024, 2)}" for s_name, s in stats.items()])
-                index_size = sum(s["totalIndexSize"] for s in stats.values()) / 1024 / 1024
-                index_size_detail = "<br/>".join([f"{s_name}: {round(s['totalIndexSize'] / 1024 / 1024, 2)}" for s_name, s in stats.items()])
+                data_size = sum(s["size"] for s in stats.values())
+                data_size_detail = "<br/>".join([f"{s_name}: {format_size(s['size'])}" for s_name, s in stats.items()])
+                storage_size = sum(s["storageSize"] for s in stats.values())
+                storage_size_detail = "<br/>".join([f"{s_name}: {format_size(s['storageSize'])}" for s_name, s in stats.items()])
+                index_size = sum(s["totalIndexSize"] for s in stats.values())
+                index_size_detail = "<br/>".join([f"{s_name}: {format_size(s['totalIndexSize'])}" for s_name, s in stats.items()])
                 docs_count = sum(s["count"] for s in stats.values())
                 docs_count_detail = "<br/>".join([f"{s_name}: {s['count']}" for s_name, s in stats.items()])
                 table["rows"].append([ns, key, 
-                                      f"{data_size:,.2f}<br/><pre>{data_size_detail}</pre>", 
-                                      f"{storage_size:,.2f}<br/><pre>{storage_size_detail}</pre>", 
-                                      f"{index_size:,.2f}<br/><pre>{index_size_detail}</pre>", 
-                                      f"{docs_count:,}<br/><pre>{docs_count_detail}</pre>"
+                                      f"{format_size(data_size)}<br/><pre>{data_size_detail}</pre>", 
+                                      f"{format_size(storage_size)}<br/><pre>{storage_size_detail}</pre>", 
+                                      f"{format_size(index_size)}<br/><pre>{index_size_detail}</pre>", 
+                                      f"{docs_count}<br/><pre>{docs_count_detail}</pre>"
                 ])
         enum_result_items(result, func_sh_cluster=review_cluster)
         return {
