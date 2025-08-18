@@ -11,10 +11,10 @@ class IndexInfoItem(BaseItem):
     def __init__(self, output_folder, config = None):
         super().__init__(output_folder, config)
         self._name = "Index Information"
-        self._description = "Collects & review index statistics. \n\n"
-        self._description += "- Check for the number of indexes in the collection.\n"
-        self._description += "- Check for unused indexes in the collection.\n"
-        self._description += "- Check for redundant indexes in the collection.\n"
+        self._description = "Collects & review index statistics.\n\n"
+        self._description += "- Whether the number of indexes in the collection is too many.\n"
+        self._description += "- Whether there are unused indexes in the collection.\n"
+        self._description += "- Whether there are redundant indexes in the collection.\n"
 
     def _num_indexes_check(self, ns, index_stats, num_indexes, host):
         """ Check for the number of indexes in the collection.
