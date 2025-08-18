@@ -174,8 +174,8 @@ class ClusterItem(BaseItem):
             sh_overview["rows"].append(["Sharded Cluster", shards, mongos])
 
         def func_rs(set_name, result):
-            repl_status = result["rawResult"]["replsetConfig"]["config"]
-            members = repl_status["members"]
+            repl_config = result["rawResult"]["replsetConfig"]["config"]
+            members = repl_config["members"]
             num_members = len(members)
             num_voting = sum(1 for m in members if m["votes"] > 0)
             num_arbiters = sum(1 for m in members if m["arbiterOnly"])
@@ -185,6 +185,10 @@ class ClusterItem(BaseItem):
                 "min_retention_hours": round(m.get("rawResult", {}).get("oplogInfo", {}).get("minRetentionHours", 0), 2),
                 "current_retention_hours": round(m.get("rawResult", {}).get("oplogInfo", {}).get("currentRetentionHours", 0), 2)
             } for m in result["members"]}
+
+            repl_status = result["rawResult"]["replsetStatus"]
+            latest_optime = max(m["optime"]["ts"] for m in repl_status["members"])
+            member_delay = {m["name"]: (latest_optime.time - m["optime"]["ts"].time) for m in repl_status["members"]}
             table_details = {
                 "type": "table",
                 "caption": f"Component Details - `{set_name}`",
@@ -196,12 +200,14 @@ class ClusterItem(BaseItem):
                     {"name": "Hidden", "type": "boolean"},
                     {"name": "Priority", "type": "integer"},
                     {"name": "Votes", "type": "integer"},
-                    {"name": "Delay", "type": "integer"},
+                    {"name": "Configured Delay", "type": "integer"},
+                    {"name": "Current Delay", "type": "integer"},
                     {"name": "Oplog Window", "type": "integer"}
                 ],
                 "rows": [
                     [m["host"], m["_id"], m["arbiterOnly"], m["buildIndexes"], 
                      m["hidden"], m["priority"], m["votes"], m.get("secondaryDelaySecs", m.get("slaveDelay", 0)),
+                     member_delay[m["host"]] if m["host"] in member_delay else "N/A",
                      oplog_info[m["host"]]["min_retention_hours"] if oplog_info[m["host"]]["min_retention_hours"] > 0 else oplog_info[m["host"]]["current_retention_hours"]
                      ] for m in members
                 ]
