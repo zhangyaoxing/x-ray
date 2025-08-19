@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from libs.check_items.base_item import BaseItem
-from libs.shared import SEVERITY, discover_nodes, enum_all_nodes, enum_result_items, escape_markdown
+from libs.shared import MAX_MONGOS_PING_LATENCY, SEVERITY, discover_nodes, enum_all_nodes, enum_result_items, escape_markdown
 from libs.utils import *
 from pymongo.uri_parser import parse_uri
 
@@ -101,6 +101,10 @@ class IndexInfoItem(BaseItem):
         def enum_namespaces(node, func, **kwargs):
             level = kwargs.get("level")
             client = node["client"]
+            latency = node.get("pingLatencySec", 0)
+            if latency > MAX_MONGOS_PING_LATENCY:
+                self._logger.warning(yellow(f"Skip {node['host']} because it has been irresponsive for {latency / 60:.2f} minutes."))
+                return None, None
             dbs = client.admin.command("listDatabases").get("databases", [])
             test_result, raw_result = [], []
             host = node.get("host", "cluster")

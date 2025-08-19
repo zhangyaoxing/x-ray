@@ -1,7 +1,7 @@
 
 from datetime import datetime
 import re
-from libs.shared import to_markdown_id
+from libs.shared import to_markdown_id, irresponsive_nodes
 from libs.utils import *
 import logging
 import importlib
@@ -71,6 +71,13 @@ class Framework:
 
         with open(output_file, "w") as f:
             f.write("# Deployment Health Check\n\n")
+            # Display irresponsive nodes
+            if len(irresponsive_nodes) > 0:
+                f.write("## 0 Review Irresponsive Nodes\n\n")
+                f.write("The following nodes have been detected as irresponsive during the checks:\n\n")
+                for node in irresponsive_nodes:
+                    f.write(f"- `{node['host']}`\n")
+                f.write("\n**<span style='color: red;'>All checks against the above nodes have been skipped.</span>**\n")
             f.write("## 1 Review Test Results\n\n")
             for i, item in enumerate(self._items):
                 title = f"1.{i + 1} {item.name}"

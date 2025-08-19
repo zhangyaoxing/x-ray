@@ -60,18 +60,25 @@ def to_markdown_id(str):
     id = id.strip('-')
     return id
 
-def connect_and_test(uri):
+def connect_and_test(host, uri):
     client = MongoClient(uri)
     try:
-        client.admin.command("ping")
+        ping = client.admin.command("ping")
+        cluster_time = ping["$clusterTime"]["clusterTime"]
+        latency = (datetime.now(timezone.utc) - datetime.fromtimestamp(cluster_time.time, timezone.utc)).total_seconds()
         logger.debug(f"Successfully connected to MongoDB at {uri}")
-        latency = 0
     except Exception as e:
+        global irresponsive_nodes
+        latency = MAX_MONGOS_PING_LATENCY + 1  # Set to a high value to indicate failure
+        irresponsive_nodes.append({
+            "host": host,
+            "pingLatencySec": latency
+        })
         logger.debug(f"Failed to connect to MongoDB at {uri}: {e}")
-        latency = 65536
     return latency, client
 
 nodes = {}
+irresponsive_nodes = []
 def discover_nodes(client, parsed_uri):
     """
     Discover nodes in the MongoDB replica set or sharded cluster.
@@ -100,14 +107,14 @@ def discover_nodes(client, parsed_uri):
             nodes["setName"] = is_master["setName"]
             hosts = [f"{host[0]}:{host[1]}" for host in parsed_uri['nodelist']]
             nodes["uri"] = f"mongodb://{credential}{','.join(hosts)}/{database}?{options_str}"
-            nodes["pingLatencySec"], nodes["client"] = connect_and_test(nodes["uri"])
+            nodes["pingLatencySec"], nodes["client"] = connect_and_test("cluster", nodes["uri"])
             members = client.admin.command("replSetGetStatus")["members"]
 
             # Prepare the nodes information
             nodes["members"] = []
             for member in members:
                 uri = f"mongodb://{credential}{member['name']}/{database}?{options_str_direct}"
-                l, c = connect_and_test(uri)
+                l, c = connect_and_test(member["name"], uri)
                 nodes["members"].append({
                     "host": member["name"],
                     "uri": uri,
@@ -119,7 +126,7 @@ def discover_nodes(client, parsed_uri):
             nodes["type"] = "SH"
             hosts = [f"{host[0]}:{host[1]}" for host in parsed_uri['nodelist']]
             nodes["uri"] = f"mongodb://{credential}{','.join(hosts)}/{database}?{options_str}"
-            nodes["pingLatencySec"], nodes["client"] = connect_and_test(nodes["uri"])
+            nodes["pingLatencySec"], nodes["client"] = connect_and_test("cluster", nodes["uri"])
             shard_map = client.admin.command("getShardMap")["map"]
             parsed_map = {}
             # config and shard nodes
@@ -127,7 +134,7 @@ def discover_nodes(client, parsed_uri):
                 rs_name = v.split("/")[0]
                 hosts = v.split("/")[1].split(",")
                 uri = f"mongodb://{credential}{','.join(hosts)}/{database}?{options_str}"
-                l, c = connect_and_test(uri)
+                l, c = connect_and_test(rs_name, uri)
                 parsed_map[k] = {
                     "setName": rs_name,
                     "uri": uri,
@@ -137,7 +144,7 @@ def discover_nodes(client, parsed_uri):
                 }
                 for host in hosts:
                     uri = f"mongodb://{credential}{host}/{database}?{options_str_direct}"
-                    l, c = connect_and_test(uri)
+                    l, c = connect_and_test(host, uri)
                     parsed_map[k]["members"].append({
                         "host": host,
                         "uri": uri,
@@ -156,7 +163,14 @@ def discover_nodes(client, parsed_uri):
                 ping = host.get("ping", datetime.now()).replace(tzinfo=timezone.utc)
                 uri = f"mongodb://{credential}{host['_id']}/{database}?{options_str_direct}"
                 l = round((datetime.now(timezone.utc) - ping).total_seconds())
-                l2, c = connect_and_test(uri) if l < MAX_MONGOS_PING_LATENCY else (None, None)
+                if l < MAX_MONGOS_PING_LATENCY:
+                    l, c = connect_and_test(host["_id"], uri) 
+                else:
+                    c = None
+                    irresponsive_nodes.append({
+                        "host": host["_id"],
+                        "pingLatencySec": l
+                    })
                 parsed_map["mongos"]["members"].append({
                     "host": host["_id"],
                     "uri": uri,

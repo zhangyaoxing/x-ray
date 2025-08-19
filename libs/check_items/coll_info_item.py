@@ -20,8 +20,12 @@ class CollInfoItem(BaseItem):
         
         def enum_collections(name, node, func, **kwargs):
             client = node["client"]
+            latency = node.get("pingLatencySec", 0)
             level = kwargs.get("level")
             host = node["host"] if "host" in node else "cluster"
+            if latency > MAX_MONGOS_PING_LATENCY:
+                self._logger.warning(yellow(f"Skip {host} because it has been irresponsive for {latency / 60:.2f} minutes."))
+                return None, None
             dbs = client.admin.command("listDatabases").get("databases", [])
             raw_result = []
             test_result = []

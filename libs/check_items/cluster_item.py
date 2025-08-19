@@ -20,6 +20,10 @@ class ClusterItem(BaseItem):
         Run the cluster level checks
         """
         client = node["client"]
+        latency = node.get("pingLatencySec", 0)
+        if latency > MAX_MONGOS_PING_LATENCY:
+            self._logger.warning(yellow(f"Skip {node['host']} because it has been irresponsive for {latency / 60:.2f} minutes."))
+            return None, None
         test_result= []
         replset_status = client.admin.command("replSetGetStatus")
         replset_config = client.admin.command("replSetGetConfig")
@@ -85,6 +89,10 @@ class ClusterItem(BaseItem):
         """
         test_result = []
         client = node["client"]
+        latency = node.get("pingLatencySec", 0)
+        if latency > MAX_MONGOS_PING_LATENCY:
+            self._logger.warning(yellow(f"Skip {node['host']} because it has been irresponsive for {latency / 60:.2f} minutes."))
+            return None, None
         # Gather oplog information
         stats = client.local.command("collStats", "oplog.rs")
         server_status = client.admin.command("serverStatus")
