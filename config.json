@@ -19,7 +19,7 @@
             "num_indexes": 10
         },
         "ClusterItem": {
-            "replication_lag_seconds": 0,
+            "replication_lag_seconds": 60,
             "oplog_window_hours": 48
         },
         "ServerStatusItem": {
