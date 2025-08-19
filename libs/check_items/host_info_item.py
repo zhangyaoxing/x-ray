@@ -25,7 +25,7 @@ class HostInfoItem(BaseItem):
         def func_single(name, node, **kwargs):
             client = node["client"]
             if "pingLatencySec" in node and node["pingLatencySec"] > MAX_MONGOS_PING_LATENCY:
-                self._logger.warning(yellow(f"Skip {node['host']} because it has been irresponsive for {node['pingLatencySec'] / 60} minutes."))
+                self._logger.warning(yellow(f"Skip {node['host']} because it has been irresponsive for {node['pingLatencySec'] / 60:.2f} minutes."))
                 return None, None
             host_info = client.admin.command("hostInfo")
             return None, host_info

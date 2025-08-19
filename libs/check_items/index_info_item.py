@@ -154,8 +154,8 @@ class IndexInfoItem(BaseItem):
             "type": "table",
             "caption": f"Index Review",
             "columns": [
+                {"name": "Component", "type": "string"},
                 {"name": "Namespace", "type": "string"},
-                {"name": "Shard", "type": "string"},
                 {"name": "Name", "type": "string"},
                 {"name": "Key", "type": "string"},
                 {"name": "Access per Hour", "type": "string"}
@@ -171,13 +171,13 @@ class IndexInfoItem(BaseItem):
                 ns = item["ns"]
                 capture_time = item["captureTime"]
                 for stats in item["indexStats"]:
-                    shard = stats.get("shard", "n/a")
+                    component = stats.get("shard", set_name)
                     access = stats["accesses"]
                     ops = access.get("ops", 0)
                     since = access.get("since", None)
                     access_per_hour = ops / (capture_time - since).total_seconds() / 3600
                     table["rows"].append(
-                        [escape_markdown(ns), escape_markdown(shard), escape_markdown(stats["name"]), escape_markdown(stats["key"]), access_per_hour]
+                        [escape_markdown(component), escape_markdown(ns), escape_markdown(stats["name"]), escape_markdown(stats["key"]), access_per_hour]
                     )
 
         enum_result_items(result, func_sh_cluster=func_cluster, func_rs_cluster=func_cluster)

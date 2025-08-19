@@ -60,6 +60,17 @@ def to_markdown_id(str):
     id = id.strip('-')
     return id
 
+def connect_and_test(uri):
+    client = MongoClient(uri)
+    try:
+        client.admin.command("ping")
+        logger.debug(f"Successfully connected to MongoDB at {uri}")
+        latency = 0
+    except Exception as e:
+        logger.debug(f"Failed to connect to MongoDB at {uri}: {e}")
+        latency = 65536
+    return latency, client
+
 nodes = {}
 def discover_nodes(client, parsed_uri):
     """
@@ -89,24 +100,26 @@ def discover_nodes(client, parsed_uri):
             nodes["setName"] = is_master["setName"]
             hosts = [f"{host[0]}:{host[1]}" for host in parsed_uri['nodelist']]
             nodes["uri"] = f"mongodb://{credential}{','.join(hosts)}/{database}?{options_str}"
-            nodes["client"] = MongoClient(nodes["uri"])
+            nodes["pingLatencySec"], nodes["client"] = connect_and_test(nodes["uri"])
             members = client.admin.command("replSetGetStatus")["members"]
 
             # Prepare the nodes information
             nodes["members"] = []
             for member in members:
                 uri = f"mongodb://{credential}{member['name']}/{database}?{options_str_direct}"
+                l, c = connect_and_test(uri)
                 nodes["members"].append({
                     "host": member["name"],
                     "uri": uri,
-                    "client": MongoClient(uri)
+                    "client": c,
+                    "pingLatencySec": l
                 })
         else:
             # Discover sharded cluster nodes, including config servers and shards
             nodes["type"] = "SH"
             hosts = [f"{host[0]}:{host[1]}" for host in parsed_uri['nodelist']]
             nodes["uri"] = f"mongodb://{credential}{','.join(hosts)}/{database}?{options_str}"
-            nodes["client"] = MongoClient(nodes["uri"])
+            nodes["pingLatencySec"], nodes["client"] = connect_and_test(nodes["uri"])
             shard_map = client.admin.command("getShardMap")["map"]
             parsed_map = {}
             # config and shard nodes
@@ -114,18 +127,22 @@ def discover_nodes(client, parsed_uri):
                 rs_name = v.split("/")[0]
                 hosts = v.split("/")[1].split(",")
                 uri = f"mongodb://{credential}{','.join(hosts)}/{database}?{options_str}"
+                l, c = connect_and_test(uri)
                 parsed_map[k] = {
                     "setName": rs_name,
                     "uri": uri,
-                    "client": MongoClient(uri),
+                    "client": c,
+                    "pingLatencySec": l,
                     "members": []
                 }
                 for host in hosts:
                     uri = f"mongodb://{credential}{host}/{database}?{options_str_direct}"
+                    l, c = connect_and_test(uri)
                     parsed_map[k]["members"].append({
                         "host": host,
                         "uri": uri,
-                        "client": MongoClient(uri)
+                        "client": c,
+                        "pingLatencySec": l
                     })
             # mongos nodes
             all_mongos = list(client.config.get_collection("mongos").find())
@@ -138,12 +155,13 @@ def discover_nodes(client, parsed_uri):
             for host in all_mongos:
                 ping = host.get("ping", datetime.now()).replace(tzinfo=timezone.utc)
                 uri = f"mongodb://{credential}{host['_id']}/{database}?{options_str_direct}"
-                latency = round((datetime.now(timezone.utc) - ping).total_seconds())
+                l = round((datetime.now(timezone.utc) - ping).total_seconds())
+                l2, c = connect_and_test(uri) if l < MAX_MONGOS_PING_LATENCY else (None, None)
                 parsed_map["mongos"]["members"].append({
                     "host": host["_id"],
                     "uri": uri,
-                    "client": MongoClient(uri) if latency < MAX_MONGOS_PING_LATENCY else None,
-                    "pingLatencySec": latency,
+                    "client": c,
+                    "pingLatencySec": l,
                     "lastPing": ping
                 })
             nodes["map"] = parsed_map
@@ -338,12 +356,3 @@ def escape_markdown(text):
         text = str(text)
     # Escape underscores, asterisks, backticks, and other special characters
     return text.replace('_', '\\_').replace('*', '\\*').replace('`', '\\`')
-
-
-if __name__ == "__main__":
-    from bson import json_util
-    parsed_uri = parse_uri("mongodb://localhost:30017?tls=false")
-    client = MongoClient("mongodb://localhost:30017?tls=false")
-    nodes = discover_nodes(client, parsed_uri)
-    result = enum_all_nodes(nodes, lambda s, n: {"setName": s, "uri": n["uri"]}, lambda s, n: {"setName": s, "host": n["host"]})
-    print(json_util.dumps(result, indent=2))

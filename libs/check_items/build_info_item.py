@@ -17,7 +17,7 @@ class BuildInfoItem(BaseItem):
         def func_node(set_name, node, **kwargs):
             host = node["host"]
             if "pingLatencySec" in node and node["pingLatencySec"] > MAX_MONGOS_PING_LATENCY:
-                self._logger.warning(yellow(f"Skip {host} because it has been irresponsive for {node['pingLatencySec'] / 60} minutes."))
+                self._logger.warning(yellow(f"Skip {host} because it has been irresponsive for {node['pingLatencySec'] / 60:.2f} minutes."))
                 return None, None
             client = node["client"]
             raw_result = client.admin.command("buildInfo")
