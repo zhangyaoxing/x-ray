@@ -25,6 +25,7 @@
             var outline = document.getElementById('outline');
             var h2 = document.getElementsByTagName('h2');
             var ul = document.createElement('ul');
+            var body = document.getElementsByClassName('markdown-body')[0];
             for (var i = 0; i < h2.length; i++) {
                 var li = document.createElement('li');
                 var link = document.createElement('a');
@@ -41,22 +42,24 @@
                 li.appendChild(createList(children));
             }
             outline.appendChild(ul);
+            var outlineWidth = outline.offsetWidth;
+            body.style.margin = '0 auto 0 ' + outlineWidth + 'px';
             expand = document.getElementById('expand-outline');
             collapse = document.getElementById('collapse-outline');
-            collapse.onclick = function () {
-                outline.getElementsByTagName('ul')[0].style.display = 'none';
-                outline.getElementsByTagName('b')[0].style.display = 'none';
-                expand.style.display = 'inline';
-                collapse.style.display = 'none';
+            b = outline.getElementsByTagName('b')[0];
+            state = 1;
+            states = [["none", "block"], ["none", "inline"], ["inline", "none"], ["none", "inline"], ["0 auto", '0 auto 0 ' + outlineWidth + 'px']];
+            click = function () {
+                state = state == 0 ? 1 : 0;
+                ul.style.display = states[0][state];
+                b.style.display = states[1][state];
+                expand.style.display = states[2][state];
+                collapse.style.display = states[3][state];
+                body.style.margin = states[4][state];
                 return false;
             };
-            expand.onclick = function () {
-                outline.getElementsByTagName('ul')[0].style.display = 'block';
-                outline.getElementsByTagName('b')[0].style.display = 'inline';
-                expand.style.display = 'none';
-                collapse.style.display = 'inline';
-                return false;
-            };
+            collapse.onclick = click;
+            expand.onclick = click;
         };
     </script>
     <style>
