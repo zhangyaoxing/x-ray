@@ -5,7 +5,7 @@ from libs.utils import *
 class BuildInfoItem(BaseItem):
     def __init__(self, output_folder: str, config: dict = None):
         super().__init__(output_folder, config)
-        self._name = "Build Info"
+        self._name = "Build Information"
         self._description = "Collects & review server build information.\n\n"
         self._description += "- Whether the server is running a supported version.\n"
 
