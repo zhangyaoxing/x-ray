@@ -7,8 +7,7 @@ from pymongo import MongoClient
 from pymongo.uri_parser import parse_uri
 
 parser = argparse.ArgumentParser(description="HSBC X-Ray project.")
-parser.add_argument("-q", "--quiet", help="Quiet mode. Defaults to \"false\".", action="store_true", default=False)
-parser.add_argument("-s", "--checkset", help="Check set to run. Defaults to \"default\".", type=str, default="default")
+parser.add_argument("-s", "--checkset", help="Checkset to run. Defaults to \"default\".", type=str, default="default")
 parser.add_argument("-o", "--output", help="Output folder path. Defaults to \"output/\".", type=str, default="output/")
 parser.add_argument("-f", "--format", help="Output format (markdown/html). Defaults to \"markdown\".", type=str, default="markdown", choices=["markdown", "html"])
 parser.add_argument("--uri", help="MongoDB database URI. Defaults to \"mongodb://localhost:27017/\".", type=str, default="mongodb://localhost:27017/")
