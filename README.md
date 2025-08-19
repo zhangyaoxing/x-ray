@@ -1,15 +1,15 @@
 # x-ray
 This project aims to build a tool to run health check against MongoDB clusters.
 
-## 1 Support Matrix
-| Replica Set | Sharded Cluster | Standalone |
-| :---------: | :-------------: | :--------: |
-|    >=4.2    |      >=4.2      |  &cross;   |
+## 1 Compatibility Matrix
+|  Replica Set  | Sharded Cluster | Standalone |
+| :-----------: | :-------------: | :--------: |
+| >=4.2 &check; |  >=4.2 &check;  |  &cross;   |
 
-Older versions may be supported but are not tested.
+Older versions are not tested.
 
 ## 2 Dependencies
-The tool is tested with Python `3.11.12`. Dependencies can be installed by:
+The tool is tested with `Python 3.11.12`. Dependencies can be installed by:
 ```bash
 pip install -r requirements.txt
 ```
@@ -155,6 +155,7 @@ The check items usually use the `map.mongos` level so all mongos are included.
 ```bash
 ./x-ray [-h] [-s CHECKSET] [-o OUTPUT] [-f {markdown,html}] [--uri URI] [-c CONFIG]
 ```
+- `-q`, `--quiet`: Quiet mode. Defaults to `false`.
 - `-h`, `--help`: Show the help message and exit.
 - `-s`, `--checkset`: Checkset to run. Defaults to `default`.
 - `-o`, `--output`: Output folder path. Defaults to `output/`.
@@ -165,5 +166,5 @@ The check items usually use the `map.mongos` level so all mongos are included.
 Besides, you can use environment variables to control some behaviors:
 - `ENV`: `development` will change the following behaviors:
   - Formatted the output JSON for for easier reading.
-  - The output will not create new folder for each run but overwrite the same files.
+  - The output will not create a new folder for each run but overwrite the same files.
 - `LOG_LEVEL`: Can be `DEBUG`, `ERROR` or `INFO` (default).
