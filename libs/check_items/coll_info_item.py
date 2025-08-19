@@ -290,9 +290,9 @@ class CollInfoItem(BaseItem):
                 avg_writes_latency = stats.get("latencyStats", {}).get("writes_latency", 0)
                 avg_commands_latency = stats.get("latencyStats", {}).get("commands_latency", 0)
                 avg_transactions_latency = stats.get("latencyStats", {}).get("transactions_latency", 0)
-                latency_table["rows"].append([host, escape_markdown(ns), f"{avg_reads_latency:.2f}",
-                                                f"{avg_writes_latency:.2f}", f"{avg_commands_latency:.2f}",
-                                                f"{avg_transactions_latency:.2f}"])
+                latency_table["rows"].append([host, escape_markdown(ns), f"{avg_reads_latency:.2f}ms",
+                                                f"{avg_writes_latency:.2f}ms", f"{avg_commands_latency:.2f}ms",
+                                                f"{avg_transactions_latency:.2f}ms"])
         enum_result_items(result, func_sh_cluster=func_overview, func_rs_cluster=func_overview, func_rs_member=func_node, func_shard_member=func_node)
         return {
             "title": self.name,
