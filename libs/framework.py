@@ -66,7 +66,7 @@ class Framework:
     def output_results(self, output_folder: str = "output/", format: str = "markdown"):
         # output the results to a markdown file
         batch_folder = self._get_output_folder(output_folder)
-        output_file = f"{batch_folder}results.md"
+        output_file = f"{batch_folder}report.md"
         template_file = get_script_path(f"templates/{self._config.get('template', 'standard.html')}")
         self._logger.info(f"Saving results to: {green(output_file)}")
 
@@ -110,8 +110,9 @@ class Framework:
                 f.write(item.review_result_markdown)
 
         if format == "html":
-            self._logger.info(f"Converting results to HTML format and saving to: {green(batch_folder + 'results.html')}")
-            with open(f"{batch_folder}results.html", "w") as f:
+            html_file = f"{batch_folder}report.html"
+            self._logger.info(f"Converting results to HTML format and saving to: {green(html_file)}")
+            with open(html_file, "w") as f:
                 with open(output_file, "r") as md_file:
                     md_text = md_file.read()
                 html = markdown.markdown(md_text, extensions=["tables", "toc"])

@@ -100,7 +100,7 @@ class CollInfoItem(BaseItem):
                     "title": "High Index Storage Ratio",
                     "description": f"Collection `{ns}` has an `index:storage` ratio of `{ratio:.2%}` which is higher than the threshold of `{threshold:.2%}`. Consider optimizing your indexes."
                 })
-            # TODO: check latency
+            
             return test_result, stats
 
         def func_node(host, stats, **kwargs):
