@@ -30,5 +30,6 @@
         "ShardKeyItem": {
             "sharding_imbalance_percentage": 0.1
         }
-    }
+    },
+    "template": "no-network.html"
 }

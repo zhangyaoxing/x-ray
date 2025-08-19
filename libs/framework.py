@@ -67,6 +67,7 @@ class Framework:
         # output the results to a markdown file
         batch_folder = self._get_output_folder(output_folder)
         output_file = f"{batch_folder}results.md"
+        template_file = get_script_path(f"templates/{self._config.get('template', 'standard.html')}")
         self._logger.info(f"Saving results to: {green(output_file)}")
 
         with open(output_file, "w") as f:
@@ -103,19 +104,9 @@ class Framework:
                 with open(output_file, "r") as md_file:
                     md_text = md_file.read()
                 html = markdown.markdown(md_text, extensions=["tables", "toc"])
-                f.write('<!DOCTYPE html>\n')
-                f.write('<html lang="en">\n')
-                f.write('<head>\n')
-                f.write('<meta charset="UTF-8">\n')
-                f.write('<title>Check Results</title>\n')
-                f.write('<meta name="viewport" content="width=device-width, initial-scale=1">\n')
-                f.write('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.8.1/github-markdown-dark.min.css"></link>\n')
-                f.write('<style>.markdown-body{box-sizing:border-box;min-width:200px;max-width:980px;margin:0 auto;padding:45px;}@media(max-width:90%){.markdown-body{padding:15px;}}</style>\n')
-                f.write('</head>\n')
-                f.write('<body class="markdown-body">\n')
+                with open(template_file, "r") as template:
+                    template_content = template.read()
+                    html = template_content.replace("{{ content }}", html)
                 f.write(html)
-                f.write('</body>\n')
-                f.write('</html>\n')
 
-        # TODO: may need to output the raw results to a file.
         self._logger.info(bold(green("All checks complete.")))
