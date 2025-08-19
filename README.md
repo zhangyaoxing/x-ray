@@ -48,7 +48,8 @@ This is a example of config file `/config.json`.
             "query_targeting": 1000,
             "query_targeting_obj": 1000
         }
-    }
+    },
+    "template": "standard.html"
 }
 ```
 There's also the `/config_test.json` which sets the thresholds to a very low level so that most items will show up in the report. It's mainly used for testing purpose.
@@ -91,6 +92,13 @@ Each optional check item requires different permissions. Please properly grant t
 | ShardKeyItem  | `find` against `config.collections`, `config.shards`                |
 
 TODO: define a role that has all the permissions.
+
+### 3.3 Template
+Different template allows you to customize the report in your own way. Currently there are the following templates:
+- `standard.html`: Standard output.
+- `no-netork.html`: Removed the link to the resources on the internet. Embeds the content directly into the template instead.
+
+When you create your own template, put the `{{ content }}` in a proper position. The placeholder will later be replaced by the report content.
 
 ## 4 Output
 The output will be in the `output/` or folder specified by you. For each run, there will be a new folder created. Folder name: `<checkset name>-<timestamp>`. If you set `ENV=development` the output will be directly in the root output folder.
