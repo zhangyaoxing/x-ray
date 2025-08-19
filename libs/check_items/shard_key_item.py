@@ -76,6 +76,12 @@ class ShardKeyItem(BaseItem):
     @property
     def review_result(self):
         result = self.captured_sample
+        if result is None:
+            return {
+                "name": self.name,
+                "description": self.description,
+                "data": []
+            }
         table = {
             "type": "table",
             "caption": f"Shard Keys",
@@ -109,10 +115,10 @@ class ShardKeyItem(BaseItem):
                 docs_count = sum(s["count"] for s in stats.values())
                 docs_count_detail = "<br/>".join([f"{escape_markdown(s_name)}: {s['count']}" for s_name, s in stats.items()])
                 table["rows"].append([escape_markdown(ns), escape_markdown(key), 
-                                      f"{format_size(data_size)}<br/><pre>{data_size_detail}</pre>", 
-                                      f"{format_size(storage_size)}<br/><pre>{storage_size_detail}</pre>", 
-                                      f"{format_size(index_size)}<br/><pre>{index_size_detail}</pre>", 
-                                      f"{docs_count}<br/><pre>{docs_count_detail}</pre>"
+                                    f"{format_size(data_size)}<br/><pre>{data_size_detail}</pre>", 
+                                    f"{format_size(storage_size)}<br/><pre>{storage_size_detail}</pre>", 
+                                    f"{format_size(index_size)}<br/><pre>{index_size_detail}</pre>", 
+                                    f"{docs_count}<br/><pre>{docs_count_detail}</pre>"
                 ])
         enum_result_items(result, func_sh_cluster=func_cluster)
         return {

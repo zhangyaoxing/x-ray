@@ -42,9 +42,12 @@ class BaseItem:
 
     @property
     def captured_sample(self):
-        with open(self.cache_file_name, "r") as f:
-            return json_util.loads(f.read())
-        
+        try:
+            with open(self.cache_file_name, "r") as f:
+                return json_util.loads(f.read())
+        except FileNotFoundError:
+            return None
+
     @property
     def test_result(self):
         return {
@@ -79,6 +82,9 @@ class BaseItem:
     def review_result_markdown(self):
         result_data = self.review_result["data"]
         result = ""
+        if len(result_data) == 0:
+            result += "(No data)\n\n"
+            return result
         for i, block in enumerate(result_data):
             type = block.get("type")
             caption = block.get("caption")
