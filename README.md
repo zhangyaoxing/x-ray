@@ -33,7 +33,8 @@ This is a example of config file `/config.json`.
             "obj_size_kb": 32,
             "collection_size_GB": 2048,
             "fragmentation_ratio": 0.5,
-            "index_size_ratio": 0.2
+            "index_size_ratio": 0.2,
+            "ops_latency_ms": 100
         },
         "IndexInfoItem": {
             "unused_index_days": 7,
@@ -52,7 +53,7 @@ This is a example of config file `/config.json`.
     "template": "standard.html"
 }
 ```
-There's also the `/config_test.json` which sets the thresholds to a very low level so that most items will show up in the report. It's mainly used for testing purpose.
+There's also the `/config_test.json` which sets the thresholds to a very low level which will fail most tests. It's mainly used for testing purpose.
 
 #### Checksets
 *The `checksets` section in the above example.*  
@@ -72,6 +73,7 @@ Each check item uses some thresholds to help determine whether a value is in the
 |   CollInfoItem   |   collection_size_GB    | Largest collection size in GB.                                  |   2048    |
 |   CollInfoItem   |   fragmentation_ratio   | Highest storage fragmentation ratio.                            |    0.5    |
 |   CollInfoItem   |    index_size_ratio     | Largest index:storage ratio.                                    |    0.2    |
+|   CollInfoItem   |     ops_latency_ms      | Highest operation latency in ms.                                |    100    |
 |  IndexInfoItem   |    unused_index_days    | Longest unused days.                                            |     7     |
 |  IndexInfoItem   |       num_indexes       | Number of indexes on one collection.                            |    10     |
 |   ClusterItem    | replication_lag_seconds | Replication lag in seconds.                                     |     0     |

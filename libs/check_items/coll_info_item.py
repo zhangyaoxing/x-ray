@@ -12,7 +12,8 @@ class CollInfoItem(BaseItem):
         self._description = "Collects & review collection statistics.\n\n"
         self._description += "- Whether average object size is too big.\n"
         self._description += "- Whether collections are big enough for sharding.\n"
-        self._description += "- Whether collections are fragmented.\n"
+        self._description += "- Whether collections and indexes are fragmented.\n"
+        self._description += "- Whether operation latency exceeds thresholds.\n"
 
     def test(self, *args, **kwargs):
         client = kwargs.get("client")
@@ -50,8 +51,7 @@ class CollInfoItem(BaseItem):
                     self._logger.debug(f"Gathering stats for collection: `{db_name}.{coll_name}`")
 
                     args = {"storageStats": {}}
-                    if level in ["sh_cluster", "rs_cluster"]:
-                        args["latencyStats"] = {"histograms": True}
+                    args["latencyStats"] = {"histograms": True}
                     stats = db.get_collection(coll_name).aggregate([{
                         "$collStats": args
                     }]).next()
@@ -136,6 +136,44 @@ class CollInfoItem(BaseItem):
                         "title": "High Index Fragmentation",
                         "description": f"Collection `{ns}` index `{index_name}` has a higher index fragmentation: `{fragmentation:.2%}` than threshold `{fragmentation_ratio:.2%}`."
                     })
+            # Check operation latency
+            latency_stats = stats.get("latencyStats", {})
+            reads, writes, commands, transactions = latency_stats["reads"], latency_stats["writes"], latency_stats["commands"], latency_stats["transactions"]
+            r_latency, w_latency, c_latency, t_latency = reads["latency"], writes["latency"], commands["latency"], transactions["latency"]
+            r_ops, w_ops, c_ops, t_ops = reads["ops"], writes["ops"], commands["ops"], transactions["ops"]
+            avg_r_latency = r_latency / r_ops if r_ops > 0 else 0
+            avg_w_latency = w_latency / w_ops if w_ops > 0 else 0
+            avg_c_latency = c_latency / c_ops if c_ops > 0 else 0
+            avg_t_latency = t_latency / t_ops if t_ops > 0 else 0
+            op_latency_ms = self._config.get("op_latency_ms", 100)
+            if avg_r_latency > op_latency_ms:
+                test_result.append({
+                    "host": host,
+                    "severity": SEVERITY.MEDIUM,
+                    "title": "High Read Latency",
+                    "description": f"Collection `{ns}` has a higher average read latency `{avg_r_latency:.2f}ms` than threshold `{op_latency_ms:.2f}ms`."
+                })
+            if avg_w_latency > op_latency_ms:
+                test_result.append({
+                    "host": host,
+                    "severity": SEVERITY.MEDIUM,
+                    "title": "High Write Latency",
+                    "description": f"Collection `{ns}` has a higher average write latency `{avg_w_latency:.2f}ms` than threshold `{op_latency_ms:.2f}ms`."
+                })
+            if avg_c_latency > op_latency_ms:
+                test_result.append({
+                    "host": host,
+                    "severity": SEVERITY.MEDIUM,
+                    "title": "High Command Latency",
+                    "description": f"Collection `{ns}` has a higher average command latency `{avg_c_latency:.2f}ms` than threshold `{op_latency_ms:.2f}ms`."
+                })
+            if avg_t_latency > op_latency_ms:
+                test_result.append({
+                    "host": host,
+                    "severity": SEVERITY.MEDIUM,
+                    "title": "High Transaction Latency",
+                    "description": f"Collection `{ns}` has a higher average transaction latency `{avg_t_latency:.2f}ms` than threshold `{op_latency_ms:.2f}ms`."
+                })
             return test_result, {
                 "ns": ns,
                 "collFragmentation": {
@@ -144,6 +182,12 @@ class CollInfoItem(BaseItem):
                     "fragmentation": coll_frag
                 },
                 "indexFragmentation": index_frags,
+                "latencyStats": {
+                    "reads_latency": avg_r_latency,
+                    "writes_latency": avg_w_latency,
+                    "commands_latency": avg_c_latency,
+                    "transactions_latency": avg_t_latency
+                },
                 "stats": stats
             }
 
@@ -194,7 +238,7 @@ class CollInfoItem(BaseItem):
                                       f"{index_data_ratio:.2%}"])
         frag_table = {
             "type": "table",
-            "caption": f"Fragmentation",
+            "caption": f"Storage Fragmentation",
             "columns": [
                 {"name": "Host", "type": "string"},
                 {"name": "Namespace", "type": "string"},
@@ -203,7 +247,21 @@ class CollInfoItem(BaseItem):
             ],
             "rows": []
         }
+        latency_table = {
+            "type": "table",
+            "caption": f"Operation Latency",
+            "columns": [
+                {"name": "Host", "type": "string"},
+                {"name": "Namespace", "type": "string"},
+                {"name": "Read Latency", "type": "string"},
+                {"name": "Write Latency", "type": "decimal"},
+                {"name": "Command Latency", "type": "decimal"},
+                {"name": "Transaction Latency", "type": "decimal"},
+            ],
+            "rows": []
+        }
         data.append(frag_table)
+        data.append(latency_table)
         def func_node(set_name, node, **kwargs):
             raw_result = node["rawResult"]
             host = node["host"]
@@ -212,6 +270,7 @@ class CollInfoItem(BaseItem):
                 return
             for stats in raw_result:
                 ns = stats["ns"]
+                # Fragmentation visualization
                 coll_frag = stats.get("collFragmentation", {}).get("fragmentation", 0)
                 index_frags = stats.get("indexFragmentation", [])
                 total_reusable_size = 0
@@ -224,9 +283,16 @@ class CollInfoItem(BaseItem):
                     fragmentation = index.get("fragmentation", 0)
                     index_details.append(f"{index_name}: {fragmentation:.2%}")
                 index_frag = round(total_reusable_size / total_index_size, 4) if total_index_size > 0 else 0
-                row = [host, escape_markdown(ns), f"{coll_frag:.2%}",
-                       f"{index_frag:.2%}<br/><pre>{'<br/>'.join(index_details)}</pre>"]
-                frag_table["rows"].append(row)
+                frag_table["rows"].append([host, escape_markdown(ns), f"{coll_frag:.2%}",
+                       f"{index_frag:.2%}<br/><pre>{'<br/>'.join(index_details)}</pre>"])
+                # Latency visualization
+                avg_reads_latency = stats.get("latencyStats", {}).get("reads_latency", 0)
+                avg_writes_latency = stats.get("latencyStats", {}).get("writes_latency", 0)
+                avg_commands_latency = stats.get("latencyStats", {}).get("commands_latency", 0)
+                avg_transactions_latency = stats.get("latencyStats", {}).get("transactions_latency", 0)
+                latency_table["rows"].append([host, escape_markdown(ns), f"{avg_reads_latency:.2f}",
+                                                f"{avg_writes_latency:.2f}", f"{avg_commands_latency:.2f}",
+                                                f"{avg_transactions_latency:.2f}"])
         enum_result_items(result, func_sh_cluster=func_overview, func_rs_cluster=func_overview, func_rs_member=func_node, func_shard_member=func_node)
         return {
             "title": self.name,

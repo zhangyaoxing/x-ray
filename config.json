@@ -12,7 +12,8 @@
             "obj_size_kb": 32,
             "collection_size_GB": 2048,
             "fragmentation_ratio": 0.5,
-            "index_size_ratio": 0.2
+            "index_size_ratio": 0.2,
+            "op_latency_ms": 100
         },
         "IndexInfoItem": {
             "unused_index_days": 7,
