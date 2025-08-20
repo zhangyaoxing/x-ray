@@ -31,7 +31,7 @@ This is a example of config file `/config.json`.
         },
         "CollInfoItem": {
             "obj_size_kb": 32,
-            "collection_size_GB": 2048,
+            "collection_size_gb": 2048,
             "fragmentation_ratio": 0.5,
             "index_size_ratio": 0.2,
             "ops_latency_ms": 100
@@ -47,7 +47,11 @@ This is a example of config file `/config.json`.
         "ServerStatusItem": {
             "used_connection_ratio": 0.8,
             "query_targeting": 1000,
-            "query_targeting_obj": 1000
+            "query_targeting_obj": 1000,
+            "cache_read_into_mb": 100
+        },
+        "ShardKeyItem": {
+            "sharding_imbalance_percentage": 0.1
         }
     },
     "template": "standard.html"
@@ -81,6 +85,7 @@ Each check item uses some thresholds to help determine whether a value is in the
 | ServerStatusItem |  used_connection_ratio  | Highest used:total connection ratio                             |    0.8    |
 | ServerStatusItem |     query_targeting     | Scanned:Returned                                                |   1000    |
 | ServerStatusItem |   query_targeting_obj   | Scanned Object:Returned                                         |   1000    |
+| ServerStatusItem |   cache_read_into_mb    | Data read into cache / s                                        |    100    |
 
 ### 3.2 Database Permissions
 Each optional check item requires different permissions. Please properly grant the permissions to the user that you use to access MongoDB.

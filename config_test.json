@@ -26,7 +26,8 @@
         "ServerStatusItem": {
             "used_connection_ratio": 0.01,
             "query_targeting": 0,
-            "query_targeting_obj": 0
+            "query_targeting_obj": 0,
+            "cache_read_into_mb": 0
         },
         "ShardKeyItem": {
             "sharding_imbalance_percentage": 0.1
