@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from libs.check_items.base_item import BaseItem
-from libs.shared import MAX_MONGOS_PING_LATENCY, SEVERITY, discover_nodes, enum_all_nodes, enum_result_items, escape_markdown
+from libs.shared import MAX_MONGOS_PING_LATENCY, SEVERITY, discover_nodes, enum_all_nodes, enum_result_items, escape_markdown, format_json_md
 from libs.utils import *
 from pymongo.uri_parser import parse_uri
 
@@ -152,7 +152,6 @@ class IndexInfoItem(BaseItem):
     @property
     def review_result(self):
         result = self.captured_sample
-        # TODO: display index options? (Unique, sparse, partial...)
         # TODO: display access/hour for each node.
         table = {
             "type": "table",
@@ -161,7 +160,7 @@ class IndexInfoItem(BaseItem):
                 {"name": "Component", "type": "string"},
                 {"name": "Namespace", "type": "string"},
                 {"name": "Name", "type": "string"},
-                {"name": "Key", "type": "string"},
+                {"name": "Key", "type": "string", "align": "left"},
                 {"name": "Access per Hour", "type": "string"}
             ],
             "rows": []
@@ -176,12 +175,20 @@ class IndexInfoItem(BaseItem):
                 capture_time = item["captureTime"]
                 for stats in item["indexStats"]:
                     component = stats.get("shard", set_name)
+                    key_md = escape_markdown(format_json_md(stats["key"], 0))
                     access = stats["accesses"]
                     ops = access.get("ops", 0)
                     since = access.get("since", None)
+                    spec = stats.get("spec", {})
+                    options = get_index_options(spec)
+                    options_md = f"<pre>{format_json_md(options)}</pre>" if len(options) > 0 else ""
                     access_per_hour = ops / (capture_time - since).total_seconds() / 3600
                     table["rows"].append(
-                        [escape_markdown(component), escape_markdown(ns), escape_markdown(stats["name"]), escape_markdown(stats["key"]), access_per_hour]
+                        [escape_markdown(component), 
+                         escape_markdown(ns), 
+                         escape_markdown(stats["name"]),
+                         f"{key_md}{options_md}",
+                         access_per_hour]
                     )
 
         enum_result_items(result, func_sh_cluster=func_cluster, func_rs_cluster=func_cluster)
@@ -190,3 +197,10 @@ class IndexInfoItem(BaseItem):
             "description": self.description,
             "data": [table]
         }
+
+def get_index_options(spec):
+    options = {}
+    for key, value in spec.items():
+        if key not in ["key", "name", "v"]:
+            options[key] = value
+    return options

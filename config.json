@@ -29,5 +29,5 @@
             "query_targeting_obj": 1000
         }
     },
-    "template": "standard.html"
+    "template": "full.html"
 }
