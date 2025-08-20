@@ -1,5 +1,5 @@
 from libs.check_items.base_item import BaseItem
-from libs.shared import SEVERITY, discover_nodes, enum_all_nodes, enum_result_items, escape_markdown, format_size, to_json
+from libs.shared import SEVERITY, discover_nodes, enum_all_nodes, enum_result_items, escape_markdown, format_json_md, format_size, to_json
 from libs.utils import red
 from pymongo.errors import OperationFailure
 
@@ -105,6 +105,7 @@ class ShardKeyItem(BaseItem):
             for coll in collections:
                 ns = coll["_id"]
                 key = coll["key"]
+                key_md = escape_markdown(format_json_md(key, indent=None))
                 stats = all_stats.get(ns, {})
                 data_size = sum(s["size"] for s in stats.values())
                 data_size_detail = "<br/>".join([f"{escape_markdown(s_name)}: {format_size(s['size'])}" for s_name, s in stats.items()])
@@ -114,7 +115,7 @@ class ShardKeyItem(BaseItem):
                 index_size_detail = "<br/>".join([f"{escape_markdown(s_name)}: {format_size(s['totalIndexSize'])}" for s_name, s in stats.items()])
                 docs_count = sum(s["count"] for s in stats.values())
                 docs_count_detail = "<br/>".join([f"{escape_markdown(s_name)}: {s['count']}" for s_name, s in stats.items()])
-                table["rows"].append([escape_markdown(ns), escape_markdown(key), 
+                table["rows"].append([escape_markdown(ns), key_md, 
                                     f"{format_size(data_size)}<br/><pre>{data_size_detail}</pre>", 
                                     f"{format_size(storage_size)}<br/><pre>{storage_size_detail}</pre>", 
                                     f"{format_size(index_size)}<br/><pre>{index_size_detail}</pre>", 
