@@ -10,6 +10,7 @@ class ServerStatusItem(BaseItem):
         self._description = "Collects and reviews server status metrics.\n\n"
         self._description += "- Whether used/total connection ratio is too high.\n"
         self._description += "- Whether query targeting is poor.\n"
+        self._description += "- Whether the cache read into rate is too high.\n"
 
     def _check_connections(self, host, server_status):
         """
