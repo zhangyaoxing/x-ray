@@ -82,7 +82,7 @@ class ServerStatusItem(BaseItem):
         def func_2nd_req(set_name, node, server_status):
             host = node["host"]
             test_result1, raw_result1 = self._check_connections(host, server_status)
-            test_result2, raw_result2 = self._check_query_targeting(host, server_status)
+            test_result2, raw_result2 = self._check_query_targeting(host, server_status) if set_name != "mongos" else ([], None)
             test_result = test_result1 + test_result2
             self.append_test_results(test_result)
             raw_result = {
@@ -92,13 +92,6 @@ class ServerStatusItem(BaseItem):
             }
             
             return test_result, raw_result
-        def func_mongos(set_name, node, server_status):
-            host = node["host"]
-            test_result, raw_result1 = self._check_connections(host, server_status)
-            self.append_test_results(test_result)
-            return test_result, {
-                "server_status": raw_result1
-            }
 
         def enumerator(set_name, node, **kwargs):
             host = node["host"]
@@ -112,33 +105,31 @@ class ServerStatusItem(BaseItem):
             return test_result, raw_result
 
         nodes = discover_nodes(client, parsed_uri)
+        func_all_first = lambda set_name, node, **kwargs: enumerator(set_name, node, func_req=func_first_req)
         result1 = enum_all_nodes(nodes,
-                                 func_rs_member=lambda set_name, node, **kwargs: enumerator(set_name, node, func_req=func_first_req),
-                                 func_shard_member=lambda set_name, node, **kwargs: enumerator(set_name, node, func_req=func_first_req))
+                                 func_mongos_member=func_all_first,
+                                 func_rs_member=func_all_first,
+                                 func_shard_member=func_all_first,
+                                 func_config_member=func_all_first)
         # Sleep for 5s to capture next status.
         self._logger.info(f"Sleep {green(f'{SERVER_STATUS_INTERVAL} seconds')} to capture next server status.")
         sleep(SERVER_STATUS_INTERVAL)
+        func_all_2nd = lambda set_name, node, **kwargs: enumerator(set_name, node, func_req=func_2nd_req)
         result2 = enum_all_nodes(nodes,
-                                 func_mongos_member=lambda set_name, node, **kwargs: enumerator(set_name, node, func_req=func_mongos),
-                                 func_rs_member=lambda set_name, node, **kwargs: enumerator(set_name, node, func_req=func_2nd_req),
-                                 func_shard_member=lambda set_name, node, **kwargs: enumerator(set_name, node, func_req=func_2nd_req),
-                                 func_config_member=lambda set_name, node, **kwargs: enumerator(set_name, node, func_req=func_2nd_req))
+                                 func_mongos_member=func_all_2nd,
+                                 func_rs_member=func_all_2nd,
+                                 func_shard_member=func_all_2nd,
+                                 func_config_member=func_all_2nd)
 
         # These metrics needs to compare 2 `serverStatus` results
         cache = {}
-        op_counters = {}
         read_into_threshold = self._config.get("cache_read_into_mb", 100)
-        def func_node(set_name, node, **kwargs):
+        def func_data_member(set_name, node, **kwargs):
             raw_result = node.get("rawResult", {})
             host = node["host"]
             if not raw_result:
                 cache[host] = {
-                    "setName": set_name, 
-                    "host": host, 
-                    "cacheSize": "n/a", 
-                    "inCacheSize": "n/a", 
-                    "readInto": "n/a", 
-                    "writtenFrom": "n/a"
+                    "setName": set_name, "host": host, "cacheSize": "n/a", "inCacheSize": "n/a", "readInto": "n/a", "writtenFrom": "n/a"
                 }
                 return
 
@@ -175,9 +166,48 @@ class ServerStatusItem(BaseItem):
                 # Attach the test result and raw result to the original result.
                 node["testResult"].extend(test_result)
                 node["rawResult"]["cache"] = cache[host]
-        enum_result_items(result1, func_rs_member=func_node, func_shard_member=func_node)
-        enum_result_items(result2, func_rs_member=func_node, func_shard_member=func_node)
+        enum_result_items(result1, func_rs_member=func_data_member, func_shard_member=func_data_member, func_config_member=func_data_member)
+        enum_result_items(result2, func_rs_member=func_data_member, func_shard_member=func_data_member, func_config_member=func_data_member)
 
+        op_counters = {}
+        def func_all_member(set_name, node, **kwargs):
+            raw_result = node.get("rawResult", {})
+            host = node["host"]
+            if not raw_result:
+                op_counters[host] = {
+                    "set_name": set_name, "host": host,
+                    "insert": "n/a", "query": "n/a", "update": "n/a", "delete": "n/a", "command": "n/a", "getmore": "n/a"
+                }
+                return
+            ops = raw_result["server_status"]["opcounters"]
+            if host not in op_counters:
+                op_counters[host] = {
+                    "set_name": set_name, "host": host,
+                    "insert": ops.get("insert", 0), "query": ops.get("query", 0),
+                    "update": ops.get("update", 0), "delete": ops.get("delete", 0),
+                    "command": ops.get("command", 0), "getmore": ops.get("getmore", 0)
+                }
+            else:
+                inserts = ops["insert"]
+                reads = ops["query"]
+                updates = ops["update"]
+                deletes = ops["delete"]
+                commands = ops["command"]
+                getmores = ops["getmore"]
+                op_counters[host] = {
+                    "set_name": set_name, "host": host,
+                    "insert": inserts - op_counters[host]["insert"],
+                    "query": reads - op_counters[host]["query"],
+                    "update": updates - op_counters[host]["update"],
+                    "delete": deletes - op_counters[host]["delete"],
+                    "command": commands - op_counters[host]["command"],
+                    "getmore": getmores - op_counters[host]["getmore"]
+                }
+                node["rawResult"]["op_counters"] = op_counters[host]
+        enum_result_items(result1, func_mongos_member=func_all_member, func_rs_member=func_all_member,
+                          func_shard_member=func_all_member, func_config_member=func_all_member)
+        enum_result_items(result2, func_mongos_member=func_all_member, func_rs_member=func_all_member,
+                          func_shard_member=func_all_member, func_config_member=func_all_member)
         self.captured_sample = [result1, result2]
 
     @property
@@ -198,6 +228,53 @@ class ServerStatusItem(BaseItem):
             ],
             "rows": []
         }
+        opcounters_table = {
+            "type": "table",
+            "caption": f"Operation Counters",
+            "columns": [
+                {"name": "Component", "type": "string"},
+                {"name": "Host", "type": "string"},
+                {"name": "Inserts", "type": "decimal"},
+                {"name": "Queries", "type": "decimal"},
+                {"name": "Updates", "type": "decimal"},
+                {"name": "Deletes", "type": "decimal"},
+                {"name": "Commands", "type": "decimal"},
+                {"name": "Getmores", "type": "decimal"},
+            ],
+            "rows": []
+        }
+        data.append(conn_table)
+        data.append(opcounters_table)
+        def func_all_members(set_name, node, **kwargs):
+            raw_result = node.get("rawResult", {})
+            if not raw_result:
+                conn_table["rows"].append([escape_markdown(set_name), node["host"], "n/a", "n/a", "n/a", "n/a"])
+                opcounters_table["rows"].append([escape_markdown(set_name), node["host"], "n/a", "n/a", "n/a", "n/a", "n/a", "n/a"])
+                return
+            host = node["host"]
+            connections = raw_result.get("connections", {})
+            conn_table["rows"].append([
+                escape_markdown(set_name),
+                host,
+                connections.get("current", 0),
+                connections.get("available", 0),
+                connections.get("active", 0),
+                connections.get("created", 0)
+            ])
+            opcounters = raw_result.get("op_counters", {})
+            opcounters_table["rows"].append([
+                escape_markdown(set_name),
+                host,
+                opcounters.get("insert", 0),
+                opcounters.get("query", 0),
+                opcounters.get("update", 0),
+                opcounters.get("delete", 0),
+                opcounters.get("command", 0),
+                opcounters.get("getmore", 0),
+            ])
+
+        enum_result_items(result2, func_mongos_member=func_all_members, func_rs_member=func_all_members, 
+                          func_shard_member=func_all_members, func_config_member=func_all_members)
         qt_table = {
             "type": "table",
             "caption": f"Query Targeting",
@@ -209,34 +286,6 @@ class ServerStatusItem(BaseItem):
             ],
             "rows": []
         }
-        data.append(conn_table)
-        data.append(qt_table)
-        def func_all_members(set_name, node, **kwargs):
-            raw_result = node.get("rawResult", {})
-            if not raw_result:
-                conn_table["rows"].append([escape_markdown(set_name), node["host"], "n/a", "n/a", "n/a", "n/a"])
-                qt_table["rows"].append([escape_markdown(set_name), node["host"], "n/a", "n/a"])
-                return
-            host = node["host"]
-            connections = raw_result.get("connections", {})
-            query_targeting = raw_result.get("query_targeting", {})
-            conn_table["rows"].append([
-                escape_markdown(set_name),
-                host,
-                connections.get("current", 0),
-                connections.get("available", 0),
-                connections.get("active", 0),
-                connections.get("created", 0)
-            ])
-            qt_table["rows"].append([
-                escape_markdown(set_name),
-                host,
-                f"{query_targeting.get('scanned/returned', 0):.2f}",
-                f"{query_targeting.get('scanned_objects/returned', 0):.2f}"
-            ])
-        enum_result_items(result2, func_mongos_member=func_all_members, func_rs_member=func_all_members, 
-                          func_shard_member=func_all_members, func_config_member=func_all_members)
-
         cache_table = {
             "type": "table",
             "caption": "WiredTiger Cache",
@@ -251,11 +300,13 @@ class ServerStatusItem(BaseItem):
             "rows": []
         }
         data.append(cache_table)
-        def func_cache_member(set_name, node, **kwargs):
+        data.append(qt_table)
+        def func_data_member(set_name, node, **kwargs):
             raw_result = node.get("rawResult", {})
             host = node["host"]
             if not raw_result:
                 cache_table["rows"].append([escape_markdown(set_name), host, "n/a", "n/a", "n/a", "n/a"])
+                qt_table["rows"].append([escape_markdown(set_name), node["host"], "n/a", "n/a"])
                 return
             cache = raw_result.get("cache", {})
             cache_table["rows"].append([
@@ -266,7 +317,14 @@ class ServerStatusItem(BaseItem):
                 f"{format_size(cache.get('readInto', 0))}/s",
                 f"{format_size(cache.get('writtenFrom', 0))}/s"
             ])
-        enum_result_items(result2, func_rs_member=func_cache_member, func_shard_member=func_cache_member)
+            query_targeting = raw_result.get("query_targeting", {})
+            qt_table["rows"].append([
+                escape_markdown(set_name),
+                host,
+                f"{query_targeting.get('scanned/returned', 0):.2f}",
+                f"{query_targeting.get('scanned_objects/returned', 0):.2f}"
+            ])
+        enum_result_items(result2, func_rs_member=func_data_member, func_shard_member=func_data_member, func_config_member=func_data_member)
 
         return {
             "name": self.name,
