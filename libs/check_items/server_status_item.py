@@ -233,6 +233,36 @@ class ServerStatusItem(BaseItem):
             ],
             "rows": []
         }
+        current = []
+        active = []
+        conn_bar = {
+            "type": "bar",
+            "data": {
+                "labels": [],
+                "datasets": [{
+                    "label": "Idle Connections",
+                    "data": current
+                }, {
+                    "label": "Active Connections",
+                    "data": active
+                }]
+            },
+            "options": {
+                "scales": {
+                    "x": {
+                        "stacked": True
+                    },
+                    "y": {
+                        "stacked": True,
+                        "beginAtZero": True,
+                        "title": {
+                            "display": True,
+                            "text": "Connections"
+                        }
+                    }
+                }
+            }
+        }
         opcounters_table = {
             "type": "table",
             "caption": f"Operation Counters",
@@ -248,8 +278,57 @@ class ServerStatusItem(BaseItem):
             ],
             "rows": []
         }
+        inserts = []
+        queries = []
+        updates = []
+        deletes = []
+        commands = []
+        getmores = []
+        ops_bar = {
+            "type": "bar",
+            "data": {
+                "labels": [],
+                "datasets": [{
+                    "label": "Inserts",
+                    "data": inserts
+                }, {
+                    "label": "Queries",
+                    "data": queries
+                }, {
+                    "label": "Updates",
+                    "data": updates
+                }, {
+                    "label": "Deletes",
+                    "data": deletes
+                }, {
+                    "label": "Commands",
+                    "data": commands
+                }, {
+                    "label": "Getmores",
+                    "data": getmores
+                }]
+            },
+            "options": {
+                "scales": {
+                    "x": {
+                        "stacked": True
+                    },
+                    "y": {
+                        "stacked": True,
+                        "beginAtZero": True,
+                        "title": {
+                            "display": True,
+                            "text": "Operation Count"
+                        }
+                    }
+                }
+            }
+        }
         data.append(conn_table)
+        data.append(conn_bar)
         data.append(opcounters_table)
+        data.append(ops_bar)
+
         def func_all_members(set_name, node, **kwargs):
             raw_result = node.get("rawResult", {})
             if not raw_result:
@@ -265,9 +344,12 @@ class ServerStatusItem(BaseItem):
                 connections.get("available", 0),
                 connections.get("active", 0),
                 connections.get("totalCreated", 0),
-                connections.get("rejected", 0),
-                connections.get("threaded", 0)
+                connections.get("rejected", "n/a"),
+                connections.get("threaded", "n/a")
             ])
+            conn_bar["data"]["labels"].append(f"{escape_markdown(set_name)}/{host}")
+            active.append(connections.get("active", 0))
+            current.append(connections.get("current", 0) - connections.get("active", 0))
             opcounters = raw_result.get("op_counters", {})
             opcounters_table["rows"].append([
                 escape_markdown(set_name),
@@ -279,6 +361,13 @@ class ServerStatusItem(BaseItem):
                 opcounters.get("command", 0),
                 opcounters.get("getmore", 0),
             ])
+            ops_bar["data"]["labels"].append(f"{escape_markdown(set_name)}/{host}")
+            inserts.append(opcounters.get("insert", 0))
+            queries.append(opcounters.get("query", 0))
+            updates.append(opcounters.get("update", 0))
+            deletes.append(opcounters.get("delete", 0))
+            commands.append(opcounters.get("command", 0))
+            getmores.append(opcounters.get("getmore", 0))
 
         enum_result_items(result2, func_mongos_member=func_all_members, func_rs_member=func_all_members, 
                           func_shard_member=func_all_members, func_config_member=func_all_members)
@@ -306,7 +395,65 @@ class ServerStatusItem(BaseItem):
             ],
             "rows": []
         }
+        cache_sizes = []
+        in_cache_sizes = []
+        read_into_sizes = []
+        written_from_sizes = []
+        cache_bar = {
+            "type": "bar",
+            "data": {
+                "labels": [],
+                "datasets": [{
+                    "label": "Cache Size",
+                    "data": cache_sizes,
+                    "stack": "cache",
+                    "yAxisID": "y1"
+                }, {
+                    "label": "In-Cache Size",
+                    "data": in_cache_sizes,
+                    "stack": "cache",
+                    "yAxisID": "y1"
+                }, {
+                    "label": "Read Into",
+                    "data": read_into_sizes,
+                    "stack": "swap",
+                    "yAxisID": "y2"
+                }, {
+                    "label": "Written From",
+                    "data": written_from_sizes,
+                    "stack": "swap",
+                    "yAxisID": "y2"
+                }]
+            },
+            "options": {
+                "scales": {
+                    "x": {
+                        "stacked": True
+                    },
+                    "y1": {
+                        "position": "left",
+                        "stacked": True,
+                        "beginAtZero": True,
+                        "title": {
+                            "display": True,
+                            "text": "In-Cache/Total"
+                        }
+                    },
+                    "y2": {
+                        "position": "right",
+                        "stacked": True,
+                        "beginAtZero": True,
+                        "grid": { "drawOnChartArea": False },
+                        "title": {
+                            "display": True,
+                            "text": "Read/Write"
+                        }
+                    }
+                }
+            }
+        }
         data.append(cache_table)
+        data.append(cache_bar)
         data.append(qt_table)
         def func_data_member(set_name, node, **kwargs):
             raw_result = node.get("rawResult", {})
@@ -324,6 +471,11 @@ class ServerStatusItem(BaseItem):
                 f"{format_size(cache.get('readInto', 0))}/s",
                 f"{format_size(cache.get('writtenFrom', 0))}/s"
             ])
+            cache_bar["data"]["labels"].append(f"{escape_markdown(set_name)}/{host}")
+            cache_sizes.append(cache.get("cacheSize", 0))
+            in_cache_sizes.append(cache.get("inCacheSize", 0))
+            read_into_sizes.append(cache.get("readInto", 0))
+            written_from_sizes.append(cache.get("writtenFrom", 0))
             query_targeting = raw_result.get("query_targeting", {})
             qt_table["rows"].append([
                 escape_markdown(set_name),

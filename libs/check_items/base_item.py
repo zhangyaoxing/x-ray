@@ -99,7 +99,13 @@ class BaseItem:
                 for row in block.get("rows", []):
                     result += "|" + "|".join(str(cell) for cell in row) + "|\n"
                 result += "\n"
-            # TODO: support other types.
+            elif type == "bar":
+                id = f"{self.__class__.__name__}_{i}"
+                result += f"<canvas id='{id}'></canvas>"
+                result += f"<script type='text/javascript'>\n"
+                result += f"  const canvas{id} = document.getElementById('{id}');\n"
+                result += f"  const chart{id} = new Chart(canvas{id}, {to_json(block)});\n"
+                result += f"</script>\n"
         return result
 
     @captured_sample.setter
