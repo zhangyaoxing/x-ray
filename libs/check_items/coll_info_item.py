@@ -217,6 +217,46 @@ class CollInfoItem(BaseItem):
             "rows": []
         }
         data.append(stats_table)
+        data_sizes = []
+        data_size_pie = {
+            "type": "pie",
+            "data": {
+                "labels": [],
+                "datasets": [{
+                    "label": "Data Sizes",
+                    "data": data_sizes
+                }]
+            },
+            "options": {
+                "plugins": {
+                    "title": {
+                        "display": True,
+                        "text": "Data Size"
+                    }
+                }
+            }
+        }
+        index_sizes = []
+        index_size_pie = {
+            "type": "pie",
+            "data": {
+                "labels": [],
+                "datasets": [{
+                    "label": "Index Sizes",
+                    "data": index_sizes
+                }]
+            },
+            "options": {
+                "plugins": {
+                    "title": {
+                        "display": True,
+                        "text": "Index Size"
+                    }
+                }
+            }
+        }
+        data.append(data_size_pie)
+        data.append(index_size_pie)
         def func_overview(set_name, node, **kwargs):
             raw_result = node["rawResult"]
             if raw_result is None:
@@ -236,6 +276,10 @@ class CollInfoItem(BaseItem):
                                       format_size(avg_obj_size),
                                       format_size(total_index_size),
                                       f"{index_data_ratio:.2%}"])
+                data_size_pie["data"]["labels"].append(f"{ns}")
+                data_sizes.append(size)
+                index_size_pie["data"]["labels"].append(f"{ns}")
+                index_sizes.append(total_index_size)
         frag_table = {
             "type": "table",
             "caption": f"Storage Fragmentation",

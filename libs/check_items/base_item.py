@@ -99,9 +99,9 @@ class BaseItem:
                 for row in block.get("rows", []):
                     result += "|" + "|".join(str(cell) for cell in row) + "|\n"
                 result += "\n"
-            elif type == "bar":
+            elif type in ["bar", "pie"]:
                 id = f"{self.__class__.__name__}_{i}"
-                result += f"<canvas id='{id}'></canvas>"
+                result += f"<div class='{type}'><canvas class='{type}' id='{id}'></canvas></div>"
                 result += f"<script type='text/javascript'>\n"
                 result += f"  const canvas{id} = document.getElementById('{id}');\n"
                 result += f"  const chart{id} = new Chart(canvas{id}, {to_json(block)});\n"

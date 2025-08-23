@@ -260,6 +260,12 @@ class ServerStatusItem(BaseItem):
                             "text": "Connections"
                         }
                     }
+                },
+                "plugins": {
+                    "title": {
+                        "display": True,
+                        "text": "Connection Count"
+                    }
                 }
             }
         }
@@ -321,6 +327,12 @@ class ServerStatusItem(BaseItem):
                             "text": "Operation Count"
                         }
                     }
+                },
+                "plugins": {
+                    "title": {
+                        "display": True,
+                        "text": "Operation Count"
+                    }
                 }
             }
         }
@@ -347,7 +359,7 @@ class ServerStatusItem(BaseItem):
                 connections.get("rejected", "n/a"),
                 connections.get("threaded", "n/a")
             ])
-            conn_bar["data"]["labels"].append(f"{escape_markdown(set_name)}/{host}")
+            conn_bar["data"]["labels"].append(f"{set_name}/{host}")
             active.append(connections.get("active", 0))
             current.append(connections.get("current", 0) - connections.get("active", 0))
             opcounters = raw_result.get("op_counters", {})
@@ -361,7 +373,7 @@ class ServerStatusItem(BaseItem):
                 opcounters.get("command", 0),
                 opcounters.get("getmore", 0),
             ])
-            ops_bar["data"]["labels"].append(f"{escape_markdown(set_name)}/{host}")
+            ops_bar["data"]["labels"].append(f"{set_name}/{host}")
             inserts.append(opcounters.get("insert", 0))
             queries.append(opcounters.get("query", 0))
             updates.append(opcounters.get("update", 0))
@@ -448,6 +460,12 @@ class ServerStatusItem(BaseItem):
                             "display": True,
                             "text": "Read/Write"
                         }
+                    }
+                },
+                "plugins": {
+                    "title": {
+                        "display": True,
+                        "text": "Cache Size"
                     }
                 }
             }
