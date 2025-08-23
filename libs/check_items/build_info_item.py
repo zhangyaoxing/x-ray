@@ -1,5 +1,5 @@
 from libs.check_items.base_item import BaseItem
-from libs.shared import MAX_MONGOS_PING_LATENCY, SEVERITY, discover_nodes, enum_all_nodes, enum_result_items
+from libs.shared import MAX_MONGOS_PING_LATENCY, SEVERITY, ServerVersion, discover_nodes, enum_all_nodes, enum_result_items
 from libs.utils import *
 
 class BuildInfoItem(BaseItem):
@@ -22,10 +22,9 @@ class BuildInfoItem(BaseItem):
             client = node["client"]
             raw_result = client.admin.command("buildInfo")
             test_result = []
-            eol_version = self._config.get("eol_version", [4, 4, 0])
-            running_version = raw_result.get("versionArray", None)
-            if running_version[0] < eol_version[0] or \
-            (running_version[0] == eol_version[0] and running_version[1] < eol_version[1]):
+            eol_version = ServerVersion(self._config.get("eol_version", [4, 4, 0]))
+            running_version = ServerVersion(raw_result.get("versionArray", None))
+            if running_version < eol_version:
                 test_result.append({
                     "host": host,
                     "severity": SEVERITY.HIGH,
@@ -33,7 +32,8 @@ class BuildInfoItem(BaseItem):
                     "description": f"Server version {running_version} is below EOL version {eol_version}. Consider upgrading to the latest version."
                 })
             self.append_test_results(test_result)
-            
+            node["version"] = running_version
+
             return test_result, raw_result
 
         raw_result = enum_all_nodes(nodes, func_mongos_member=func_node, func_rs_member=func_node, func_shard_member=func_node, func_config_member=func_node)

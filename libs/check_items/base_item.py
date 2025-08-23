@@ -88,8 +88,10 @@ class BaseItem:
         for i, block in enumerate(result_data):
             type = block.get("type")
             caption = block.get("caption")
+            notes = block.get("notes", "")
             if type == "table":
                 result += f"#### ({i + 1}) {caption}\n"
+                result += f"{notes}\n"
                 header = [col.get('name', '(NOT SET)') for col in block.get("columns", [])]
                 align = [TABLE_ALIGNMENT.get(col.get("align", "center"), TABLE_ALIGNMENT["center"]) for col in block.get("columns", [])]
                 result += f"|{'|'.join(header)}|\n"

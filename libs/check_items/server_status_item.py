@@ -214,17 +214,22 @@ class ServerStatusItem(BaseItem):
     def review_result(self):
         result = self.captured_sample
         result1, result2 = result
+        v50 = ServerVersion([5, 0, 0])
+        v63 = ServerVersion([6, 3, 0])
         data = []
         conn_table = {
             "type": "table",
             "caption": f"Connections",
+            "notes": "- `Rejected` is only available for MongoDB 6.3 and later.\n - `Threaded` is only available for MongoDB 5.0 and later.\n",
             "columns": [
                 {"name": "Component", "type": "string"},
                 {"name": "Host", "type": "string"},
                 {"name": "Current", "type": "decimal"},
                 {"name": "Available", "type": "decimal"},
                 {"name": "Active", "type": "decimal"},
-                {"name": "Created", "type": "decimal"}
+                {"name": "Created", "type": "decimal"},
+                {"name": "Rejected", "type": "decimal"},
+                {"name": "Threaded", "type": "decimal"}
             ],
             "rows": []
         }
@@ -248,7 +253,7 @@ class ServerStatusItem(BaseItem):
         def func_all_members(set_name, node, **kwargs):
             raw_result = node.get("rawResult", {})
             if not raw_result:
-                conn_table["rows"].append([escape_markdown(set_name), node["host"], "n/a", "n/a", "n/a", "n/a"])
+                conn_table["rows"].append([escape_markdown(set_name), node["host"], "n/a", "n/a", "n/a", "n/a", "n/a", "n/a"])
                 opcounters_table["rows"].append([escape_markdown(set_name), node["host"], "n/a", "n/a", "n/a", "n/a", "n/a", "n/a"])
                 return
             host = node["host"]
@@ -259,7 +264,9 @@ class ServerStatusItem(BaseItem):
                 connections.get("current", 0),
                 connections.get("available", 0),
                 connections.get("active", 0),
-                connections.get("created", 0)
+                connections.get("totalCreated", 0),
+                connections.get("rejected", 0),
+                connections.get("threaded", 0)
             ])
             opcounters = raw_result.get("op_counters", {})
             opcounters_table["rows"].append([

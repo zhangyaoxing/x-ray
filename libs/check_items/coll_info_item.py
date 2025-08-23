@@ -240,6 +240,7 @@ class CollInfoItem(BaseItem):
             "type": "table",
             "caption": f"Storage Fragmentation",
             "columns": [
+                {"name": "Component", "type": "string"},
                 {"name": "Host", "type": "string"},
                 {"name": "Namespace", "type": "string"},
                 {"name": "Collection Fragmentation", "type": "string"},
@@ -251,6 +252,7 @@ class CollInfoItem(BaseItem):
             "type": "table",
             "caption": f"Operation Latency",
             "columns": [
+                {"name": "Component", "type": "string"},
                 {"name": "Host", "type": "string"},
                 {"name": "Namespace", "type": "string"},
                 {"name": "Read Latency", "type": "string"},
@@ -283,14 +285,14 @@ class CollInfoItem(BaseItem):
                     fragmentation = index.get("fragmentation", 0)
                     index_details.append(f"{index_name}: {fragmentation:.2%}")
                 index_frag = round(total_reusable_size / total_index_size, 4) if total_index_size > 0 else 0
-                frag_table["rows"].append([host, escape_markdown(ns), f"{coll_frag:.2%}",
+                frag_table["rows"].append([escape_markdown(set_name), host, escape_markdown(ns), f"{coll_frag:.2%}",
                        f"{index_frag:.2%}<br/><pre>{'<br/>'.join(index_details)}</pre>"])
                 # Latency visualization
                 avg_reads_latency = stats.get("latencyStats", {}).get("reads_latency", 0)
                 avg_writes_latency = stats.get("latencyStats", {}).get("writes_latency", 0)
                 avg_commands_latency = stats.get("latencyStats", {}).get("commands_latency", 0)
                 avg_transactions_latency = stats.get("latencyStats", {}).get("transactions_latency", 0)
-                latency_table["rows"].append([host, escape_markdown(ns), f"{avg_reads_latency:.2f}ms",
+                latency_table["rows"].append([escape_markdown(set_name), host, escape_markdown(ns), f"{avg_reads_latency:.2f}ms",
                                                 f"{avg_writes_latency:.2f}ms", f"{avg_commands_latency:.2f}ms",
                                                 f"{avg_transactions_latency:.2f}ms"])
         enum_result_items(result, func_sh_cluster=func_overview, func_rs_cluster=func_overview, func_rs_member=func_node, func_shard_member=func_node)
