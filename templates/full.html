@@ -10,11 +10,26 @@
     </link>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script type="text/javascript">
+        linkElms = [];
+        titleElms = [];
+        function highLightOutline() {
+            for (var i = 0; i < titleElms.length; i++) {
+                var rect = titleElms[i].getBoundingClientRect();
+                var top = i == 0 ? 0 : rect.top;
+                var bottom = i == titleElms.length - 1 ? document.body.scrollHeight : titleElms[i + 1].getBoundingClientRect().top;
+                if (top < 1 && bottom > 1) {
+                    linkElms[i].classList.add('in-view');
+                } else {
+                    linkElms[i].classList.remove('in-view');
+                }
+            }
+        };
         function createList(li_elms) {
             var ul = document.createElement('ul');
             for (var i = 0; i < li_elms.length; i++) {
                 var li = document.createElement('li');
                 var link = document.createElement('a');
+                linkElms.push(link);
                 link.href = '#' + li_elms[i].id;
                 link.textContent = li_elms[i].textContent;
                 li.appendChild(link);
@@ -28,14 +43,17 @@
             var ul = document.createElement('ul');
             var body = document.getElementsByClassName('markdown-body')[0];
             for (var i = 0; i < h2.length; i++) {
+                titleElms.push(h2[i]);
                 var li = document.createElement('li');
                 var link = document.createElement('a');
+                linkElms.push(link);
                 link.href = '#' + h2[i].id;
                 link.textContent = h2[i].textContent;
                 var children = [];
                 for (var next = h2[i].nextElementSibling; next && next.tagName !== 'H2'; next = next.nextElementSibling) {
                     if (next.tagName === 'H3') {
                         children.push(next);
+                        titleElms.push(next);
                     }
                 }
                 ul.appendChild(li);
@@ -61,6 +79,8 @@
             };
             collapse.onclick = click;
             expand.onclick = click;
+            highLightOutline();
+            window.onscroll = highLightOutline;
         };
     </script>
     <style>
@@ -85,6 +105,10 @@
         .pie {
             display: inline-block;
             width: 45%;
+        }
+        a.in-view {
+            background-color: #eee;
+            font-weight: bold;
         }
     </style>
 </head>
