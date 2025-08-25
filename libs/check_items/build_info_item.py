@@ -56,6 +56,7 @@ class BuildInfoItem(BaseItem):
             ],
             "rows": []
         }
+        versions = {}
         def func_node(name, node, **kwargs):
             raw_result = node.get("rawResult", {})
             host = node["host"]
@@ -63,15 +64,35 @@ class BuildInfoItem(BaseItem):
                 table["rows"].append([name, host, "n/a", "n/a", "n/a", "n/a"])
                 return
             build_env = raw_result.get("buildEnvironment", {})
+            v = raw_result.get("version", "")
+            versions[v] = versions.get(v, 0) + 1
             table["rows"].append([name, host, 
-                                  raw_result.get("version", ""),
+                                  v,
                                   raw_result.get("openssl", {}).get("running", ""),
                                   build_env.get("target_arch", ""),
                                   build_env.get("target_os", "")])
         enum_result_items(result, func_mongos_member=func_node, func_rs_member=func_node, func_shard_member=func_node, func_config_member=func_node)
+        version_pie = {
+            "type": "pie",
+            "data": {
+                "labels": list(versions.keys()),
+                "datasets": [{
+                    "label": "Count",
+                    "data": list(versions.values())
+                }]
+            },
+            "options": {
+                "plugins": {
+                    "title": { 
+                        "display": True,
+                        "text": "Version Distribution"
+                    }
+                }
+            }
+        }
         
         return {
             "name": self.name,
             "description": self.description,
-            "data": [table]
+            "data": [table, version_pie]
         }
