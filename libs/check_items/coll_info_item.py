@@ -292,6 +292,63 @@ class CollInfoItem(BaseItem):
             ],
             "rows": []
         }
+        labels = set()
+        hosts = set()
+        frag_data = []
+        coll_frag_bar = {
+            "type": "bar",
+            "data": {
+                "labels": [],
+                "datasets": []
+            },
+            "options": {
+                "scales": {
+                    "x": {
+                        "stacked": False
+                    },
+                    "y": {
+                        "beginAtZero": True,
+                        "title": {
+                            "display": True,
+                            "text": "Storage Fragmentation Ratio"
+                        }
+                    }
+                },
+                "plugins": {
+                    "title": {
+                        "display": True,
+                        "text": "Storage Fragmentation"
+                    }
+                }
+            }
+        }
+        index_frag_bar = {
+            "type": "bar",
+            "data": {
+                "labels": [],
+                "datasets": []
+            },
+            "options": {
+                "scales": {
+                    "x": {
+                        "stacked": False
+                    },
+                    "y": {
+                        "beginAtZero": True,
+                        "title": {
+                            "display": True,
+                            "text": "Index Fragmentation Ratio"
+                        }
+                    }
+                },
+                "plugins": {
+                    "title": {
+                        "display": True,
+                        "text": "Index Fragmentation"
+                    }
+                }
+            }
+        }
         latency_table = {
             "type": "table",
             "caption": f"Operation Latency",
@@ -307,6 +364,8 @@ class CollInfoItem(BaseItem):
             "rows": []
         }
         data.append(frag_table)
+        data.append(coll_frag_bar)
+        data.append(index_frag_bar)
         data.append(latency_table)
         def func_node(set_name, node, **kwargs):
             raw_result = node["rawResult"]
@@ -316,6 +375,7 @@ class CollInfoItem(BaseItem):
                 return
             for stats in raw_result:
                 ns = stats["ns"]
+                labels.add(ns)
                 # Fragmentation visualization
                 coll_frag = stats.get("collFragmentation", {}).get("fragmentation", 0)
                 index_frags = stats.get("indexFragmentation", [])
@@ -331,6 +391,14 @@ class CollInfoItem(BaseItem):
                 index_frag = round(total_reusable_size / total_index_size, 4) if total_index_size > 0 else 0
                 frag_table["rows"].append([escape_markdown(set_name), host, escape_markdown(ns), f"{coll_frag:.2%}",
                        f"{index_frag:.2%}<br/><pre>{'<br/>'.join(index_details)}</pre>"])
+                label = f"{set_name}/{host}"
+                hosts.add(label)
+                frag_data.append({
+                    "label": label,
+                    "ns": ns,
+                    "collFrag": coll_frag,
+                    "indexFrag": index_frag
+                })
                 # Latency visualization
                 avg_reads_latency = stats.get("latencyStats", {}).get("reads_latency", 0)
                 avg_writes_latency = stats.get("latencyStats", {}).get("writes_latency", 0)
@@ -340,6 +408,31 @@ class CollInfoItem(BaseItem):
                                                 f"{avg_writes_latency:.2f}ms", f"{avg_commands_latency:.2f}ms",
                                                 f"{avg_transactions_latency:.2f}ms"])
         enum_result_items(result, func_sh_cluster=func_overview, func_rs_cluster=func_overview, func_rs_member=func_node, func_shard_member=func_node)
+        labels = list(labels)
+        hosts = list(hosts)
+        labels.sort()
+        hosts.sort()
+        coll_frag_bar["data"]["labels"] = labels
+        index_frag_bar["data"]["labels"] = labels
+        for label in hosts:
+            ns_data = []
+            idx_data = []
+            for ns in labels:
+                search = [item for item in frag_data if item["label"] == label and item["ns"] == ns]
+                v = search[0]["collFrag"] if len(search) > 0 else 0
+                ns_data.append(v)
+                v = search[0]["indexFrag"] if len(search) > 0 else 0
+                idx_data.append(v)
+            coll_frag_bar["data"]["datasets"].append({
+                "label": label,
+                "data": ns_data,
+                "stack": label
+            })
+            index_frag_bar["data"]["datasets"].append({
+                "label": label,
+                "data": idx_data
+            })
+
         return {
             "title": self.name,
             "description": self.description,
