@@ -302,15 +302,18 @@ class CollInfoItem(BaseItem):
                 "datasets": []
             },
             "options": {
+                "indexAxis": "y",
                 "scales": {
                     "x": {
-                        "stacked": False
-                    },
-                    "y": {
-                        "beginAtZero": True,
                         "title": {
                             "display": True,
                             "text": "Storage Fragmentation Ratio"
+                        }
+                    },
+                    "y": {
+                        "title": {
+                            "display": True,
+                            "text": "Namespaces"
                         }
                     }
                 },
@@ -329,15 +332,18 @@ class CollInfoItem(BaseItem):
                 "datasets": []
             },
             "options": {
+                "indexAxis": "y",
                 "scales": {
                     "x": {
-                        "stacked": False
-                    },
-                    "y": {
-                        "beginAtZero": True,
                         "title": {
                             "display": True,
                             "text": "Index Fragmentation Ratio"
+                        }
+                    },
+                    "y": {
+                        "title": {
+                            "display": True,
+                            "text": "Namespaces"
                         }
                     }
                 },
