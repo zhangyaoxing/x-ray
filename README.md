@@ -89,21 +89,49 @@ Each check item uses some thresholds to help determine whether a value is in the
 
 ### 3.2 Database Permissions
 Each optional check item requires different permissions. Please properly grant the permissions to the user that you use to access MongoDB.
-|    Module     |                               Command                               |
-| :-----------: | ------------------------------------------------------------------- |
-|    Shared     | `replSetGetStatus`, `getShardMap`                                   |
-|  ClusterItem  | `collStats`, `serverStatus`, `replSetGetStatus`, `replSetGetConfig` |
-| HostInfoItem  | `hostInfo`                                                          |
-| SecurityItem  | `getCmdLineOpts`                                                    |
-| IndexInfoItem | `listDatabases`, `listCollections`, `indexStats`                    |
-| ShardKeyItem  | `find` against `config.collections`, `config.shards`                |
+|      Module      |                                           Command                                            |
+| :--------------: | -------------------------------------------------------------------------------------------- |
+|      Shared      | `replSetGetStatus`, `getShardMap`                                                            |
+|   ClusterItem    | `collStats` against `local.oplog.rs`, `serverStatus`, `replSetGetStatus`, `replSetGetConfig` |
+|   HostInfoItem   | `hostInfo`                                                                                   |
+|   SecurityItem   | `getCmdLineOpts`                                                                             |
+|  IndexInfoItem   | `listDatabases`, `listCollections`, `indexStats`                                             |
+|   ShardKeyItem   | `find` against `config.collections` and `config.shards`                                      |
+|   CollInfoItem   | `listDatabases`, `collStats` against all collections,                                        |
+| ServerStatusItem | `serverStatus`                                                                               |
+|  BuildInfoItem   | `buildInfo`                                                                                  |
 
-TODO: define a role that has all the permissions.
+To define a role that has all the permissions:
+```javascript
+db.createRole({
+  role: "xray",
+  privileges: [{
+    resource: {
+      cluster: true
+    }, actions: ["replSetGetStatus", "replSetGetConfig", "getShardMap", "serverStatus", "hostInfo", "getCmdLineOpts", "listDatabases"]
+  }, {
+    resource: {
+      db: "", collection: ""
+    }, actions: ["collStats", "listCollections", "indexStats"]
+  }, {
+    resource: {
+      db: "config",
+      collection: "collections"
+    }, actions: ["find"]
+  }, {
+    resource: {
+      db: "config",
+      collection: "shards"
+    }, actions: ["find"]
+  }]
+})
+```
 
 ### 3.3 Template
 Different template allows you to customize the report in your own way. Currently there are the following templates:
 - `standard.html`: Standard output.
 - `no-netork.html`: Removed the link to the resources on the internet. Embeds the content directly into the template instead.
+- `full.html`: Enable all features. Need internet access.
 
 When you create your own template, put the `{{ content }}` in a proper position. The placeholder will later be replaced by the report content.
 
