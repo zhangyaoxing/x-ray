@@ -12,6 +12,19 @@
     <script type="text/javascript">
         linkElms = [];
         titleElms = [];
+        
+        function getWindowHeight() {
+            return window.innerHeight || 
+                   document.documentElement.clientHeight || 
+                   document.body.clientHeight;
+        }
+        
+        function getWindowWidth() {
+            return window.innerWidth || 
+                   document.documentElement.clientWidth || 
+                   document.body.clientWidth;
+        }
+        
         function highLightOutline() {
             for (var i = 0; i < titleElms.length; i++) {
                 var rect = titleElms[i].getBoundingClientRect();
@@ -68,6 +81,15 @@
             b = outline.getElementsByTagName('b')[0];
             state = 1;
             states = [["none", "block"], ["none", "inline"], ["inline", "none"], ["none", "inline"], ["0 auto", '0 auto 0 ' + outlineWidth + 'px']];
+            window.onresize = function() {
+                blank = (getWindowWidth() - 980) / 2;
+                if (blank > outlineWidth) {
+                    states = [["none", "block"], ["none", "inline"], ["inline", "none"], ["none", "inline"], ["0 auto", '0 auto 0 auto']];
+                } else {
+                    states = [["none", "block"], ["none", "inline"], ["inline", "none"], ["none", "inline"], ["0 auto", '0 auto 0 ' + outlineWidth + 'px']];
+                }
+                body.style.margin = states[4][state];
+            };
             click = function () {
                 state = state == 0 ? 1 : 0;
                 ul.style.display = states[0][state];

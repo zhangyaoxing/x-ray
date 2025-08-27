@@ -85,7 +85,8 @@ class BaseItem:
         if len(result_data) == 0:
             result += "(No data)\n\n"
             return result
-        for i, block in enumerate(result_data):
+        i = 0
+        for j, block in enumerate(result_data):
             type = block.get("type")
             caption = block.get("caption")
             notes = block.get("notes", "")
@@ -99,8 +100,9 @@ class BaseItem:
                 for row in block.get("rows", []):
                     result += "|" + "|".join(str(cell) for cell in row) + "|\n"
                 result += "\n"
+                i += 1
             elif type in ["bar", "pie"]:
-                id = f"{self.__class__.__name__}_{i}"
+                id = f"{self.__class__.__name__}_{j}"
                 result += f"<div class='{type}'><canvas class='{type}' id='{id}'></canvas></div>"
                 result += f"<script type='text/javascript'>\n"
                 result += f"  const canvas{id} = document.getElementById('{id}');\n"
