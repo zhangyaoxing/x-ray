@@ -6,7 +6,7 @@
     },
     "item_config": {
         "BuildInfoItem": {
-            "eol_version": [4, 4, 0]
+            "eol_version": [10, 0, 0]
         },
         "CollInfoItem": {
             "obj_size_kb": 0.01,
