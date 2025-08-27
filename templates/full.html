@@ -12,7 +12,8 @@
     <script type="text/javascript">
         linkElms = [];
         titleElms = [];
-        
+        charts = [];
+
         function getWindowHeight() {
             return window.innerHeight || 
                    document.documentElement.clientHeight || 
@@ -89,6 +90,9 @@
                     states = [["none", "block"], ["none", "inline"], ["inline", "none"], ["none", "inline"], ["0 auto", '0 auto 0 ' + outlineWidth + 'px']];
                 }
                 body.style.margin = states[4][state];
+                for (var i = 0; i < charts.length; i++) {
+                    charts[i].resize();
+                }
             };
             click = function () {
                 state = state == 0 ? 1 : 0;
@@ -127,6 +131,10 @@
         .pie {
             display: inline-block;
             width: 45%;
+        }
+        .bar {
+            display: inline-block;
+            width: 100%;
         }
         a.in-view {
             background-color: #eee;

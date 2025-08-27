@@ -107,6 +107,7 @@ class BaseItem:
                 result += f"<script type='text/javascript'>\n"
                 result += f"  const canvas{id} = document.getElementById('{id}');\n"
                 result += f"  const chart{id} = new Chart(canvas{id}, {to_json(block)});\n"
+                result += f"  charts.push(chart{id});\n"
                 result += f"</script>\n"
         return result
 
