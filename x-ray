@@ -22,12 +22,23 @@ if args.quiet:
 def main():
     parsed_uri = parse_uri(args.uri)
     client = MongoClient(args.uri)  # Initialize MongoDB client
-    config = load_config(args.config)  # Load configuration from file
+    
+    # Load configuration from file
+    try:
+        config = load_config(args.config)
+    except FileNotFoundError:
+        logger.error(f"Config file not found: {args.config}")
+        logger.info("Please provide a valid path to config.json using the -c/--config argument")
+        return 1
+        
     checkset = args.checkset
     output_folder = args.output if args.output.endswith("/") else f"{args.output}/"
     framework = Framework(config)
     framework.run_checks(checkset, client=client, output_folder=output_folder, parsed_uri=parsed_uri)
     framework.output_results(output_folder=output_folder, format=args.format)
+    return 0
 
 if __name__ == "__main__":
-    main()
+    exit_code = main()
+    import sys
+    sys.exit(exit_code)
