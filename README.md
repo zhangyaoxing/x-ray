@@ -16,8 +16,12 @@ make
 ```
 
 ## 3 Configurations
+<span style="color: yellow;">**Most configurations has default and works out of the box. Unless you want to customize the tool, you can skip this section.**</span>
+
 ### 3.1 Tool Configuration
-The configuartion can be any `json` file. You can pass the configuration to the tool by specifying `-c` or `--config`.
+There is a build-in `config.json` so you don't need to write your own configuration.
+
+You can pass your own configuration to the tool by specifying `-c` or `--config`.
 
 This is a example of config file `/config.json`.
 ```json
@@ -59,11 +63,11 @@ This is a example of config file `/config.json`.
     "template": "standard.html"
 }
 ```
-There's also the `/config_test.json` which sets the thresholds to a very low level which will fail most tests. It's mainly used for testing purpose.
+There's also the `/config_test.json` which sets the thresholds to a very low value. It will fail most tests and is mainly used for testing purpose.
 
 #### Checksets
 *The `checksets` section in the above example.*  
-Check sets allows you to define a group of check items that you want to run against the database. By default there's `default` checkset which enables all check items. You can define new checksets that include different items. And you can choose which checkset to run by passing the `-s` or `--checkset` with the set name.
+Check sets allows you to define a group of check items that you want to run against the database. By default there's `default` checkset, which enables all check items. You can define new checksets that include different items. And you can choose which checkset to run by passing the `-s` or `--checkset` with the set name.
 
 To define a checkset, add a new key in the `checksets` section:
 - `checksets.<your set name>.items`: Array of strings. The names of check items.
@@ -90,7 +94,7 @@ Each check item uses some thresholds to help determine whether a value is in the
 | ServerStatusItem |   cache_read_into_mb    | Data read into cache / s                                        |    100    |
 
 ### 3.2 Database Permissions
-**Important:** The tool will connect to each node in the cluster to gather information. For replica sets, you only need to create the user on the primary, and it will be replicated to all members. To sharded cluster, however, the user you created will only be stored in the CSRS, which let mongos and CSRS nodes pass the authentication. The shards will not accept the credential unless you also create the same user on the shards. If the cluster is created by Ops Manager, this has been done by the automation agents. If the clusters is manually created, this needs to be done by yourself.
+<span style="color: red;">**Important:**</span> The tool will connect to each node in the cluster to gather information. For replica sets, you only need to create the user on the primary, and it will be replicated to all members. To sharded cluster, however, the user you created will only be stored in the CSRS, which let mongos and CSRS nodes pass the authentication. The shards will not accept the credential unless you also create the same user on the shards. If the cluster is created by Ops Manager, this has been done by the automation agents. If the clusters is manually created, this needs to be done by yourself.
 
 Each optional check item requires different permissions. Please properly grant the permissions to the user that you use to access MongoDB.
 |      Module      |                                           Command                                            |
@@ -139,19 +143,49 @@ Different template allows you to customize the report in your own way. Currently
 
 When you create your own template, put the `{{ content }}` in a proper position. The placeholder will later be replaced by the report content.
 
-## 4 Output
+## 4 Using the Tool
+### 4.1 Basic Usage
+```bash
+./x-ray --uri localhost:27017 # Scan the cluster with default settings.
+./x-ray --uri localhost:27017 --output ./output/ # Specify output folder.
+./x-ray --uri localhost:27017 --config ./config.json # Use your own configuration.
+```
+
+### 4.2 Full Arguments
+```bash
+./x-ray [-h] [-s CHECKSET] [-o OUTPUT] [-f {markdown,html}] [--uri URI] [-c CONFIG]
+```
+|      Argument      |                 Description                 |           Default            |
+| ------------------ | ------------------------------------------- | :--------------------------: |
+| `-q`, `--quiet`    | Quiet mode.                                 |           `false`            |
+| `-h`, `--help`     | Show the help message and exit.             |             n/a              |
+| `-s`, `--checkset` | Checkset to run.                            |          `default`           |
+| `-o`, `--output`   | Output folder path.                         |          `output/`           |
+| `-f`, `--format`   | Output format. Can be `markdown` or `html`. |            `html`            |
+| `--uri`            | MongoDB database URI.                       | `mongodb://localhost:27017/` |
+| `-c`, `--config`   | Path to configuration file.                 |        `config.json`         |
+
+Besides, you can use environment variables to control some behaviors:
+- `ENV=development` For developing. It will change the following behaviors:
+  - Formatted the output JSON for for easier reading.
+  - The output will not create a new folder for each run but overwrite the same files.
+- `LOG_LEVEL`: Can be `DEBUG`, `ERROR` or `INFO` (default).
+
+## 5 Output
 The output will be in the `output/` or folder specified by you. For each run, there will be a new folder created. Folder name: `<checkset name>-<timestamp>`. If you set `ENV=development` the output will be directly in the root output folder.
 
 The output consists of:
-- `results.md` and `results.html`: The final report. In the report you'll see the failed items, and some some raw data collected by each check item.
+- `report.md` and `report.html`: The final report. In the report you'll see the failed items, and some some raw data collected by each check item.
 - `<check item>_raw.json`: Complete raw data collected by each item. You can use them to integrate with other systems.
 
-### 4.1 Raw Data Structure
+<span style="color: yellow;">**The following contents here are mainly for developers or integration with other systems.**</span>
+
+### 5.1 Raw Data Structure
 The raw data collected by each item is organized in a structure that reflects the structure of your target cluster. This is mainly because some check items are better run against the cluster. E.g.: Get replica set config and status. While others may be better against the node. E.g.: Get storage fragmentation ratio.
 
 The raw result collected will be mounted at the node or cluster level depending on which it runs against.
 
-#### 4.1.1 Shared Structures
+#### 5.1.1 Shared Structures
 The following structures can show up at many different places in the result.
 
 ##### Test Result Structure.
@@ -167,13 +201,13 @@ The following structures can show up at many different places in the result.
   - `rawResult`: `object`. Raw data collected by the item, against the current host.
   - `testResult`: `array`. The failed items. Refer to the [Test Result Structure](#test-result-structure).
 
-#### 4.1.2 Replica Set
+#### 5.1.2 Replica Set
 - `type`: `string`. `RS`
 - `setName`: `string`. The replica set name.
 - `members`: `array`. Replica set members. Refer to the [Member Structure](#member-structure).
 - `rawResult`: `object`. Raw data collected by the item, against the replica set.
 
-#### 4.1.3 Sharded Cluster
+#### 5.1.3 Sharded Cluster
 - `type`: `SH`
 - `map`: `object`. Subdocument for all the sharded cluster components.
   - `config`: `object`. Subdocument for all the config server members.
@@ -199,21 +233,3 @@ The following structures can show up at many different places in the result.
 - The `map.mongos` level `MongoClient` is using the connection string that include all known mongos instances, selected from `config.mongos` collections.
 
 The check items usually use the `map.mongos` level so all mongos are included.
-
-## 5 Using the Tool
-```bash
-./x-ray [-h] [-s CHECKSET] [-o OUTPUT] [-f {markdown,html}] [--uri URI] [-c CONFIG]
-```
-- `-q`, `--quiet`: Quiet mode. Defaults to `false`.
-- `-h`, `--help`: Show the help message and exit.
-- `-s`, `--checkset`: Checkset to run. Defaults to `default`.
-- `-o`, `--output`: Output folder path. Defaults to `output/`.
-- `-f`, `--format`: Output format. Can be `markdown` or `html`. Defaults to `markdown`.
-- `--uri`: MongoDB database URI. Defaults to `mongodb://localhost:27017/`.
-- `-c`, `--config`: Path to configuration file. Defaults to `config.json`.
-
-Besides, you can use environment variables to control some behaviors:
-- `ENV`: `development` will change the following behaviors:
-  - Formatted the output JSON for for easier reading.
-  - The output will not create a new folder for each run but overwrite the same files.
-- `LOG_LEVEL`: Can be `DEBUG`, `ERROR` or `INFO` (default).
