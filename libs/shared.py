@@ -82,12 +82,17 @@ RESERVED_CONN_OPTIONS = [
 def to_json(obj, indent=0):
     if env == "development":
         indent = 2
+        separators = (',\n', ': ')
+    else:
+        indent = 0
+        separators = (',', ':')
+
     def custom_json_serialize(obj):
         if isinstance(obj, SEVERITY):
             return obj.name
         else:
             return json_util._json_convert(obj)
-    return json_util.dumps(obj, default=custom_json_serialize, indent=indent)
+    return json_util.dumps(obj, default=custom_json_serialize, separators=separators, indent=indent)
 
 def to_markdown_id(str):
     id = str.lower()
