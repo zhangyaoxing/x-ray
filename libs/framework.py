@@ -116,9 +116,19 @@ class Framework:
                 with open(output_file, "r") as md_file:
                     md_text = md_file.read()
                 html = markdown.markdown(md_text, extensions=["tables", "toc"])
+                html = self._compact_html(html)
+                
                 with open(template_file, "r") as template:
                     template_content = template.read()
                     html = template_content.replace("{{ content }}", html)
                 f.write(html)
 
         self._logger.info(bold(green("All checks complete.")))
+    
+    def _compact_html(self, html: str) -> str:
+        html = re.sub(r'>\s+<', '><', html)
+        html = re.sub(r'\s{2,}', ' ', html)
+        html = re.sub(r'\n\s*\n', '\n', html)
+        html = html.strip()
+        return html
+
