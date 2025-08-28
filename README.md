@@ -16,9 +16,9 @@ make
 ```
 
 ## 3 Configurations
+### 3.1 Tool Configuration
 <span style="color: yellow;">**Most configurations has default and works out of the box. Unless you want to customize the tool, you can skip this section.**</span>
 
-### 3.1 Tool Configuration
 There is a build-in `config.json` so you don't need to write your own configuration.
 
 You can pass your own configuration to the tool by specifying `-c` or `--config`.
@@ -113,6 +113,7 @@ To define a role that has all the permissions:
 ```javascript
 db.createRole({
   role: "xray",
+  roles: [],
   privileges: [{
     resource: {
       cluster: true
