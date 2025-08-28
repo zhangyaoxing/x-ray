@@ -82,9 +82,9 @@ RESERVED_CONN_OPTIONS = [
 def to_json(obj, indent=0):
     if env == "development":
         indent = 2
-        separators = (',\n', ': ')
+        separators = (',', ': ')
     else:
-        indent = 0
+        indent = None
         separators = (',', ':')
 
     def custom_json_serialize(obj):
