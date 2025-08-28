@@ -117,7 +117,7 @@ class SecurityItem(BaseItem):
                 {"name": "Authorization", "type": "string"},
                 {"name": "Cluster Auth", "type": "string"},
                 {"name": "Log Redaction", "type": "string"},
-                {"name": "EAT", "type": "string"},
+                {"name": "EAR", "type": "string"},
                 {"name": "Auditing", "type": "string"}
             ],
             "rows": []

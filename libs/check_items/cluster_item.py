@@ -244,8 +244,8 @@ class ClusterItem(BaseItem):
                     {"name": "Hidden", "type": "boolean"},
                     {"name": "Priority", "type": "integer"},
                     {"name": "Votes", "type": "integer"},
-                    {"name": "Configured Delay", "type": "integer"},
-                    {"name": "Current Delay", "type": "integer"},
+                    {"name": "Configured Delay (sec)", "type": "integer"},
+                    {"name": "Current Delay (sec)", "type": "integer"},
                     {"name": "Oplog Window Hours", "type": "integer"}
                 ],
                 "rows": []

@@ -219,7 +219,8 @@ def discover_nodes(client, parsed_uri):
 
     except Exception as e:
         logger.error(red(f"Failed to discover nodes: {str(e)}"))
-        raise e
+        import sys
+        sys.exit(1)
 
     return nodes
 

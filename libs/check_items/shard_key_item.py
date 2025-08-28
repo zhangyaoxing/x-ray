@@ -40,7 +40,7 @@ class ShardKeyItem(BaseItem):
                 if (v == 1 or v == -1) and len(key.keys()) == 1:
                     test_result.append({
                         "host": "cluster",
-                        "severity": SEVERITY.LOW,
+                        "severity": SEVERITY.INFO,
                         "title": "Improper Shard Key",
                         "description": f"Collection `{ns}` has the shard key set to `{{_id: {v}}}`. Make sure the value of `_id` is not monotonically increasing or decreasing."
                     })
