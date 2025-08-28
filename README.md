@@ -16,9 +16,9 @@ make
 ```
 
 ## 3 Configurations
+### 3.1 Tool Configuration
 <span style="color: yellow;">**Most configurations has default and works out of the box. Unless you want to customize the tool, you can skip this section.**</span>
 
-### 3.1 Tool Configuration
 There is a build-in `config.json` so you don't need to write your own configuration.
 
 You can pass your own configuration to the tool by specifying `-c` or `--config`.
@@ -113,6 +113,7 @@ To define a role that has all the permissions:
 ```javascript
 db.createRole({
   role: "xray",
+  roles: [],
   privileges: [{
     resource: {
       cluster: true
@@ -123,6 +124,10 @@ db.createRole({
     }, actions: ["collStats", "listCollections", "indexStats"]
   }, {
     resource: {
+      db: "local", collection: "oplog.rs"
+    }, actions: ["collStats"]
+  }, {
+    resource: {
       db: "config",
       collection: "collections"
     }, actions: ["find"]
@@ -131,9 +136,15 @@ db.createRole({
       db: "config",
       collection: "shards"
     }, actions: ["find"]
+  }, {
+    resource: {
+      db: "local",
+      collection: "oplog.rs"
+    }, actions: ["find"]
   }]
 })
 ```
+If you are using Atlas clusters, there will be no `indexStats` permission. You can inherite `clusterMonitor` to have the right permission.
 
 ### 3.3 Template
 Different template allows you to customize the report in your own way. Currently there are the following templates:

@@ -82,9 +82,9 @@ RESERVED_CONN_OPTIONS = [
 def to_json(obj, indent=0):
     if env == "development":
         indent = 2
-        separators = (',\n', ': ')
+        separators = (',', ': ')
     else:
-        indent = 0
+        indent = None
         separators = (',', ':')
 
     def custom_json_serialize(obj):
@@ -131,7 +131,7 @@ def discover_nodes(client, parsed_uri):
         return nodes
     try:
         is_master = client.admin.command("isMaster")
-        database = parsed_uri["database"] if parsed_uri.get("database", None) is not None else "test"
+        database = parsed_uri["database"] if parsed_uri.get("database", None) is not None else "admin"
         # Reserve the options in the list
         options = []
         for k, v in parsed_uri["options"].items():
