@@ -19,18 +19,53 @@ logger.info(f"Using log level: {level}")
 # This function gives you the base path of the script.
 # If `filename` is provided then the path include the file. Otherwise it's the folder.
 def get_script_path(filename = None):
-    script_folder = Path(dirname(abspath(getsourcefile(lambda:0))))
-    if filename == None:
-        return str((script_folder / "..").resolve())
+    import sys
+    
+    # Check if running in a PyInstaller bundle
+    if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+        # Running in a PyInstaller bundle
+        base_path = sys._MEIPASS
     else:
-        return str((script_folder / ".." / filename).resolve())
+        # Running in a normal Python environment
+        script_folder = Path(dirname(abspath(getsourcefile(lambda:0))))
+        base_path = str((script_folder / "..").resolve())
+        
+    if filename == None:
+        return base_path
+    else:
+        return str(Path(base_path) / filename)
     
 config = None
 def load_config(config_path = "config.json"):
     global config
     if not config:
-        config_path = get_script_path(config_path)
-        config = json.load(open(config_path))
+        try:
+            # First try to load from the path provided by the user
+            if os.path.isfile(config_path):
+                config = json.load(open(config_path))
+                logger.info(f"Loaded config from user-provided path: {config_path}")
+                return config
+                
+            # Then try to load from the script path
+            script_config_path = get_script_path(config_path)
+            if os.path.isfile(script_config_path):
+                config = json.load(open(script_config_path))
+                logger.info(f"Loaded config from script path: {script_config_path}")
+                return config
+                
+            # Finally, try current working directory
+            cwd_config_path = os.path.join(os.getcwd(), config_path)
+            if os.path.isfile(cwd_config_path):
+                config = json.load(open(cwd_config_path))
+                logger.info(f"Loaded config from current directory: {cwd_config_path}")
+                return config
+                
+            # If all fails, raise an error
+            raise FileNotFoundError(f"Could not find config file: {config_path}")
+            
+        except Exception as e:
+            logger.error(f"Failed to load config file: {e}")
+            raise
     return config
 
 def color_code(code): return f"\x1b[{code}m"
