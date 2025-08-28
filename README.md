@@ -88,6 +88,8 @@ Each check item uses some thresholds to help determine whether a value is in the
 | ServerStatusItem |   cache_read_into_mb    | Data read into cache / s                                        |    100    |
 
 ### 3.2 Database Permissions
+**Important:** The tool will connect to each node in the cluster to gather information. For replica sets, you only need to create the user on the primary, and it will be replicated to all members. To sharded cluster, however, the user you created will only be stored in the CSRS, which let mongos and CSRS nodes pass the authentication. The shards will not accept the credential unless you also create the same user on the shards. If the cluster is created by Ops Manager, this has been done by the automation agents. If the clusters is manually created, this needs to be done by yourself.
+
 Each optional check item requires different permissions. Please properly grant the permissions to the user that you use to access MongoDB.
 |      Module      |                                           Command                                            |
 | :--------------: | -------------------------------------------------------------------------------------------- |
@@ -145,9 +147,11 @@ The output consists of:
 ### 4.1 Raw Data Structure
 The raw data collected by each item is organized in a structure that reflects the structure of your target cluster. This is mainly because some check items are better run against the cluster. E.g.: Get replica set config and status. While others may be better against the node. E.g.: Get storage fragmentation ratio.
 
-The raw result collected will be placed in the right position in the structure.
+The raw result collected will be mounted at the node or cluster level depending on which it runs against.
 
-#### Shared Structures
+#### 4.1.1 Shared Structures
+The following structures can show up at many different places in the result.
+
 ##### Test Result Structure.
 - `testResult`: `array`. The failed items.
   - `host`: `string`. Hostname of the member. Or `cluster` if it's running against the cluster level (E.g. sharded cluster, or shard, or config).
@@ -161,13 +165,13 @@ The raw result collected will be placed in the right position in the structure.
   - `rawResult`: `object`. Raw data collected by the item, against the current host.
   - `testResult`: `array`. The failed items. Refer to the [Test Result Structure](#test-result-structure).
 
-#### Replica Sets
+#### 4.1.2 Replica Set
 - `type`: `string`. `RS`
 - `setName`: `string`. The replica set name.
 - `members`: `array`. Replica set members. Refer to the [Member Structure](#member-structure).
 - `rawResult`: `object`. Raw data collected by the item, against the replica set.
 
-For sharded clusters, you have:
+#### 4.1.3 Sharded Cluster
 - `type`: `SH`
 - `map`: `object`. Subdocument for all the sharded cluster components.
   - `config`: `object`. Subdocument for all the config server members.
