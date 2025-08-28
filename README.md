@@ -9,10 +9,12 @@ This project aims to build a tool to run health check against MongoDB clusters.
 Older versions are not tested.
 
 ## 2 Dependencies
-The tool is tested with `Python 3.11.12`. Dependencies can be installed by:
+The tool is tested with `Python 3.11.12`. The `Makefile` will help you install the dependencies.
 ```bash
-pip install -r requirements.txt
+make init # if it's the first time you build the project
+make
 ```
+
 ## 3 Configurations
 ### 3.1 Tool Configuration
 The configuartion can be any `json` file. You can pass the configuration to the tool by specifying `-c` or `--config`.
