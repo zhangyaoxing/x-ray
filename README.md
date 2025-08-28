@@ -124,6 +124,10 @@ db.createRole({
     }, actions: ["collStats", "listCollections", "indexStats"]
   }, {
     resource: {
+      db: "local", collection: "oplog.rs"
+    }, actions: ["collStats"]
+  }, {
+    resource: {
       db: "config",
       collection: "collections"
     }, actions: ["find"]
@@ -132,9 +136,15 @@ db.createRole({
       db: "config",
       collection: "shards"
     }, actions: ["find"]
+  }, {
+    resource: {
+      db: "local",
+      collection: "oplog.rs"
+    }, actions: ["find"]
   }]
 })
 ```
+If you are using Atlas clusters, there will be no `indexStats` permission. You can inherite `clusterMonitor` to have the right permission.
 
 ### 3.3 Template
 Different template allows you to customize the report in your own way. Currently there are the following templates:

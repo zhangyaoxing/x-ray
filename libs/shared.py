@@ -131,7 +131,7 @@ def discover_nodes(client, parsed_uri):
         return nodes
     try:
         is_master = client.admin.command("isMaster")
-        database = parsed_uri["database"] if parsed_uri.get("database", None) is not None else "test"
+        database = parsed_uri["database"] if parsed_uri.get("database", None) is not None else "admin"
         # Reserve the options in the list
         options = []
         for k, v in parsed_uri["options"].items():
