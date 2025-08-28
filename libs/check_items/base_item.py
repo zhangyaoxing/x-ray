@@ -1,5 +1,6 @@
 from abc import abstractmethod
 import logging
+import gzip
 from bson import json_util
 from libs.shared import SEVERITY, to_json
 from libs.utils import env
@@ -43,8 +44,12 @@ class BaseItem:
     @property
     def captured_sample(self):
         try:
-            with open(self.cache_file_name, "r") as f:
-                return json_util.loads(f.read())
+            if self.cache_file_name.endswith('.gz'):
+                with gzip.open(self.cache_file_name, "rt") as f:
+                    return json_util.loads(f.read())
+            else:
+                with open(self.cache_file_name, "r") as f:
+                    return json_util.loads(f.read())
         except FileNotFoundError:
             return None
 
@@ -113,12 +118,19 @@ class BaseItem:
 
     @captured_sample.setter
     def captured_sample(self, data):
-        with open(self.cache_file_name, "w") as f:
-            f.write(to_json(data))
+        # 根据文件扩展名决定是否使用压缩
+        if self.cache_file_name.endswith('.gz'):
+            with gzip.open(self.cache_file_name, 'wt') as f:
+                f.write(to_json(data))
+        else:
+            with open(self.cache_file_name, "w") as f:
+                f.write(to_json(data))
 
     @property
     def cache_file_name(self):
-        return f"{self._output_folder}{self.__class__.__name__}_raw.json"
+        if env == "development":
+            return f"{self._output_folder}{self.__class__.__name__}_raw.json"
+        return f"{self._output_folder}{self.__class__.__name__}_raw.json.gz"
     
     def append_test_result(self, host: str, severity: SEVERITY, title: str, message: str):
         self._test_result.append({
