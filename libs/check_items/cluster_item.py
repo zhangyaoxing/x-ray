@@ -104,7 +104,7 @@ class ClusterItem(BaseItem):
         oplog_window_threshold = self._config.get("oplog_window_hours", 48)
 
         # Check oplog information
-        retention_hours = configured_retention_hours if configured_retention_hours > current_retention_hours else current_retention_hours
+        retention_hours = max(configured_retention_hours, current_retention_hours)
         if retention_hours < oplog_window_threshold:
             test_result.append({
                 "host": node["host"],
@@ -257,7 +257,7 @@ class ClusterItem(BaseItem):
                 if min_retention_hours == "n/a" or min_retention_hours == 0:
                     retention_hours = current_retention_hours
                 else:
-                    retention_hours = min_retention_hours
+                    retention_hours = max(min_retention_hours, current_retention_hours)
                 table_details["rows"].append([
                     member_host,
                     m["_id"],

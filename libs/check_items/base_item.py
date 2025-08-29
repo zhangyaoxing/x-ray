@@ -60,7 +60,7 @@ class BaseItem:
     def test_result_markdown(self):
         result = ""
         if len(self._test_result) == 0:
-            result += "<b style='color: green;'>All pass.</b>\n\n"
+            result += "<b style='color: green;'>Pass.</b>\n\n"
             return result
         
         result += "| \\# | Host | Severity | Category | Message |\n"
