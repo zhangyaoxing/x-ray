@@ -72,16 +72,16 @@ class SecurityItem(BaseItem):
             if bind_ip == "0.0.0.0":
                 test_result.append({
                     "host": host,
-                    "severity": SEVERITY.HIGH,
+                    "severity": SEVERITY.LOW,
                     "title": "Unrestricted Bind IP",
-                    "description": "Bind IP is set to `0.0.0.0`, which may expose the server to unauthorized access."
+                    "description": "Bind IP is set to `0.0.0.0`. Your service may be exposed to the internet. Make sure to restrict it to specific IP addresses."
                 })
             if port == 27017:
                 test_result.append({
                     "host": host,
                     "severity": SEVERITY.LOW,
                     "title": "Default Port Used",
-                    "description": "Default port `27017` is used, which may expose the server to unnecessary risks."
+                    "description": "Default port `27017` is used. Make sure to restrict access to this port."
                 })
             
             if audit == "disabled":

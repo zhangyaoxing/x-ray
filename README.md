@@ -166,15 +166,15 @@ When you create your own template, put the `{{ content }}` in a proper position.
 ```bash
 ./x-ray [-h] [-s CHECKSET] [-o OUTPUT] [-f {markdown,html}] [--uri URI] [-c CONFIG]
 ```
-|      Argument      |                 Description                 |           Default            |
-| ------------------ | ------------------------------------------- | :--------------------------: |
-| `-q`, `--quiet`    | Quiet mode.                                 |           `false`            |
-| `-h`, `--help`     | Show the help message and exit.             |             n/a              |
-| `-s`, `--checkset` | Checkset to run.                            |          `default`           |
-| `-o`, `--output`   | Output folder path.                         |          `output/`           |
-| `-f`, `--format`   | Output format. Can be `markdown` or `html`. |            `html`            |
-| `--uri`            | MongoDB database URI.                       | `mongodb://localhost:27017/` |
-| `-c`, `--config`   | Path to configuration file.                 |        `config.json`         |
+|      Argument      |                                                                                      Description                                                                                      |    Default    |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-----------: |
+| `-q`, `--quiet`    | Quiet mode.                                                                                                                                                                           |    `false`    |
+| `-h`, `--help`     | Show the help message and exit.                                                                                                                                                       |      n/a      |
+| `-s`, `--checkset` | Checkset to run.                                                                                                                                                                      |   `default`   |
+| `-o`, `--output`   | Output folder path.                                                                                                                                                                   |   `output/`   |
+| `-f`, `--format`   | Output format. Can be `markdown` or `html`.                                                                                                                                           |    `html`     |
+| `--uri`            | MongoDB database URI. <br/>If the URI is not provided, user will be asked to input the URI. <br/>If URI is provided but not username/password, user will also be asked to input them. |     None      |
+| `-c`, `--config`   | Path to configuration file.                                                                                                                                                           | `config.json` |
 
 Besides, you can use environment variables to control some behaviors:
 - `ENV=development` For developing. It will change the following behaviors:

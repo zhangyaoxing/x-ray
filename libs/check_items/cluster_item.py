@@ -11,7 +11,7 @@ class ClusterItem(BaseItem):
         self._description += "- The following items apply to replica set, shards and CSRS:\n"
         self._description += "    - Replication status check.\n"
         self._description += "    - Replication config check.\n"
-        self._description += "    - Oplog window check (Both `minRetentionHours` and oplog size are considered).\n"
+        self._description += "    - Oplog window check (Both `oplogMinRetentionHours` and oplog size are considered).\n"
         self._description += "- Whether there are irresponsive mongos nodes.\n"
         self._description += "- Whether active mongos nodes are enough.\n"
 
@@ -96,7 +96,7 @@ class ClusterItem(BaseItem):
         # Gather oplog information
         stats = client.local.command("collStats", "oplog.rs")
         server_status = client.admin.command("serverStatus")
-        configured_retention_hours = server_status.get("oplogTruncation", {}).get("minRetentionHours", 0)
+        configured_retention_hours = server_status.get("oplogTruncation", {}).get("oplogMinRetentionHours", 0)
         latest_oplog = list(client.local.oplog.rs.find().sort("$natural", -1).limit(1))[0]["ts"]
         earliest_oplog = list(client.local.oplog.rs.find().sort("$natural", 1).limit(1))[0]["ts"]
         delta = latest_oplog.time - earliest_oplog.time
@@ -104,7 +104,7 @@ class ClusterItem(BaseItem):
         oplog_window_threshold = self._config.get("oplog_window_hours", 48)
 
         # Check oplog information
-        retention_hours = configured_retention_hours if configured_retention_hours > 0 else current_retention_hours
+        retention_hours = max(configured_retention_hours, current_retention_hours)
         if retention_hours < oplog_window_threshold:
             test_result.append({
                 "host": node["host"],
@@ -117,7 +117,7 @@ class ClusterItem(BaseItem):
 
         return test_result, {
             "oplogInfo": {
-                "minRetentionHours": configured_retention_hours,
+                "oplogMinRetentionHours": configured_retention_hours,
                 "currentRetentionHours": current_retention_hours,
                 "oplogStats": {
                     "size": stats["size"],
@@ -226,7 +226,7 @@ class ClusterItem(BaseItem):
                     }
                 else:
                     oplog_info[m["host"]] = {
-                        "min_retention_hours": round(r_result.get("oplogInfo", {}).get("minRetentionHours", 0), 2),
+                        "min_retention_hours": round(r_result.get("oplogInfo", {}).get("oplogMinRetentionHours", 0), 2),
                         "current_retention_hours": round(r_result.get("oplogInfo", {}).get("currentRetentionHours", 0), 2)
                     }
 
@@ -257,7 +257,7 @@ class ClusterItem(BaseItem):
                 if min_retention_hours == "n/a" or min_retention_hours == 0:
                     retention_hours = current_retention_hours
                 else:
-                    retention_hours = min_retention_hours
+                    retention_hours = max(min_retention_hours, current_retention_hours)
                 table_details["rows"].append([
                     member_host,
                     m["_id"],
@@ -325,13 +325,15 @@ def check_replset_status(replset_status, config):
 
         # Check replication lag
         if state == 2:  # SECONDARY
-            lag = member["optimeDate"] - primary_member["optimeDate"]
-            if lag.seconds >= max_delay:
+            p_time = primary_member["optime"]["ts"]
+            s_time = member["optime"]["ts"]
+            lag = s_time.time - p_time.time
+            if lag >= max_delay:
                 result.append({
                     "host": host,
                     "severity": SEVERITY.HIGH,
                     "title": "High Replication Lag",
-                    "description": f"`{set_name}` member `{host}` has a replication lag of `{lag.seconds}` seconds, which is greater than the configured threshold of `{max_delay}` seconds."
+                    "description": f"`{set_name}` member `{host}` has a replication lag of `{lag}` seconds, which is greater than the configured threshold of `{max_delay}` seconds."
                 })
 
     return result

@@ -5,13 +5,14 @@ from libs.utils import *
 from libs.framework import Framework
 from pymongo import MongoClient
 from pymongo.uri_parser import parse_uri
+from getpass import getpass
 
 parser = argparse.ArgumentParser(description="X-Ray project. Run health checks against MongoDB clusters.")
 parser.add_argument("-q", "--quiet", help="Quiet mode. Defaults to \"false\".", action="store_true", default=False)
 parser.add_argument("-s", "--checkset", help="Checkset to run. Defaults to \"default\".", type=str, default="default")
 parser.add_argument("-o", "--output", help="Output folder path. Defaults to \"output/\".", type=str, default="output/")
 parser.add_argument("-f", "--format", help="Output format (markdown/html). Defaults to \"markdown\".", type=str, default="html", choices=["markdown", "html"])
-parser.add_argument("--uri", help="MongoDB database URI. Defaults to \"mongodb://localhost:27017/\".", type=str, default="mongodb://localhost:27017/")
+parser.add_argument("--uri", help="MongoDB database URI. Defaults to \"mongodb://localhost:27017/\".", type=str, default=None)
 parser.add_argument("-c", "--config", help="Path to configuration file. Defaults to \"config.json\".", type=str, default="config.json")
 args = parser.parse_args()
 
@@ -20,9 +21,18 @@ if args.quiet:
     logger.setLevel(logging.FATAL)
 
 def main():
+    if args.uri == None:
+        # Get uri from console
+        args.uri = input("Enter MongoDB URI: ")
     parsed_uri = parse_uri(args.uri)
-    client = MongoClient(args.uri)  # Initialize MongoDB client
-    
+    if parsed_uri["username"] == None or parsed_uri["password"] == None:
+        username = input("Enter MongoDB username: ")
+        password = getpass("Enter MongoDB password: ")
+        parsed_uri["username"] = username
+        parsed_uri["password"] = password
+        client = MongoClient(args.uri, username=username, password=password)
+    else:
+        client = MongoClient(args.uri)
     # Load configuration from file
     try:
         config = load_config(args.config)
