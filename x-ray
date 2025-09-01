@@ -7,32 +7,99 @@ from pymongo import MongoClient
 from pymongo.uri_parser import parse_uri
 from getpass import getpass
 
-parser = argparse.ArgumentParser(description="X-Ray project. Run health checks against MongoDB clusters.")
-parser.add_argument("-q", "--quiet", help="Quiet mode. Defaults to \"false\".", action="store_true", default=False)
-parser.add_argument("-s", "--checkset", help="Checkset to run. Defaults to \"default\".", type=str, default="default")
-parser.add_argument("-o", "--output", help="Output folder path. Defaults to \"output/\".", type=str, default="output/")
-parser.add_argument("-f", "--format", help="Output format (markdown/html). Defaults to \"markdown\".", type=str, default="html", choices=["markdown", "html"])
-parser.add_argument("--uri", help="MongoDB database URI. Defaults to \"mongodb://localhost:27017/\".", type=str, default=None)
-parser.add_argument("-c", "--config", help="Path to configuration file. Defaults to \"config.json\".", type=str, default="config.json")
-args = parser.parse_args()
+def setup_parser():
+    """Parse command line arguments."""
+    parser = argparse.ArgumentParser(
+        description="X-Ray project for MongoDB analysis and diagnostics.",
+        epilog="""
+Examples:
+  ./x-ray healthcheck mongodb://localhost:27017 -f html
+  ./x-ray hc -s comprehensive -o /path/to/output/
+  ./x-ray log /var/log/mongodb/mongod.log -f markdown
+
+For more information on specific commands, use:
+  ./x-ray healthcheck --help
+  ./x-ray log --help
+        """,
+        formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    
+    parser.add_argument("-q", "--quiet", help="Quiet mode. Defaults to \"false\".", action="store_true", default=False)
+    parser.add_argument("-c", "--config", help="Path to configuration file. Defaults to \"config.json\".", type=str, default="config.json")
+    
+    subparsers = parser.add_subparsers(dest="command", help="Command to execute", required=True)
+    
+    # Health check module
+    hc_description = """
+    Run comprehensive health checks on MongoDB deployments including replica sets and sharded clusters (Standalone instance is NOT supported!).
+    The results will be output in the format specified (HTML or Markdown).
+    """
+    
+    hc_epilog = """
+    Examples:
+      ./x-ray healthcheck mongodb://localhost:27017
+      ./x-ray hc mongodb://user:password@mongodb0.example.com:27017/?authSource=admin
+      ./x-ray hc -s default -f html -o /path/to/output/
+    """
+    
+    hc_parser = subparsers.add_parser("healthcheck", aliases=["hc"], 
+                                     help="Run health checks on MongoDB cluster",
+                                     description=hc_description,
+                                     epilog=hc_epilog,
+                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+    hc_parser.add_argument("uri", nargs="?", help="MongoDB database URI. If not provided, you will be prompted to enter it.", type=str)
+    hc_parser.add_argument("-s", "--checkset", help="Checkset to run. Defaults to \"default\".", type=str, default="default")
+    hc_parser.add_argument("-o", "--output", help="Output folder path. Defaults to \"output/\".", type=str, default="output/")
+    hc_parser.add_argument("-f", "--format", help="Output format (markdown/html). Defaults to \"markdown\".", type=str, default="html", choices=["markdown", "html"])
+    
+    # Log analysis module
+    log_description = """
+    Analyze MongoDB log files to identify patterns, issues, and optimization opportunities.
+    
+    This command will process MongoDB log files and provide insights including:
+    - Slow query analysis
+    - Error pattern detection
+    - Connection statistics
+    - Operation distribution
+    - Index usage suggestions
+    
+    The analysis will be output in the format specified (HTML or Markdown).
+    """
+    
+    log_epilog = """
+    Examples:
+      ./x-ray log /var/log/mongodb/mongod.log
+      ./x-ray log /path/to/mongod.log -f html -o /path/to/output/
+    """
+    
+    log_parser = subparsers.add_parser("log", 
+                                      help="Analyze MongoDB log files",
+                                      description=log_description,
+                                      epilog=log_epilog,
+                                      formatter_class=argparse.RawDescriptionHelpFormatter)
+    log_parser.add_argument("log_file", help="Path to the MongoDB log file to analyze")
+    log_parser.add_argument("-o", "--output", help="Output folder path. Defaults to \"output/\".", type=str, default="output/")
+    log_parser.add_argument("-f", "--format", help="Output format (markdown/html). Defaults to \"markdown\".", type=str, default="html", choices=["markdown", "html"])
+    
+    return parser
 
 logger = logging.getLogger(__name__)
-if args.quiet:
-    logger.setLevel(logging.FATAL)
 
-def main():
-    if args.uri == None:
+def health_check_command(args):
+    """Health check command"""
+    uri = args.uri
+    if uri is None:
         # Get uri from console
-        args.uri = input("Enter MongoDB URI: ")
-    parsed_uri = parse_uri(args.uri)
-    if parsed_uri["username"] == None or parsed_uri["password"] == None:
+        uri = input("Enter MongoDB URI: ")
+    parsed_uri = parse_uri(uri)
+    if parsed_uri["username"] is None or parsed_uri["password"] is None:
         username = input("Enter MongoDB username: ")
         password = getpass("Enter MongoDB password: ")
         parsed_uri["username"] = username
         parsed_uri["password"] = password
-        client = MongoClient(args.uri, username=username, password=password)
+        client = MongoClient(uri, username=username, password=password)
     else:
-        client = MongoClient(args.uri)
+        client = MongoClient(uri)
     # Load configuration from file
     try:
         config = load_config(args.config)
@@ -47,6 +114,31 @@ def main():
     framework.run_checks(checkset, client=client, output_folder=output_folder, parsed_uri=parsed_uri)
     framework.output_results(output_folder=output_folder, format=args.format)
     return 0
+
+def log_analysis_command(args):
+    """Log analysis command"""
+    logger.info(f"Analyzing log file: {args.log_file}")
+    # 这里是日志分析的实现代码
+    # 暂时返回一个成功值，实际功能后续实现
+    logger.info("Log analysis feature not yet implemented")
+    return 0
+
+def main():
+    parser = setup_parser()
+    args = parser.parse_args()
+
+    # Set logging level
+    if args.quiet:
+        logger.setLevel(logging.FATAL)
+
+    # Dispatch to different handler functions based on subcommand
+    if args.command in ["healthcheck", "hc"]:
+        return health_check_command(args)
+    elif args.command == "log":
+        return log_analysis_command(args)
+    else:
+        logger.error(f"Unknown command: {args.command}")
+        return 1
 
 if __name__ == "__main__":
     exit_code = main()
