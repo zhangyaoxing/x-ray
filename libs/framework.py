@@ -1,5 +1,5 @@
 
-from datetime import datetime
+from datetime import datetime, timezone
 import re
 from libs.shared import to_markdown_id, irresponsive_nodes
 from libs.utils import *
@@ -25,7 +25,8 @@ class Framework:
         self._config = config
         self._logger = logging.getLogger(__name__)
         self._items = []
-        self._timestamp = datetime.now().isoformat()
+        now = str(datetime.now(tz=timezone.utc))
+        self._timestamp = re.sub(r"[:\- ]", "", now.split(".")[0])
 
     def _get_output_folder(self, output_folder: str):
         if env == "development":
