@@ -20,7 +20,7 @@ def load_checklist_classes(package_name="libs.check_items"):
     return class_map
 CHECKLIST_CLASSES = load_checklist_classes()
 
-class Framework:
+class HealthCheckFramework:
     def __init__(self, config: dict):
         self._config = config
         self._logger = logging.getLogger(__name__)

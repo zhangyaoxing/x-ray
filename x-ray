@@ -2,7 +2,7 @@
 import argparse
 import logging
 from libs.utils import *
-from libs.framework import Framework
+from libs.health_check_framework import HealthCheckFramework
 from pymongo import MongoClient
 from pymongo.uri_parser import parse_uri
 from getpass import getpass
@@ -110,7 +110,7 @@ def health_check_command(args):
         
     checkset = args.checkset
     output_folder = args.output if args.output.endswith("/") else f"{args.output}/"
-    framework = Framework(config)
+    framework = HealthCheckFramework(config)
     framework.run_checks(checkset, client=client, output_folder=output_folder, parsed_uri=parsed_uri)
     framework.output_results(output_folder=output_folder, format=args.format)
     return 0
