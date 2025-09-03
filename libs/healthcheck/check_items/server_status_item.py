@@ -1,6 +1,6 @@
 from time import sleep
-from libs.check_items.base_item import BaseItem
-from libs.shared import *
+from libs.healthcheck.check_items.base_item import BaseItem
+from libs.healthcheck.shared import *
 
 SERVER_STATUS_INTERVAL = 5
 class ServerStatusItem(BaseItem):

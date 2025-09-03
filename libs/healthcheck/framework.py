@@ -1,14 +1,14 @@
 
 from datetime import datetime
 import re
-from libs.shared import to_markdown_id, irresponsive_nodes
+from libs.healthcheck.shared import to_markdown_id, irresponsive_nodes
 from libs.utils import *
 import logging
 import importlib
 import pkgutil
 import markdown
 
-def load_checklist_classes(package_name="libs.check_items"):
+def load_checklist_classes(package_name="libs.healthcheck.check_items"):
     class_map = {}
     package = importlib.import_module(package_name)
     for _, module_name, _ in pkgutil.iter_modules(package.__path__):
@@ -20,7 +20,7 @@ def load_checklist_classes(package_name="libs.check_items"):
     return class_map
 CHECKLIST_CLASSES = load_checklist_classes()
 
-class HealthCheckFramework:
+class Framework:
     def __init__(self, config: dict):
         self._config = config
         self._logger = logging.getLogger(__name__)

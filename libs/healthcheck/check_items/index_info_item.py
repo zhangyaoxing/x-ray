@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
-from libs.check_items.base_item import BaseItem
-from libs.shared import MAX_MONGOS_PING_LATENCY, SEVERITY, discover_nodes, enum_all_nodes, enum_result_items, escape_markdown, format_json_md
+from libs.healthcheck.check_items.base_item import BaseItem
+from libs.healthcheck.shared import MAX_MONGOS_PING_LATENCY, SEVERITY, discover_nodes, enum_all_nodes, enum_result_items, escape_markdown, format_json_md
 from libs.utils import *
 from pymongo.uri_parser import parse_uri
 

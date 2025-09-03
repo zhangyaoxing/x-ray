@@ -2,8 +2,8 @@
 from datetime import datetime, timedelta, timezone
 from pymongo import MongoClient
 from pymongo.uri_parser import parse_uri
-from libs.check_items.base_item import BaseItem
-from libs.shared import MAX_MONGOS_PING_LATENCY, discover_nodes, enum_all_nodes, enum_result_items, format_size
+from libs.healthcheck.check_items.base_item import BaseItem
+from libs.healthcheck.shared import MAX_MONGOS_PING_LATENCY, discover_nodes, enum_all_nodes, enum_result_items, format_size
 from libs.utils import red, yellow
 
 

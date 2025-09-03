@@ -1,5 +1,5 @@
-from libs.check_items.base_item import BaseItem
-from libs.shared import *
+from libs.healthcheck.check_items.base_item import BaseItem
+from libs.healthcheck.shared import *
 from libs.utils import *
 
 """

@@ -1,7 +1,7 @@
 from abc import abstractmethod
 import logging
 from bson import json_util
-from libs.shared import SEVERITY, to_json
+from libs.healthcheck.shared import SEVERITY, to_json
 from libs.utils import env
 
 def colorize_severity(severity: SEVERITY) -> str:

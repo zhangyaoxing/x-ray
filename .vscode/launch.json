@@ -16,7 +16,7 @@
             }
         },
         {
-            "name": "App: X-Ray",
+            "name": "App: X-Ray-HC",
             "type": "debugpy",
             "request": "launch",
             "program": "x-ray",
