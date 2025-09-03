@@ -62,6 +62,7 @@ class BuildInfoItem(BaseItem):
             host = node["host"]
             if raw_result is None:
                 table["rows"].append([name, host, "n/a", "n/a", "n/a", "n/a"])
+                versions["n/a"] = versions.get("n/a", 0) + 1
                 return
             build_env = raw_result.get("buildEnvironment", {})
             v = raw_result.get("version", "")

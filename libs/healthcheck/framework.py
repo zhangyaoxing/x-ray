@@ -1,5 +1,5 @@
 
-from datetime import datetime
+from datetime import datetime, timezone
 import re
 from libs.healthcheck.shared import to_markdown_id, irresponsive_nodes
 from libs.utils import *
@@ -25,7 +25,8 @@ class Framework:
         self._config = config
         self._logger = logging.getLogger(__name__)
         self._items = []
-        self._timestamp = datetime.now().isoformat()
+        now = str(datetime.now(tz=timezone.utc))
+        self._timestamp = re.sub(r"[:\- ]", "", now.split(".")[0])
 
     def _get_output_folder(self, output_folder: str):
         if env == "development":
@@ -116,9 +117,19 @@ class Framework:
                 with open(output_file, "r") as md_file:
                     md_text = md_file.read()
                 html = markdown.markdown(md_text, extensions=["tables", "toc"])
+                html = self._compact_html(html)
+                
                 with open(template_file, "r") as template:
                     template_content = template.read()
                     html = template_content.replace("{{ content }}", html)
                 f.write(html)
 
         self._logger.info(bold(green("All checks complete.")))
+    
+    def _compact_html(self, html: str) -> str:
+        html = re.sub(r'>\s+<', '><', html)
+        html = re.sub(r'\s{2,}', ' ', html)
+        html = re.sub(r'\n\s*\n', '\n', html)
+        html = html.strip()
+        return html
+

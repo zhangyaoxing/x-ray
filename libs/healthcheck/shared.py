@@ -29,7 +29,7 @@ class SEVERITY(Enum):
 
 class ServerVersion():
     def __init__(self, version_array):
-        if version_array is None or len(version_array) > 4:
+        if not isinstance(version_array, list) or len(version_array) > 4:
             raise ValueError("Invalid version array")
         while len(version_array) < 4:
             version_array.append(0)
