@@ -10,7 +10,6 @@ class BuildInfoItem(BaseItem):
         self._description += "- Whether the server is running a supported version.\n"
 
     def test(self, *args, **kwargs):
-        self._logger.info(f"Gathering server build information...")
         client = kwargs.get("client")
         parsed_uri = kwargs.get("parsed_uri")
         nodes = discover_nodes(client, parsed_uri)

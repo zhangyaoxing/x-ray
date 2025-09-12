@@ -33,5 +33,5 @@
             "sharding_imbalance_percentage": 0.1
         }
     },
-    "template": "full.html"
+    "template": "healthcheck/full.html"
 }
