@@ -69,6 +69,9 @@ class HostInfoItem(BaseItem):
                 system = info["system"]
                 os = info["os"]
                 extra = info["extra"]
+                if "extra" in extra:
+                    # Compatibility for MongoDB 6.0
+                    extra = extra["extra"]
                 table["rows"].append([
                     m["host"],
                     f"{extra['cpuString']} ({system['cpuArch']}) {extra['cpuFrequencyMHz']} MHz",

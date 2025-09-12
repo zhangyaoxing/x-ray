@@ -24,9 +24,9 @@
             "args": [
                 "-c", "config.json",
                 "hc",
-                "mongodb+srv://cluster0.wy1z6.mongodb.net/admin",
+                // "mongodb+srv://cluster0.wy1z6.mongodb.net/admin",
                 // "--uri", "mongodb://localhost:30017/admin?tls=false&connectTimeoutMS=5000",
-                // "--uri", "mongodb://localhost:27017/admin?tls=false&connectTimeoutMS=5000",
+                "mongodb://localhost:27017/admin?tls=false&connectTimeoutMS=5000",
                 "-f", "html",
             ],
             "env": {
