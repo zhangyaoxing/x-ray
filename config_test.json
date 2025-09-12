@@ -1,37 +1,39 @@
 {
-    "checksets":{
-        "default": {
-            "items": ["BuildInfoItem", "CollInfoItem", "ServerStatusItem", "ShardKeyItem", "IndexInfoItem", "SecurityItem", "ClusterItem", "HostInfoItem"]
-        }
-    },
-    "item_config": {
-        "BuildInfoItem": {
-            "eol_version": [10, 0, 0]
+    "healthcheck":{
+        "checksets":{
+            "default": {
+                "items": ["BuildInfoItem", "CollInfoItem", "ServerStatusItem", "ShardKeyItem", "IndexInfoItem", "SecurityItem", "ClusterItem", "HostInfoItem"]
+            }
         },
-        "CollInfoItem": {
-            "obj_size_kb": 0.01,
-            "collection_size_gb": 2048,
-            "fragmentation_ratio": 0.3,
-            "index_size_ratio": 0.2,
-            "op_latency_ms": 0
+        "item_config": {
+            "BuildInfoItem": {
+                "eol_version": [10, 0, 0]
+            },
+            "CollInfoItem": {
+                "obj_size_kb": 0.01,
+                "collection_size_gb": 2048,
+                "fragmentation_ratio": 0.3,
+                "index_size_ratio": 0.2,
+                "op_latency_ms": 0
+            },
+            "IndexInfoItem": {
+                "unused_index_days": 0,
+                "num_indexes": 1
+            },
+            "ClusterItem": {
+                "replication_lag_seconds": 0,
+                "oplog_window_hours": 100000
+            },
+            "ServerStatusItem": {
+                "used_connection_ratio": 0.01,
+                "query_targeting": 0,
+                "query_targeting_obj": 0,
+                "cache_read_into_mb": 0
+            },
+            "ShardKeyItem": {
+                "sharding_imbalance_percentage": 0.1
+            }
         },
-        "IndexInfoItem": {
-            "unused_index_days": 0,
-            "num_indexes": 1
-        },
-        "ClusterItem": {
-            "replication_lag_seconds": 0,
-            "oplog_window_hours": 100000
-        },
-        "ServerStatusItem": {
-            "used_connection_ratio": 0.01,
-            "query_targeting": 0,
-            "query_targeting_obj": 0,
-            "cache_read_into_mb": 0
-        },
-        "ShardKeyItem": {
-            "sharding_imbalance_percentage": 0.1
-        }
-    },
-    "template": "healthcheck/full.html"
+        "template": "healthcheck/full.html"
+    }
 }

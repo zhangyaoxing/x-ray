@@ -102,7 +102,7 @@ def health_check_command(args):
         client = MongoClient(uri)
     # Load configuration from file
     try:
-        config = load_config(args.config)
+        config = load_config(args.config)["healthcheck"]
     except FileNotFoundError:
         logger.error(f"Config file not found: {args.config}")
         logger.info("Please provide a valid path to config.json using the -c/--config argument")
