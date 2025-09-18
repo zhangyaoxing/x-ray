@@ -37,9 +37,9 @@
         "template": "healthcheck/full.html"
     },
     "log": {
-        "checksets": {
+        "logsets": {
             "default": {
-                "items": ["LogVolumeItem", "LogPatternItem", "LogAnomalyItem"]
+                "items": ["ConnectionRateItem", "SlowRateItem"]
             }
         }
     }

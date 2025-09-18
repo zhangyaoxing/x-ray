@@ -35,5 +35,12 @@
             }
         },
         "template": "healthcheck/full.html"
+    },
+    "log": {
+        "logsets": {
+            "default": {
+                "items": ["ConnectionRateItem", "SlowRateItem"]
+            }
+        }
     }
 }

@@ -32,6 +32,22 @@
                 "LOG_LEVEL": "INFO",
                 "ENV": "development"
             }
+        },
+        {
+            "name": "App: X-Ray-LOG",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "x-ray",
+            "console": "integratedTerminal",
+            "args": [
+                "-c", "config_test.json",
+                "log",
+                "mongod.log"
+            ],
+            "env": {
+                "LOG_LEVEL": "INFO",
+                "ENV": "development"
+            }
         }
     ]
 }
