@@ -6,18 +6,17 @@ from libs.log_analysis.shared import to_json
 from bson import json_util
 import math
 
-class ConnectionRateItem(BaseItem):
+class SlowRateItem(BaseItem):
     def __init__(self, output_folder: str, config):
-        super(ConnectionRateItem, self).__init__(output_folder, config)
+        super(SlowRateItem, self).__init__(output_folder, config)
         self._cache = {}
-        self.name = "Connection Rate"
-        self.description = "Analyse the rate of connections created and ended over a specified time window."
+        self.name = "Slow Rate"
+        self.description = "Analyse the rate of slow queries."
 
     def analyze(self, log_line):
         msg = log_line.get("msg", "")
-        if msg not in ["Connection accepted", "Connection ended"]:
+        if msg != "Slow query":
             return
-        counter = "created" if msg == "Connection accepted" else "ended"
         time = log_line.get("t")
         ts = math.floor(time.timestamp())
         time_min = datetime.fromtimestamp(ts - (ts % 60))
@@ -31,19 +30,20 @@ class ConnectionRateItem(BaseItem):
                 self._write_output()
             self._cache = {
                 "time": time_min,
-                "created": 0,
-                "ended": 0,
-                "total": 0,
-                "byIp": {}
+                "total_slow_ms": 0,
+                "count": 0,
+                "byNs": {}
             }
         attr = log_line.get("attr", {})
-        conn_count = attr.get("connectionCount", 1)
-        ip = attr["remote"].split(":")[0] if "remote" in attr else "unknown"
-        self._cache[counter] += 1
-        self._cache["total"] = conn_count
-        if ip not in self._cache["byIp"]:
-            self._cache["byIp"][ip] = {
-                "created": 0,
-                "ended": 0
+        slow_ms = attr.get("durationMillis", 0)
+        ns = attr.get("ns", "unknown")
+        self._cache["count"] += 1
+        self._cache["total_slow_ms"] += slow_ms
+        if ns not in self._cache["byNs"]:
+            self._cache["byNs"][ns] = {
+                "count": 0,
+                "total_slow_ms": 0
             }
-        self._cache["byIp"][ip][counter] += 1
+        self._cache["byNs"][ns]["count"] += 1
+        self._cache["byNs"][ns]["total_slow_ms"] += slow_ms
+
