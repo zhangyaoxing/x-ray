@@ -2,7 +2,8 @@
 import argparse
 import logging
 from libs.utils import *
-from libs.healthcheck.framework import Framework
+from libs.healthcheck.framework import Framework as HealthCheckFramework
+from libs.log_analysis.framework import Framework as LogAnalysisFramework
 from pymongo import MongoClient
 from pymongo.uri_parser import parse_uri
 from getpass import getpass
@@ -78,6 +79,7 @@ For more information on specific commands, use:
                                       epilog=log_epilog,
                                       formatter_class=argparse.RawDescriptionHelpFormatter)
     log_parser.add_argument("log_file", help="Path to the MongoDB log file to analyze")
+    log_parser.add_argument("-s", "--checkset", help="Checkset to run. Defaults to \"default\".", type=str, default="default")
     log_parser.add_argument("-o", "--output", help="Output folder path. Defaults to \"output/\".", type=str, default="output/")
     log_parser.add_argument("-f", "--format", help="Output format (markdown/html). Defaults to \"markdown\".", type=str, default="html", choices=["markdown", "html"])
     
@@ -110,7 +112,7 @@ def health_check_command(args):
         
     checkset = args.checkset
     output_folder = args.output if args.output.endswith("/") else f"{args.output}/"
-    framework = Framework(config)
+    framework = HealthCheckFramework(config)
     framework.run_checks(checkset, client=client, output_folder=output_folder, parsed_uri=parsed_uri)
     framework.output_results(output_folder=output_folder, format=args.format)
     return 0
@@ -118,7 +120,18 @@ def health_check_command(args):
 def log_analysis_command(args):
     """Log analysis command"""
     logger.info(f"Analyzing log file: {args.log_file}")
-    logger.info("Log analysis feature not yet implemented")
+    try:
+        config = load_config(args.config)["log"]
+    except FileNotFoundError:
+        logger.error(f"Config file not found: {args.config}")
+        logger.info("Please provide a valid path to config.json using the -c/--config argument")
+        return 1
+    
+    checkset = args.checkset
+    output_folder = args.output if args.output.endswith("/") else f"{args.output}/"
+    framework = LogAnalysisFramework(args.log_file, config)
+    framework.run_logs_analysis(checkset, output_folder=output_folder)
+    framework.output_results(output_folder=output_folder, format=args.format)
     return 0
 
 def main():

@@ -118,7 +118,6 @@ class BaseItem:
 
     @captured_sample.setter
     def captured_sample(self, data):
-        # 根据文件扩展名决定是否使用压缩
         if self.cache_file_name.endswith('.gz'):
             with gzip.open(self.cache_file_name, 'wt') as f:
                 f.write(to_json(data))

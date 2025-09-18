@@ -39,7 +39,12 @@
     "log": {
         "logsets": {
             "default": {
-                "items": ["ConnectionRateItem", "SlowRateItem"]
+                "items": ["ConnectionRateItem"]
+            }
+        },
+        "item_config": {
+            "ConnectionRateItem": {
+                "sample_rate": 1
             }
         }
     }
