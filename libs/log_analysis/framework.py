@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+import random
 import re
 from libs.healthcheck.shared import to_markdown_id, irresponsive_nodes
 from libs.utils import *
@@ -61,9 +62,12 @@ class Framework:
             log_items.append(item)
             self._logger.info(f"Log analyze item loaded: {bold(cyan(item_name))}")
         log_file = get_script_path(self._file_path)
+        rate = self._config.get("sample_rate", 1.0)
         # Read the log file line by line and pass each line to the log items for analysis
         with open(log_file, "r", encoding="utf-8", errors="ignore") as f:
             for line in f:
+                if random.random() > rate:
+                    continue
                 # Parse the log line as JSON
                 try:
                     log_line = json_util.loads(line)

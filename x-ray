@@ -82,6 +82,7 @@ For more information on specific commands, use:
     log_parser.add_argument("-s", "--checkset", help="Checkset to run. Defaults to \"default\".", type=str, default="default")
     log_parser.add_argument("-o", "--output", help="Output folder path. Defaults to \"output/\".", type=str, default="output/")
     log_parser.add_argument("-f", "--format", help="Output format (markdown/html). Defaults to \"markdown\".", type=str, default="html", choices=["markdown", "html"])
+    log_parser.add_argument("-r", "--rate", help="Log sampling rate (e.g., 1 for all logs, 0.1 for 10% logs). Defaults to 1.", type=float, default=1.0)
     
     return parser
 
@@ -122,6 +123,7 @@ def log_analysis_command(args):
     logger.info(f"Analyzing log file: {args.log_file}")
     try:
         config = load_config(args.config)["log"]
+        config["sample_rate"] = args.rate
     except FileNotFoundError:
         logger.error(f"Config file not found: {args.config}")
         logger.info("Please provide a valid path to config.json using the -c/--config argument")

@@ -42,6 +42,7 @@
             "args": [
                 "-c", "config_test.json",
                 "log",
+                "-r", "1",
                 "mongod.log"
             ],
             "env": {
