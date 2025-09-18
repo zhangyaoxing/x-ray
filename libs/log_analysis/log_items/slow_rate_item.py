@@ -22,11 +22,7 @@ class SlowRateItem(BaseItem):
         time_min = datetime.fromtimestamp(ts - (ts % 60))
 
         if self._cache.get("time", None) != time_min:
-            if self._cache == {}:
-                # First time, remove the output file if it exists.
-                # This is only possible when running in development mode.
-                os.remove(self._output_file) if os.path.isfile(self._output_file) else None
-            else:
+            if self._cache != {}:
                 self._write_output()
             self._cache = {
                 "time": time_min,

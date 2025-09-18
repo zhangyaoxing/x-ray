@@ -9,6 +9,7 @@ class BaseItem(object):
         self.config = config
         self._output_file = os.path.join(output_folder, f"{self.__class__.__name__}.json")
         self._logger = logging.getLogger(__name__)
+        os.remove(self._output_file) if os.path.isfile(self._output_file) else None
 
     def analyze(self, log_line):
         raise NotImplementedError("Subclasses must implement the analyze method.")
