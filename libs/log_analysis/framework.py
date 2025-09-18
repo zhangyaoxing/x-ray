@@ -50,7 +50,7 @@ class Framework:
         ls = logsets[logset_name]
         self._logger.info(f"Running log checkset: {bold(green(logset_name))}")
 
-        log_items = []
+        self._items = []
         for item_name in ls.get("items", []):
             item_cls = LOG_CLASSES.get(item_name)
             if not item_cls:
@@ -59,19 +59,19 @@ class Framework:
             # The config for the item can be specified in the `item_config` section, under the item class name.
             item_config = ls.get("item_config", {}).get(item_name, {})
             item = item_cls(batch_folder, item_config)
-            log_items.append(item)
+            self._items.append(item)
             self._logger.info(f"Log analyze item loaded: {bold(cyan(item_name))}")
         log_file = get_script_path(self._file_path)
         rate = self._config.get("sample_rate", 1.0)
         # Read the log file line by line and pass each line to the log items for analysis
         with open(log_file, "r", encoding="utf-8", errors="ignore") as f:
             for line in f:
+                # Sampling based on the rate. For dealing with large log files.
                 if random.random() > rate:
                     continue
-                # Parse the log line as JSON
                 try:
                     log_line = json_util.loads(line)
-                    for item in log_items:
+                    for item in self._items:
                         try:
                             item.analyze(log_line)
                         except Exception as e:
@@ -80,6 +80,25 @@ class Framework:
                 except Exception as e:
                     self._logger.warning(yellow(f"Failed to parse log line as JSON: {line.strip()}"))
                     continue
+        for item in self._items:
+            try:
+                item.finalize()
+            except Exception as e:
+                self._logger.warning(yellow(f"Log analysis item '{item.name}' finalize failed: {e}"))
+                continue
         
-    def output_results(self, *args, **kwargs):
-        pass
+    def output_results(self, output_folder: str = "output/", format: str = "html"):
+        batch_folder = self._get_output_folder(output_folder)
+        output_file = f"{batch_folder}report.md"
+        template_file = get_script_path(f"templates/{self._config.get('template', 'full.html')}")
+        self._logger.info(f"Saving results to: {green(output_file)}")
+
+        with open(output_file, "w") as f:
+            f.write(f"# Log Analysis Report for {self._file_path}\n")
+            # f.write(f"Generated on {datetime.now(tz=timezone.utc).strftime('%Y-%m-%d %H:%M:%S %Z')}\n\n")
+            for item in self._items:
+                try:
+                    item.review_results_markdown(f)
+                except Exception as e:
+                    self._logger.warning(yellow(f"Failed to generate markdown for log item '{item.name}': {e}"))
+                    continue

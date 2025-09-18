@@ -11,10 +11,27 @@ class BaseItem(object):
     def analyze(self, log_line):
         raise NotImplementedError("Subclasses must implement the analyze method.")
 
+    def finalize(self):
+        raise NotImplementedError("Subclasses must implement the finalize method.")
+
+    def review_results(self):
+        raise NotImplementedError("Subclasses must implement the review_results method.")
+    
+    def review_results_markdown(self, f):
+        raise NotImplementedError("Subclasses must implement the review_results_markdown method.")
+
     @property
     def name(self):
-        raise NotImplementedError("Subclasses must implement the name method.")
+        return self._name
+    
+    @name.setter
+    def name(self, value):
+        self._name = value
 
     @property
     def description(self):
-        raise NotImplementedError("Subclasses must implement the description method.")
+        return self._description
+
+    @description.setter
+    def description(self, value):
+        self._description = value
