@@ -60,3 +60,81 @@ class ClientMetaItem(BaseItem):
                 platform = escape_markdown(doc.get("platform", "Unknown"))
                 ips = [f"{ip['ip']} ({ip['count']} times)" for ip in line_json["ips"]]
                 f.write(f"|{app}|{driver_str}|{os_str}|{platform}|{'<br/>'.join(ips)}|\n")
+        f.write(f"<div class=\"pie\"><canvas id='canvas_{self.__class__.__name__}'></canvas></div>\n")
+        f.write(f"<div class=\"pie\"><canvas id='canvas_{self.__class__.__name__}_ip'></canvas></div>\n")
+        f.write(JS.replace("{self.__class__.__name__}", self.__class__.__name__))
+
+JS = """
+<script type="text/javascript">
+var rawData = data["{self.__class__.__name__}"];
+
+var driverCount = {};
+rawData.forEach(doc => {
+  const name = doc.doc.driver.name;
+  if (driverCount[name] === undefined) {
+    driverCount[name] = 0;
+  }
+  driverCount[name] += doc.ips.reduce((sum, ip) => sum + ip.count, 0);
+});
+
+var labels = Object.keys(driverCount);
+var values = Object.values(driverCount);
+var colors = labels.map((_, i) => `hsl(${i * 360 / labels.length}, 70%, 60%)`);
+
+const ctx_{self.__class__.__name__} = document.getElementById('canvas_{self.__class__.__name__}').getContext('2d');
+var chart = new Chart(ctx_{self.__class__.__name__}, {
+  type: 'pie',
+  data: {
+    labels: labels,
+    datasets: [{
+      data: values,
+      backgroundColor: colors
+    }]
+  },
+  options: {
+    plugins: {
+      title: {
+        display: true,
+        text: 'Client By Driver'
+      },
+      legend: { position: 'right' }
+    }
+  }
+});
+charts.push(chart);
+
+var ipCount = {};
+rawData.forEach(doc => {
+  var ips = doc.ips.forEach(ip => {
+    if (ipCount[ip.ip] === undefined) {
+      ipCount[ip.ip] = 0;
+    }
+    ipCount[ip.ip] += ip.count;
+  });
+});
+var labels = Object.keys(ipCount);
+var values = Object.values(ipCount);
+var colors = labels.map((_, i) => `hsl(${i * 360 / labels.length}, 70%, 60%)`);
+const ctx_{self.__class__.__name__}_ip = document.getElementById('canvas_{self.__class__.__name__}_ip').getContext('2d');
+var chart = new Chart(ctx_{self.__class__.__name__}_ip, {
+  type: 'pie',
+  data: {
+    labels: labels,
+    datasets: [{
+      data: values,
+      backgroundColor: colors
+    }]
+  },
+  options: {
+    plugins: {
+      title: {
+        display: true,
+        text: 'Client By IP'
+      },
+      legend: { position: 'right' }
+    }
+  }
+});
+charts.push(chart);
+</script>
+"""
