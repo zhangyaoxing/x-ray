@@ -43,3 +43,66 @@ class SlowRateItem(BaseItem):
         self._cache["byNs"][ns]["count"] += 1
         self._cache["byNs"][ns]["total_slow_ms"] += slow_ms
 
+    def review_results_markdown(self, f):
+        super(SlowRateItem, self).review_results_markdown(f)
+        f.write(f"<canvas id=\"canvas_{self.__class__.__name__}\" width=\"400\" height=\"200\"></canvas>\n")
+        f.write(JS.replace("{self.__class__.__name__}", self.__class__.__name__))
+
+JS = """
+<script type="text/javascript">
+var labels = [];
+var count = [];
+var total_slow_ms = [];
+data["{self.__class__.__name__}"].forEach(d => {
+    labels.push(d.time);
+    count.push(d.count);
+    total_slow_ms.push(d.total_slow_ms);
+});
+
+const ctx_{self.__class__.__name__} = document.getElementById('canvas_{self.__class__.__name__}').getContext('2d');
+chart = new Chart(ctx_{self.__class__.__name__}, {
+  type: 'bar',
+  data: {
+    labels: labels,
+    datasets: [
+      {
+        label: 'Slow Count',
+        data: count,
+        backgroundColor: 'rgba(54, 162, 235, 0.7)',
+        yAxisID: 'y'
+      },
+      {
+        label: 'Total Slow (ms)',
+        data: total_slow_ms,
+        type: 'line',
+        borderColor: 'rgba(255, 99, 132, 1)',
+        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+        fill: false,
+        yAxisID: 'y1',
+        tension: 0.3,
+        pointRadius: 2
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { position: 'top' }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        title: { display: true, text: 'Count' }
+      },
+      y1: {
+        beginAtZero: true,
+        position: 'right',
+        title: { display: true, text: 'Total Slow (ms)' },
+        grid: { drawOnChartArea: false }
+      }
+    }
+  }
+});
+charts.push(chart);
+</script>
+"""
