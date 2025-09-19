@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Log Analysis Report</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.8.1/github-markdown.min.css">
+    </link>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="text/javascript">
+        data = {};
+        linkElms = [];
+        titleElms = [];
+        charts = [];
+
+        function getWindowHeight() {
+            return window.innerHeight || 
+                   document.documentElement.clientHeight || 
+                   document.body.clientHeight;
+        }
+        
+        function getWindowWidth() {
+            return window.innerWidth || 
+                   document.documentElement.clientWidth || 
+                   document.body.clientWidth;
+        }
+        
+        function highLightOutline() {
+            for (var i = 0; i < titleElms.length; i++) {
+                var rect = titleElms[i].getBoundingClientRect();
+                var top = i == 0 ? 0 : rect.top;
+                var bottom = i == titleElms.length - 1 ? document.body.scrollHeight : titleElms[i + 1].getBoundingClientRect().top;
+                if (top < 1 && bottom > 1) {
+                    linkElms[i].classList.add('in-view');
+                } else {
+                    linkElms[i].classList.remove('in-view');
+                }
+            }
+        };
+        function createList(li_elms) {
+            var ul = document.createElement('ul');
+            for (var i = 0; i < li_elms.length; i++) {
+                var li = document.createElement('li');
+                var link = document.createElement('a');
+                linkElms.push(link);
+                link.href = '#' + li_elms[i].id;
+                link.textContent = li_elms[i].textContent;
+                li.appendChild(link);
+                ul.appendChild(li);
+            }
+            return ul;
+        }
+        window.onload = function () {
+            var outline = document.getElementById('outline');
+            var h2 = document.getElementsByTagName('h2');
+            var ul = document.createElement('ul');
+            var body = document.getElementsByClassName('markdown-body')[0];
+            for (var i = 0; i < h2.length; i++) {
+                titleElms.push(h2[i]);
+                var li = document.createElement('li');
+                var link = document.createElement('a');
+                linkElms.push(link);
+                link.href = '#' + h2[i].id;
+                link.textContent = h2[i].textContent;
+                var children = [];
+                for (var next = h2[i].nextElementSibling; next && next.tagName !== 'H2'; next = next.nextElementSibling) {
+                    if (next.tagName === 'H3') {
+                        children.push(next);
+                        titleElms.push(next);
+                    }
+                }
+                ul.appendChild(li);
+                li.appendChild(link);
+                li.appendChild(createList(children));
+            }
+            outline.appendChild(ul);
+            var outlineWidth = outline.offsetWidth;
+            body.style.margin = '0 auto 0 ' + outlineWidth + 'px';
+            expand = document.getElementById('expand-outline');
+            collapse = document.getElementById('collapse-outline');
+            b = outline.getElementsByTagName('b')[0];
+            state = 1;
+            states = [["none", "block"], ["none", "inline"], ["inline", "none"], ["none", "inline"], ["0 auto", '0 auto 0 ' + outlineWidth + 'px']];
+            window.onresize = function() {
+                blank = (getWindowWidth() - 980) / 2;
+                if (blank > outlineWidth) {
+                    states = [["none", "block"], ["none", "inline"], ["inline", "none"], ["none", "inline"], ["0 auto", '0 auto 0 auto']];
+                } else {
+                    states = [["none", "block"], ["none", "inline"], ["inline", "none"], ["none", "inline"], ["0 auto", '0 auto 0 ' + outlineWidth + 'px']];
+                }
+                body.style.margin = states[4][state];
+                for (var i = 0; i < charts.length; i++) {
+                    charts[i].resize();
+                }
+            };
+            click = function () {
+                state = state == 0 ? 1 : 0;
+                ul.style.display = states[0][state];
+                b.style.display = states[1][state];
+                expand.style.display = states[2][state];
+                collapse.style.display = states[3][state];
+                body.style.margin = states[4][state];
+                return false;
+            };
+            collapse.onclick = click;
+            expand.onclick = click;
+            highLightOutline();
+            window.onscroll = highLightOutline;
+        };
+    </script>
+    <style>
+        .markdown-body {
+            box-sizing: border-box;
+            min-width: 200px;
+            max-width: 980px;
+            margin: 0 auto 0 350px;
+            padding: 45px;
+        }
+        @media(max-width:90%) {
+            .markdown-body {
+                padding: 15px;
+            }
+        }
+        #outline {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            padding: 40px 0;
+        }
+        .pie {
+            display: inline-block;
+            width: 45%;
+        }
+        .bar {
+            display: inline-block;
+            width: 100%;
+        }
+        a.in-view {
+            background-color: #eee;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="markdown-body">
+    <div id="outline">
+        <a href="#" id="collapse-outline">&#x25C0;</a>
+        <b>Report Outline</b>
+        <a href="#" style="display: none;" id="expand-outline">&#x25B6;</a>
+    </div>
+    {{ content }}
+</body>
+</html>
