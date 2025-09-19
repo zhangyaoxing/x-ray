@@ -150,7 +150,7 @@ var chart = new Chart(ctx_{self.__class__.__name__}_byip, {
     plugins: {
       title: {
         display: true,
-        text: 'Connections Created/Ended by IP per Minute'
+        text: 'Connections Created/Ended by IP Over Time'
       },
       legend: { position: 'top' }
     },

@@ -109,7 +109,7 @@ class Framework:
             self._logger.info(f"Converting markdown to HTML: {green(html_file)}")
             with open(html_file, "w") as f:
                 with open(output_file, "r") as md_file:
-                    html_content = markdown.markdown(md_file.read(), extensions=["tables", "fenced_code", "codehilite"])
+                    html_content = markdown.markdown(md_file.read(), extensions=["tables", "fenced_code", "codehilite", "toc"])
                 # Load the template file
                 with open(template_file, "r") as tf:
                     template_content = tf.read()
