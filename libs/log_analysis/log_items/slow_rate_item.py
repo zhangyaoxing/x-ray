@@ -46,6 +46,8 @@ class SlowRateItem(BaseItem):
     def review_results_markdown(self, f):
         super(SlowRateItem, self).review_results_markdown(f)
         f.write(f"<canvas id=\"canvas_{self.__class__.__name__}\" width=\"400\" height=\"200\"></canvas>\n")
+        f.write(f"<div class=\"pie\"><canvas id=\"canvas_{self.__class__.__name__}_byns\" height=\"200\"></canvas></div>\n")
+        f.write(f"<div class=\"pie\"><canvas id=\"canvas_{self.__class__.__name__}_byns_ms\" height=\"200\"></canvas></div>\n")
         f.write(JS.replace("{self.__class__.__name__}", self.__class__.__name__))
 
 JS = """
@@ -100,6 +102,70 @@ chart = new Chart(ctx_{self.__class__.__name__}, {
         title: { display: true, text: 'Total Slow (ms)' },
         grid: { drawOnChartArea: false }
       }
+    }
+  }
+});
+charts.push(chart);
+
+var rawData = data["{self.__class__.__name__}"];
+var nsCount = {};
+rawData.forEach(d => {
+  Object.entries(d.byNs).forEach(([ns, val]) => {
+    nsCount[ns] = (nsCount[ns] || 0) + (val.count || 0);
+  });
+});
+
+var labels = Object.keys(nsCount);
+var dataSlow = Object.values(nsCount);
+var colors = labels.map((_, i) => `hsl(${i * 360 / labels.length}, 70%, 60%)`);
+
+const ctx_{self.__class__.__name__}_byns = document.getElementById('canvas_{self.__class__.__name__}_byns').getContext('2d');
+var chart = new Chart(ctx_{self.__class__.__name__}_byns, {
+  type: 'pie',
+  data: {
+    labels: labels,
+    datasets: [{
+      data: dataSlow,
+      backgroundColor: colors
+    }]
+  },
+  options: {
+    plugins: {
+      title: {
+        display: true,
+        text: 'Slow Count by Namespace'
+      },
+      legend: { position: 'right' }
+    }
+  }
+});
+charts.push(chart);
+
+var nsSlowMs = {};
+rawData.forEach(d => {
+  Object.entries(d.byNs).forEach(([ns, val]) => {
+    nsSlowMs[ns] = (nsSlowMs[ns] || 0) + (val.total_slow_ms || 0);
+  });
+});
+
+var dataSlow = Object.values(nsSlowMs);
+const ctx_{self.__class__.__name__}_byns_ms = document.getElementById('canvas_{self.__class__.__name__}_byns_ms').getContext('2d');
+var chart = new Chart(ctx_{self.__class__.__name__}_byns_ms, {
+  type: 'pie',
+  data: {
+    labels: labels,
+    datasets: [{
+      data: dataSlow,
+      backgroundColor: colors
+    }]
+  },
+  options: {
+    plugins: {
+      title: {
+        display: true,
+        text: 'Slow MS by Namespace'
+      },
+      legend: { position: 'right' }
     }
   }
 });
