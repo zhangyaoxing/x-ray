@@ -1,5 +1,5 @@
 from libs.log_analysis.log_items.base_item import BaseItem
-from libs.log_analysis.shared import escape_markdown, json_hash
+from libs.log_analysis.shared import escape_markdown, json_hash, to_ejson
 from bson import json_util
 from libs.log_analysis.shared import to_json
 
@@ -19,34 +19,44 @@ class ClientMetaItem(BaseItem):
         ip = attr["remote"].split(":")[0]
         doc = attr["doc"]
         doc_hash = json_hash(doc)
-        self._cache[doc_hash] = {
-            "doc": doc
-        }
+        if doc_hash not in self._cache:
+            self._cache[doc_hash] = {
+                "doc": doc
+            }
         if "ips" not in self._cache[doc_hash]:
-            self._cache[doc_hash]["ips"] = []
-        self._cache[doc_hash]["ips"].append(ip)
+            self._cache[doc_hash]["ips"] = {}
+        self._cache[doc_hash]["ips"][ip] = self._cache[doc_hash]["ips"].get(ip, 0) + 1
+
+    def finalize(self):
+        with open(self._output_file, "a") as f:
+            for v in self._cache.values():
+                doc = v["doc"]
+                ips = [{"ip": ip, "count": count} for ip, count in v.get("ips", {}).items()]
+                f.write(to_ejson({
+                    "doc": doc,
+                    "ips": ips
+                }))
+                f.write("\n")
 
     def review_results_markdown(self, f):
         super().review_results_markdown(f)
         f.write(f"|Application|Driver|OS|Platform|Client IPs|\n")
         f.write(f"|---|---|---|---|---|\n")
         with open(self._output_file, "r") as data:
-            # load all json lines
             for line in data:
                 line_json = json_util.loads(line)
-                for k,v in line_json.items():
-                    doc = v.get("doc", {})
-                    app = escape_markdown(doc.get("application", {}).get("name", "Unknown"))
-                    driver = doc.get("driver", {})
-                    driver_name = driver.get("name", "Unknown")
-                    driver_version = driver.get("version", "Unknown")
-                    driver_str = escape_markdown(f"{driver_name} {driver_version}")
-                    os = doc.get("os", {})
-                    os_type = os.get("type", "Unknown")
-                    os_name = os.get("name", "Unknown")
-                    os_arch = os.get("architecture", "Unknown")
-                    os_version = os.get("version", "Unknown")
-                    os_str = escape_markdown(f"{os_name if os_name != 'Unknown' else os_type} {os_arch} {os_version if os_version != 'Unknown' else ''}")
-                    platform = escape_markdown(doc.get("platform", "Unknown"))
-                    ips = v.get("ips", [])
-                    f.write(f"|{app}|{driver_str}|{os_str}|{platform}|{'<br/>'.join(ips)}|\n")
+                doc = line_json.get("doc", {})
+                app = escape_markdown(doc.get("application", {}).get("name", "Unknown"))
+                driver = doc.get("driver", {})
+                driver_name = driver.get("name", "Unknown")
+                driver_version = driver.get("version", "Unknown")
+                driver_str = escape_markdown(f"{driver_name} {driver_version}")
+                os = doc.get("os", {})
+                os_type = os.get("type", "Unknown")
+                os_name = os.get("name", "Unknown")
+                os_arch = os.get("architecture", "Unknown")
+                os_version = os.get("version", "Unknown")
+                os_str = escape_markdown(f"{os_name if os_name != 'Unknown' else os_type} {os_arch} {os_version if os_version != 'Unknown' else ''}")
+                platform = escape_markdown(doc.get("platform", "Unknown"))
+                ips = [f"{ip['ip']} ({ip['count']} times)" for ip in line_json["ips"]]
+                f.write(f"|{app}|{driver_str}|{os_str}|{platform}|{'<br/>'.join(ips)}|\n")
