@@ -41,6 +41,7 @@
             "default": {
                 "items": ["ConnectionRateItem", "SlowRateItem", "ClientMetaItem"]
             }
-        }
+        },
+        "template": "log/full.html"
     }
 }

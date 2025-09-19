@@ -28,23 +28,25 @@ class ClientMetaItem(BaseItem):
 
     def review_results_markdown(self, f):
         super().review_results_markdown(f)
-        f.write(f"|Application|Driver|OS|Client IPs|\n")
-        f.write(f"|---|---|---|---|\n")
+        f.write(f"|Application|Driver|OS|Platform|Client IPs|\n")
+        f.write(f"|---|---|---|---|---|\n")
         with open(self._output_file, "r") as data:
             # load all json lines
             for line in data:
                 line_json = json_util.loads(line)
                 for k,v in line_json.items():
                     doc = v.get("doc", {})
-                    app = escape_markdown(doc.get("application", {}).get("name", "(Unknown)"))
+                    app = escape_markdown(doc.get("application", {}).get("name", "Unknown"))
                     driver = doc.get("driver", {})
-                    driver_name = escape_markdown(driver.get("name", "(Unknown)"))
-                    driver_version = escape_markdown(driver.get("version", "(Unknown)"))
+                    driver_name = driver.get("name", "Unknown")
+                    driver_version = driver.get("version", "Unknown")
+                    driver_str = escape_markdown(f"{driver_name} {driver_version}")
                     os = doc.get("os", {})
-                    os_type = escape_markdown(os.get("type", "(Unknown)"))
-                    os_name = escape_markdown(os.get("name", "(Unknown)"))
-                    os_arch = escape_markdown(os.get("architecture", "(Unknown)"))
-                    os_version = escape_markdown(os.get("version", "(Unknown)"))
-                    platform = escape_markdown(doc.get("platform", "(Unknown)"))
+                    os_type = os.get("type", "Unknown")
+                    os_name = os.get("name", "Unknown")
+                    os_arch = os.get("architecture", "Unknown")
+                    os_version = os.get("version", "Unknown")
+                    os_str = escape_markdown(f"{os_name if os_name != 'Unknown' else os_type} {os_arch} {os_version if os_version != 'Unknown' else ''}")
+                    platform = escape_markdown(doc.get("platform", "Unknown"))
                     ips = v.get("ips", [])
-                    f.write(f"|{app}|{driver_name} {driver_version}|{os_type} ({os_name}) {os_arch} {os_version}|{'<br/>'.join(ips)}|\n")
+                    f.write(f"|{app}|{driver_str}|{os_str}|{platform}|{'<br/>'.join(ips)}|\n")

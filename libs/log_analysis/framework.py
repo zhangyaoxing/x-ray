@@ -6,6 +6,7 @@ from libs.utils import *
 import logging
 import importlib
 import pkgutil
+import markdown
 from bson import json_util
 
 def load_log_classes(package_name="libs.log_analysis.log_items"):
@@ -90,7 +91,7 @@ class Framework:
     def output_results(self, output_folder: str = "output/", format: str = "html"):
         batch_folder = self._get_output_folder(output_folder)
         output_file = f"{batch_folder}report.md"
-        template_file = get_script_path(f"templates/{self._config.get('template', 'full.html')}")
+        template_file = get_script_path(f"templates/{self._config.get('templates', 'log/full.html')}")
         self._logger.info(f"Saving results to: {green(output_file)}")
 
         with open(output_file, "w") as f:
@@ -102,3 +103,16 @@ class Framework:
                 except Exception as e:
                     self._logger.warning(yellow(f"Failed to generate markdown for log item '{item.name}': {e}"))
                     continue
+
+        if format == "html":
+            html_file = f"{batch_folder}report.html"
+            self._logger.info(f"Converting markdown to HTML: {green(html_file)}")
+            with open(html_file, "w") as f:
+                with open(output_file, "r") as md_file:
+                    html_content = markdown.markdown(md_file.read(), extensions=["tables", "fenced_code", "codehilite"])
+                # Load the template file
+                with open(template_file, "r") as tf:
+                    template_content = tf.read()
+                    # Replace the placeholder with the generated HTML content
+                final_html = template_content.replace("{{ content }}", html_content)
+                f.write(final_html)
