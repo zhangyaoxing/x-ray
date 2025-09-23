@@ -39,7 +39,6 @@ class BaseItem(object):
     
     def finalize(self):
         self._write_output()
-        self._row_count += 1
 
     def review_results_markdown(self, f):
         # Calculate the scale for the chart. Avoid too many data points.
@@ -82,3 +81,4 @@ class BaseItem(object):
         with open(self._output_file, "a") as f:
             f.write(to_ejson(self._cache))
             f.write("\n")
+        self._row_count += 1

@@ -21,7 +21,6 @@ class ConnectionRateItem(BaseItem):
         if self._cache.get("time", None) != time_min:
             if self._cache != {}:
                 self._write_output()
-                self._row_count += 1
             self._cache = {
                 "time": time_min,
                 "created": 0,
