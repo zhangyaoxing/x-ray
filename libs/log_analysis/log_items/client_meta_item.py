@@ -1,6 +1,7 @@
 from libs.log_analysis.log_items.base_item import BaseItem
 from libs.log_analysis.shared import escape_markdown, json_hash
 from bson import json_util
+from libs.utils import *
 
 class ClientMetaItem(BaseItem):
     def __init__(self, output_folder: str, config):
@@ -47,11 +48,13 @@ class ClientMetaItem(BaseItem):
             for line in data:
                 line_json = json_util.loads(line)
                 doc = line_json.get("doc", {})
-                app = escape_markdown(doc.get("application", {}).get("name", "Unknown"))
+                full_app = doc.get("application", {}).get("name", "Unknown")
+                trunc_app = truncate_content(full_app)
+                app_html = tooltip_html(escape_markdown(full_app), escape_markdown(trunc_app)) if full_app != trunc_app else escape_markdown(full_app)
                 driver = doc.get("driver", {})
                 driver_name = driver.get("name", "Unknown")
                 driver_version = driver.get("version", "Unknown")
-                driver_str = escape_markdown(f"{driver_name} {driver_version}")
+                full_driver = escape_markdown(f"{driver_name} {driver_version}")
                 os = doc.get("os", {})
                 os_type = os.get("type", "Unknown")
                 os_name = os.get("name", "Unknown")
@@ -60,6 +63,6 @@ class ClientMetaItem(BaseItem):
                 os_str = escape_markdown(f"{os_name if os_name != 'Unknown' else os_type} {os_arch} {os_version if os_version != 'Unknown' else ''}")
                 platform = escape_markdown(doc.get("platform", "Unknown"))
                 ips = [f"{ip['ip']} ({ip['count']} times)" for ip in line_json["ips"]]
-                f.write(f"|{app}|{driver_str}|{os_str}|{platform}|{'<br/>'.join(ips)}|\n")
+                f.write(f"|{app_html}|{full_driver}|{os_str}|{platform}|{'<br/>'.join(ips)}|\n")
         f.write(f"<div class=\"pie\"><canvas id='canvas_{self.__class__.__name__}'></canvas></div>\n")
         f.write(f"<div class=\"pie\"><canvas id='canvas_{self.__class__.__name__}_ip'></canvas></div>\n")

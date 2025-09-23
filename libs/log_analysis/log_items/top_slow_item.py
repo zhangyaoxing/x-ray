@@ -69,5 +69,5 @@ class TopSlowItem(BaseItem):
                 f.write(f"|[{query_hash}](#{i})|{duration}|{count}|{avg_duration}|{scanned_per_returned}|{scannedobj_per_returned}|{has_sort}|{plan_summary}|\n")
                 i += 1
         f.write("\n```json\n")
-        f.write("// Click query hash to display sample slow query...\n")
+        f.write("// Click query hash to display sample query...\n")
         f.write("```\n")

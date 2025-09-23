@@ -91,7 +91,7 @@ class Framework:
     def output_results(self, output_folder: str = "output/", format: str = "html"):
         batch_folder = self._get_output_folder(output_folder)
         output_file = f"{batch_folder}report.md"
-        template_file = get_script_path(f"templates/{self._config.get('templates', 'log/full.html')}")
+        template_file = get_script_path(f"templates/{self._config.get('template', 'log/full.html')}")
         self._logger.info(f"Saving results to: {green(output_file)}")
 
         with open(output_file, "w") as f:

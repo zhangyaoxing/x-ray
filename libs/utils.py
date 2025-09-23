@@ -1,6 +1,7 @@
 import os
 import json
 import logging
+import re
 from inspect import getsourcefile
 from os.path import abspath, dirname
 from pathlib import Path
@@ -67,6 +68,19 @@ def load_config(config_path = "config.json"):
             logger.error(f"Failed to load config file: {e}")
             raise
     return config
+
+MAX_CONTENT_WORDS = 3
+MORE_CONTENT = "..."
+def truncate_content(content: str, delimiter='[ \t]', max_words=MAX_CONTENT_WORDS, more_content=MORE_CONTENT) -> str:
+    content = content.strip()
+    truncated = re.split(delimiter, content)
+    if len(truncated) <= max_words:
+        return content
+    return ' '.join(truncated[:max_words]) + f" {more_content}"
+
+def tooltip_html(full, truncated) -> str:
+    html = f"<span class=\"tooltip\" data-tip=\"{full}\">{truncated}</span>"
+    return html
 
 def color_code(code): return f"\x1b[{code}m"
 def colorize(code: int, s: str) -> str: return f"{color_code(code)}{str(s).replace(color_code(0), color_code(code))}{color_code(0)}"

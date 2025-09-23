@@ -10,7 +10,7 @@ for (var i = 0; i < anchors.length; i++) {
         row = data[index];
         if (highlighted == index) {
             highlighted = -1;
-            sample.textContent = "// Click query hash to display sample slow query...";
+            sample.textContent = "// Click query hash to display sample query...";
             return
         }
         sample.textContent = JSON.stringify(row.sample, null, 2);
