@@ -56,3 +56,5 @@ def format_json_md(json_data, indent=2):
     else:
         json_str = json_util.dumps(json_data, indent=indent).replace("\n", "<br />")
     return json_str
+
+MAX_DATA_POINTS = 40

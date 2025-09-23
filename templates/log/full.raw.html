@@ -10,6 +10,7 @@
     </link>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script type="text/javascript">
+        MAX_DATA_POINTS = 20;
         data = {};
         linkElms = [];
         titleElms = [];
@@ -109,6 +110,21 @@
             highLightOutline();
             window.onscroll = highLightOutline;
         };
+        function scaleData(data, scale) {
+            if (data.length <= MAX_DATA_POINTS) {
+                return data;
+            }
+            var scaled = [];
+            for (var i = 0; i < data.length; i += scale) {
+                scaled.push(data[i]);
+            }
+            return scaled;
+        }
+        function onSlide(sliderElm, valueElm, scaleCharts) {
+            var value = parseInt(sliderElm.value);
+            valueElm.textContent = value;
+            scaleCharts(value);
+        }
     </script>
     <style>
         .markdown-body {
