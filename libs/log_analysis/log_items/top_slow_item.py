@@ -46,8 +46,10 @@ class TopSlowItem(BaseItem):
         super().finalize()
     def review_results_markdown(self, f):
         super().review_results_markdown(f)
+        f.write("<div id=\"top_slow_positioner\"></div>\n\n")
         f.write(f"|Query Hash|Total Duration (ms)|Count|Avg Duration (ms)|Scanned/Returned|ScannedObj/Returned|Has Sort|Plan Summary|\n")
         f.write(f"|---|---|---|---|---|---|---|---|\n")
+        i = 0
         with open(self._output_file, "r") as data:
             for line in data:
                 line_json = json_util.loads(line)
@@ -64,4 +66,8 @@ class TopSlowItem(BaseItem):
                 plan_summary = escape_markdown(plan_summary if plan_summary != "" else "N/A")
                 scanned_per_returned = round(keys_examined / n_returned, 2) if n_returned > 0 else keys_examined
                 scannedobj_per_returned = round(docs_examined / n_returned, 2) if n_returned > 0 else docs_examined
-                f.write(f"|`{query_hash}`|{duration}|{count}|{avg_duration}|{scanned_per_returned}|{scannedobj_per_returned}|{has_sort}|{plan_summary}|\n")
+                f.write(f"|[{query_hash}](#{i})|{duration}|{count}|{avg_duration}|{scanned_per_returned}|{scannedobj_per_returned}|{has_sort}|{plan_summary}|\n")
+                i += 1
+        f.write("\n```json\n")
+        f.write("// Click query hash to display sample slow query...\n")
+        f.write("```\n")
