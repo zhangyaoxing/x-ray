@@ -1,7 +1,6 @@
 from libs.log_analysis.log_items.base_item import BaseItem
-from libs.log_analysis.shared import escape_markdown, json_hash, to_ejson
+from libs.log_analysis.shared import escape_markdown, json_hash
 from bson import json_util
-from libs.log_analysis.shared import to_json
 
 class ClientMetaItem(BaseItem):
     def __init__(self, output_folder: str, config):
