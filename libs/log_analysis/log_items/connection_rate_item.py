@@ -1,9 +1,5 @@
-import json
-import os
 from libs.log_analysis.log_items.base_item import BaseItem
-from datetime import datetime, timezone
-from libs.log_analysis.shared import to_json
-from bson import json_util
+from datetime import datetime
 import math
 
 class ConnectionRateItem(BaseItem):
