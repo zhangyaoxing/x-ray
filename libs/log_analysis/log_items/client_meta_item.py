@@ -29,15 +29,16 @@ class ClientMetaItem(BaseItem):
         self._cache[doc_hash]["ips"][ip] = self._cache[doc_hash]["ips"].get(ip, 0) + 1
 
     def finalize(self):
-        with open(self._output_file, "a") as f:
-            for v in self._cache.values():
-                doc = v["doc"]
-                ips = [{"ip": ip, "count": count} for ip, count in v.get("ips", {}).items()]
-                f.write(to_ejson({
-                    "doc": doc,
-                    "ips": ips
-                }))
-                f.write("\n")
+        cache = []
+        for v in self._cache.values():
+            doc = v["doc"]
+            ips = [{"ip": ip, "count": count} for ip, count in v.get("ips", {}).items()]
+            cache.append({
+                "doc": doc,
+                "ips": ips
+            })
+        self._cache = cache
+        super().finalize()
 
     def review_results_markdown(self, f):
         super().review_results_markdown(f)
