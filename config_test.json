@@ -37,9 +37,11 @@
         "template": "healthcheck/full.html"
     },
     "log": {
+        "sample_rate": 1.0,
+        "top": 10,
         "logsets": {
             "default": {
-                "items": ["ConnectionRateItem", "SlowRateItem", "ClientMetaItem"]
+                "items": ["ConnectionRateItem", "SlowRateItem", "ClientMetaItem", "TopSlowItem"]
             }
         }
     }

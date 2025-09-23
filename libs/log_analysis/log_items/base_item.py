@@ -82,6 +82,12 @@ class BaseItem(object):
     def _write_output(self):
         # Open file steam and write the cache to file
         with open(self._output_file, "a") as f:
-            f.write(to_ejson(self._cache))
-            f.write("\n")
-        self._row_count += 1
+            if isinstance(self._cache, list):
+                for item in self._cache:
+                    f.write(to_ejson(item))
+                    f.write("\n")
+                    self._row_count += 1
+            else:
+                f.write(to_ejson(self._cache))
+                f.write("\n")
+                self._row_count += 1
