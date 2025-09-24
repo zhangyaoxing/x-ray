@@ -3,6 +3,7 @@ const groupedDataScanned = {};
 const groupedDataScannedObj = {};
 const positioner = document.getElementById('positioner_{name}');
 const code = positioner.nextElementSibling.getElementsByTagName('code')[0];
+hljs.highlightElement(code);
 data.forEach((item, i) => {
     const namespace = item.attr.ns || '(unknown)';
     if (!groupedDataDuration[namespace]) {
