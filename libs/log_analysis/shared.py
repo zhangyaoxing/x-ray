@@ -1,7 +1,7 @@
 from datetime import datetime
 import hashlib
 from libs.utils import *
-from bson import json_util
+from bson import ObjectId, json_util
 
 # TODO: some of these functions should be merged with shared.py in healthcheck, and moved to libs/utils.py
 def to_ejson(obj, indent=None):
@@ -11,6 +11,8 @@ def to_json(obj, indent=None):
     def custom_serializer(o):
         if isinstance(o, datetime):
             return o.isoformat()
+        elif isinstance(o, ObjectId):
+            return str(o)
         else:
             return json._json_default(o)
     return json.dumps(obj, indent=indent, default=custom_serializer)
