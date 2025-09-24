@@ -41,7 +41,7 @@
         "top": 10,
         "logsets": {
             "default": {
-                "items": ["InfoItem", "ConnectionRateItem", "SlowRateItem", "ClientMetaItem", "TopSlowItem"]
+                "items": ["InfoItem", "ConnectionRateItem", "SlowRateItem", "ClientMetaItem", "TopSlowItem", "SlowChartItem"]
             }
         },
         "template": "log/full.raw.html"

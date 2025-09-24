@@ -80,6 +80,8 @@ class BaseItem(object):
         f.write("</script>\n")
 
     def _write_output(self):
+        if self._cache is None:
+            return
         # Open file steam and write the cache to file
         with open(self._output_file, "a") as f:
             if isinstance(self._cache, list):

@@ -127,6 +127,12 @@
             valueElm.textContent = value;
             scaleCharts(value);
         }
+        function generateRandomColor(alpha = 0.8) {
+            const hue = Math.floor(Math.random() * 360);
+            const saturation = Math.floor(Math.random() * 30) + 70; // 70-100%
+            const lightness = Math.floor(Math.random() * 20) + 50;  // 50-70%
+            return `hsla(${hue}, ${saturation}%, ${lightness}%, ${alpha})`;
+        }
     </script>
     <style>
         .markdown-body {
