@@ -17,6 +17,12 @@ db.pizzas.find({
         $in: ["small", "medium", "large"] 
     } 
 });
+iter = db.pizzas.find({ 
+    size: { 
+        $in: ["small", "medium", "large"] 
+    } 
+}).batchSize(1);
+while (iter.hasNext()) { iter.next(); }
 db.pizzas.find({ 
     size: { 
         $in: ["small", "medium", "large"] 
