@@ -297,3 +297,22 @@ charts.push(chart2);
 const ctx3 = document.getElementById('canvas_{name}_scannedObj').getContext('2d');
 const chart3 = new Chart(ctx3, configScannedObj);
 charts.push(chart3);
+
+const linksContainer = document.getElementById('links_{name}');
+const links = linksContainer.getElementsByTagName('a');
+for (let i = 0; i < links.length; i++) {
+    const link = links[i];
+    link.addEventListener('click', function(event) {
+        event.preventDefault();
+        // Hide all canvases first
+        for (let j = 0; j < links.length; j++) {
+            const link = links[j];
+            const canvasId = link.getAttribute('href').substring(1);
+            const canvas = document.getElementById(canvasId);
+            canvas.style.display = "none";
+        }
+        const canvasId = this.getAttribute('href').substring(1);
+        const canvas = document.getElementById(canvasId);
+        canvas.style.display = "block";
+    });
+}
