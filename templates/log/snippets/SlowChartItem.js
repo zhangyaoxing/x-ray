@@ -300,6 +300,7 @@ charts.push(chart3);
 
 const linksContainer = document.getElementById('links_{name}');
 const links = linksContainer.getElementsByTagName('a');
+links[0].classList.add('in-view');
 for (let i = 0; i < links.length; i++) {
     const link = links[i];
     link.addEventListener('click', function(event) {
@@ -310,9 +311,11 @@ for (let i = 0; i < links.length; i++) {
             const canvasId = link.getAttribute('href').substring(1);
             const canvas = document.getElementById(canvasId);
             canvas.style.display = "none";
+            link.classList.remove('in-view');
         }
         const canvasId = this.getAttribute('href').substring(1);
         const canvas = document.getElementById(canvasId);
         canvas.style.display = "block";
+        this.classList.add('in-view');
     });
 }
