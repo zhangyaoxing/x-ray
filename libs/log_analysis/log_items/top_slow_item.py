@@ -1,6 +1,7 @@
 from libs.log_analysis.log_items.base_item import BaseItem
 from bson import json_util
-from libs.log_analysis.shared import escape_markdown
+from libs.log_analysis.query_analyzer import analyze_query_shape
+from libs.log_analysis.shared import escape_markdown, json_hash
 
 class TopSlowItem(BaseItem):
     """
@@ -26,6 +27,11 @@ class TopSlowItem(BaseItem):
         keys_examined = attr.get("keysExamined", 0)
         docs_examined = attr.get("docsExamined", 0)
         plan_summary = attr.get("planSummary", "")
+        query_shape = analyze_query_shape(log_line)
+        if query_hash == "":
+            # Some command doesn't have queryHash, e.g., getMore
+            # If so, we generate one based on the query shape
+            query_hash = json_hash(query_shape if query_shape else {}, 4)
         slow_query = self._cache.get(query_hash, None)
         if slow_query is None:
             slow_query = {}
@@ -41,13 +47,15 @@ class TopSlowItem(BaseItem):
             "count": slow_query.get("count", 0) + 1,
             "sample": log_line if "sample" not in slow_query else slow_query["sample"],
         })
+
     def finalize(self):
         self._cache = list(sorted(self._cache.values(), key=lambda item: item["duration"], reverse=True)[:self._top_n])
         super().finalize()
+
     def review_results_markdown(self, f):
         super().review_results_markdown(f)
         f.write("<div id=\"top_slow_positioner\"></div>\n\n")
-        f.write(f"|Query Hash|Total Duration (ms)|Count|Avg Duration (ms)|Scanned/Returned|ScannedObj/Returned|Has Sort|Plan Summary|\n")
+        f.write(f"|Query Hash|Total Duration (ms)|Count|Avg Duration (ms)|Scanned / Returned|ScannedObj / Returned|Has Sort|Plan Summary|\n")
         f.write(f"|---|---|---|---|---|---|---|---|\n")
         i = 0
         with open(self._output_file, "r") as data:

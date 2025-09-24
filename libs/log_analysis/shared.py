@@ -15,10 +15,10 @@ def to_json(obj, indent=None):
             return json_util.default(o)
     return json.dumps(obj, indent=indent, default=custom_serializer)
 
-def json_hash(data):
+def json_hash(data, digest_size=8):
     json_str = json.dumps(data, sort_keys=True, separators=(',', ':'))
-    h = hashlib.blake2b(json_str.encode("utf-8"), digest_size=8)
-    return h.digest().hex()
+    h = hashlib.blake2b(json_str.encode("utf-8"), digest_size=digest_size)
+    return h.digest().hex().upper()
 
 def format_size(bytes, decimal=2):
     """
@@ -56,8 +56,5 @@ def format_json_md(json_data, indent=2):
     else:
         json_str = json_util.dumps(json_data, indent=indent).replace("\n", "<br />")
     return json_str
-
-def analyse_query_shape(log_line):
-    pass
 
 MAX_DATA_POINTS = 32

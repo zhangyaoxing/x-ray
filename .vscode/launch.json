@@ -43,7 +43,7 @@
                 "-c", "config_test.json",
                 "log",
                 "-r", "1",
-                "mongod.log"
+                "misc/example.log"
             ],
             "env": {
                 "LOG_LEVEL": "INFO",
