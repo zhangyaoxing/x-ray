@@ -103,7 +103,10 @@ var chart2 = new Chart(ctx_byip, {
                 display: true,
                 text: 'Connections Created/Ended by IP Over Time'
             },
-            legend: { position: 'top' }
+            legend: { 
+                position: 'top',
+                display: false
+            }
         },
         responsive: true,
         scales: {

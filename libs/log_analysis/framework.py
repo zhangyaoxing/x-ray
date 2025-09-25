@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 import random
 import re
-from libs.healthcheck.shared import to_markdown_id, irresponsive_nodes
+from libs.healthcheck.shared import to_json, to_markdown_id, irresponsive_nodes
 from libs.utils import *
 import logging
 import importlib
@@ -9,6 +9,7 @@ import pkgutil
 import markdown
 from bson import json_util
 
+logger = logging.getLogger(__name__)
 def load_log_classes(package_name="libs.log_analysis.log_items"):
     class_map = {}
     package = importlib.import_module(package_name)
@@ -18,6 +19,7 @@ def load_log_classes(package_name="libs.log_analysis.log_items"):
             obj = getattr(module, attr)
             if isinstance(obj, type):
                 class_map[attr] = obj
+    logger.debug(f"Loaded log analysis classes: {list(class_map.keys())}")
     return class_map
 LOG_CLASSES = load_log_classes()
 
@@ -29,6 +31,9 @@ class Framework:
         self._items = []
         now = str(datetime.now(tz=timezone.utc))
         self._timestamp = re.sub(r"[:\- ]", "", now.split(".")[0])
+        self._logger.debug(to_json(self._config))
+        if env == "development":
+            self._logger.info(yellow("Running in development mode."))
 
     def _get_output_folder(self, output_folder: str):
         if env == "development":
@@ -96,7 +101,6 @@ class Framework:
 
         with open(output_file, "w") as f:
             f.write(f"# Log Analysis Report for {self._file_path}\n")
-            # f.write(f"Generated on {datetime.now(tz=timezone.utc).strftime('%Y-%m-%d %H:%M:%S %Z')}\n\n")
             for item in self._items:
                 try:
                     item.review_results_markdown(f)

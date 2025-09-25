@@ -48,6 +48,7 @@ class BaseItem(object):
         file_name = f"{self.__class__.__name__}.js"
         file_path = os.path.join("templates", "log", "snippets", file_name)
         file_path = get_script_path(file_path)
+        self._logger.debug(f"Using JS snippet file: {file_path}")
         
         f.write(f"## {self.name}\n\n")
         f.write(f"{self.description}\n\n")
@@ -85,6 +86,7 @@ class BaseItem(object):
 
     def _write_output(self):
         if self._cache is None:
+            self._logger.debug(f"Cache is empty, nothing to write for {self.__class__.__name__}")
             return
         # Open file steam and write the cache to file
         with open(self._output_file, "a") as f:
@@ -93,7 +95,9 @@ class BaseItem(object):
                     f.write(to_ejson(item))
                     f.write("\n")
                     self._row_count += 1
+                self._logger.debug(f"Wrote {len(self._cache)} records to {self._output_file} for {self.__class__.__name__}")
             else:
                 f.write(to_ejson(self._cache))
                 f.write("\n")
                 self._row_count += 1
+                self._logger.debug(f"Wrote 1 record to {self._output_file} for {self.__class__.__name__}")

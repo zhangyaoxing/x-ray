@@ -121,7 +121,7 @@ def health_check_command(args):
 
 def log_analysis_command(args):
     """Log analysis command"""
-    logger.info(f"Analyzing log file: {args.log_file}")
+    logger.info(f"Analyzing log file: {green(args.log_file)}")
     try:
         config = load_config(args.config)["log"]
         config["sample_rate"] = args.rate
