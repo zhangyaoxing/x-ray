@@ -16,14 +16,15 @@ class InfoItem(BaseItem):
             "Build Info",
             "Operating System",
             "Options set by command line",
-            "Certificate information"
+            "Certificate information",
+            "MongoDB starting"
         ]
 
     def analyze(self, log_line):
         msg = log_line.get("msg", "")
         index = self._msgs.index(msg) if msg in self._msgs else -1
         attr = log_line.get("attr", {})
-        if index == 0:
+        if index == 0 or index == 7:
             # Process Details
             self._process_details(attr)
         elif index == 1:
@@ -96,15 +97,19 @@ class InfoItem(BaseItem):
             if fcv:
                 f.write(f" (FCV: `{fcv}`)")
             if process:
-                f.write(f" PID `{process.get('pid', 'Unknown')}` running on host `{process.get('host', 'Unknown')}:{process.get('port', 'Unknown')}`\n")
+                f.write(f" PID `{process.get('pid', 'Unknown')}` running on `{process.get('host', 'Unknown')}:{process.get('port', 'Unknown')}`\n")
             f.write("\n")
         cert_info = self._cache.get("cert_info", None)
         if cert_info:
             f.write("### Certificate Info\n\n")
+            key_file = cert_info.get("keyFile", "Unknown")
             subject = cert_info.get("subject", "Unknown")
             issuer = cert_info.get("issuer", "Unknown")
             valid_from = cert_info.get("notValidBefore", "Unknown")
             valid_to = cert_info.get("notValidAfter", "Unknown")
+            type = cert_info.get("type", "Unknown")
+            f.write(f"- Key File: `{key_file}`\n")
+            f.write(f"- Type: `{type}`\n")
             f.write(f"- Subject: `{subject}`\n")
             f.write(f"- Issuer: `{issuer}`\n")
             f.write(f"- Valid: `{valid_from}` ~ `{valid_to}`\n\n")
