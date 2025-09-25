@@ -71,7 +71,11 @@ class Framework:
         rate = self._config.get("sample_rate", 1.0)
         # Read the log file line by line and pass each line to the log items for analysis
         with open(log_file, "r", encoding="utf-8", errors="ignore") as f:
+            counter = 0
             for line in f:
+                counter += 1
+                if counter % 10000 == 0:
+                    self._logger.info(f"{green(counter)} lines ingested...")
                 # Sampling based on the rate. For dealing with large log files.
                 if random.random() > rate:
                     continue
