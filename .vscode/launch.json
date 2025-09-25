@@ -49,6 +49,17 @@
                 "LOG_LEVEL": "INFO",
                 "ENV": "development"
             }
+        },
+        {
+            "name": "Unit Test",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pytest",
+            "console": "integratedTerminal",
+            "args": [],
+            "env": {
+                "PYTHONPATH": "."
+            }
         }
     ]
 }

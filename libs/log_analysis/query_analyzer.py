@@ -19,5 +19,25 @@ def analyze_query_shape(log_line):
     return query_to_shape(query)
 
 def query_to_shape(query):
-    return {}
+    shape = {}
+    if isinstance(query, list):
+        # For aggregation pipelines
+        # Only check the 1st stage. It's not fully correct but should cover 90% of cases.
+        stage1 = query[0] if len(query) > 0 else {}
+        if "$match" in stage1:
+            return query_to_shape(stage1["$match"])
+        else:
+            return {}
+    else:
+        for k, v in query.items():
+            if isinstance(v, dict):
+                shape[k] = query_to_shape(v)
+            elif isinstance(v, list):
+                shape[k] = [query_to_shape(i) if isinstance(i, dict) else 1 for i in v]
+                # If all elements are 1, simplify to []
+                if all(i == 1 for i in shape[k]):
+                    shape[k] = 1
+            else:
+                shape[k] = 1
+    return shape
     
