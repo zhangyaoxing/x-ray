@@ -1,7 +1,7 @@
 # x-ray
-This project aims to create tools for MongoDB analysis and diagnosis. So far 2 modules are finished.
-- Health check module
-- Log analysis module
+This project aims to create tools for MongoDB analysis and diagnosis. So far 2 modules are built:
+- Health check module.
+- Log analysis module (Under construction).
 
 ## 1 Compatibility Matrix
 |  Replica Set  | Sharded Cluster | Standalone |
