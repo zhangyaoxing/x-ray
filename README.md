@@ -1,5 +1,7 @@
 # x-ray
-This project aims to create tools for MongoDB analysis and diagnostics.
+This project aims to create tools for MongoDB analysis and diagnosis. So far 2 modules are finished.
+- Health check module
+- Log analysis module
 
 ## 1 Compatibility Matrix
 |  Replica Set  | Sharded Cluster | Standalone |
@@ -66,4 +68,22 @@ Refer to the wiki for more details.
 - [Customize the output](https://github.com/zhangyaoxing/x-ray/wiki/Health-Check-Output-Template)
 
 ### 3.2 Log Analysis Component
-TBD
+#### 3.2.1 Examples
+```bash
+# Full analysis
+./x-ray log mongodb.log
+# For large logs, analyze a random 10% logs
+./x-ray log -r 0.1 mongodb.log
+```
+
+#### 3.2.2 Full Arguments
+```bash
+x-ray log [-h] [-s CHECKSET] [-o OUTPUT] [-f {markdown,html}] [log_file]
+```
+|      Argument      |                    Description                    |  Default  |
+| ------------------ | ------------------------------------------------- | :-------: |
+| `-s`, `--checkset` | Checkset to run.                                  | `default` |
+| `-o`, `--output`   | Output folder path.                               | `output/` |
+| `-f`, `--format`   | Output format. Can be `markdown` or `html`.       |  `html`   |
+| `-r`, `--rate`     | Sample rate. Only analyze a subset of logs.       |    `1`    |
+| `--top`            | When analyzing the slow queries, only list top N. |   `10`    |
