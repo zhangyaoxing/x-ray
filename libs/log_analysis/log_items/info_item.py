@@ -15,7 +15,8 @@ class InfoItem(BaseItem):
             "current featureCompatibilityVersion value",
             "Build Info",
             "Operating System",
-            "Options set by command line"
+            "Options set by command line",
+            "Certificate information"
         ]
 
     def analyze(self, log_line):
@@ -40,6 +41,9 @@ class InfoItem(BaseItem):
         elif index == 5:
             # Options set by command line
             self._process_command_line_options(attr)
+        elif index == 6:
+            # Certificate information
+            self._process_certificate_info(attr)
 
     def _process_details(self, attr):
         self._cache["process"] = {
@@ -71,6 +75,10 @@ class InfoItem(BaseItem):
         options = attr.get("options", {})
         self._cache["command_line_options"] = options
 
+    def _process_certificate_info(self, attr):
+        cert_info = attr
+        self._cache["cert_info"] = cert_info
+
     def review_results_markdown(self, f):
         super().review_results_markdown(f)
         if self._cache == {}:
@@ -90,6 +98,16 @@ class InfoItem(BaseItem):
             if process:
                 f.write(f" PID `{process.get('pid', 'Unknown')}` running on host `{process.get('host', 'Unknown')}:{process.get('port', 'Unknown')}`\n")
             f.write("\n")
+        cert_info = self._cache.get("cert_info", None)
+        if cert_info:
+            f.write("### Certificate Info\n\n")
+            subject = cert_info.get("subject", "Unknown")
+            issuer = cert_info.get("issuer", "Unknown")
+            valid_from = cert_info.get("notValidBefore", "Unknown")
+            valid_to = cert_info.get("notValidAfter", "Unknown")
+            f.write(f"- Subject: `{subject}`\n")
+            f.write(f"- Issuer: `{issuer}`\n")
+            f.write(f"- Valid: `{valid_from}` ~ `{valid_to}`\n\n")
         os = self._cache.get("os", None)
         if os:
             f.write("### Operating System\n\n")
