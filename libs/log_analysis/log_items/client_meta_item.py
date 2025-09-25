@@ -44,6 +44,7 @@ class ClientMetaItem(BaseItem):
         super().review_results_markdown(f)
         f.write(f"|Application|Driver|OS|Platform|Client IPs|\n")
         f.write(f"|---|---|---|---|---|\n")
+        rows = []
         with open(self._output_file, "r") as data:
             for line in data:
                 line_json = json_util.loads(line)
@@ -63,6 +64,11 @@ class ClientMetaItem(BaseItem):
                 os_str = escape_markdown(f"{os_name if os_name != 'Unknown' else os_type} {os_arch} {os_version if os_version != 'Unknown' else ''}")
                 platform = escape_markdown(doc.get("platform", "Unknown"))
                 ips = [f"{ip['ip']} ({ip['count']} times)" for ip in line_json["ips"]]
-                f.write(f"|{app_html}|{full_driver}|{os_str}|{platform}|{'<br/>'.join(ips)}|\n")
+                ips_html = tooltip_html(", ".join(ips), f"{ips[0]} {'...' if len(ips) > 1 else ''}")
+                rows.append([app_html, full_driver, os_str, platform, ips_html])
+        # Sort by Application name, then driver name
+        sorted_rows = sorted(rows, key=lambda x: (x[0].lower(), x[1].lower()))
+        for row in sorted_rows:
+            f.write("|".join(row) + "\n")
         f.write(f"<div class=\"pie\"><canvas id='canvas_{self.__class__.__name__}'></canvas></div>\n")
         f.write(f"<div class=\"pie\"><canvas id='canvas_{self.__class__.__name__}_ip'></canvas></div>\n")
