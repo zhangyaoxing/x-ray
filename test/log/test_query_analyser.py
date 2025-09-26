@@ -13,24 +13,24 @@ slow_update_cmd = json_util.loads('{"t":{"$date":"2025-09-25T23:56:25.149+02:00"
 slow_findandmodify = json_util.loads('{"t":{"$date":"2025-09-26T00:02:01.797+02:00"},"s":"I",  "c":"COMMAND",  "id":51803,   "ctx":"conn27","msg":"Slow query","attr":{"type":"command","ns":"Restaurant.pizzas","appName":"mongosh 2.5.6","command":{"findAndModify":"pizzas","query":{"type":"pineapple"},"remove":false,"new":false,"upsert":false,"update":{"$set":{"price":20}},"lsid":{"id":{"$uuid":"c6525f30-f9d7-4e61-affd-2ce438fecfc8"}},"txnNumber":2,"$clusterTime":{"clusterTime":{"$timestamp":{"t":1758837721,"i":14}},"signature":{"hash":{"$binary":{"base64":"AAAAAAAAAAAAAAAAAAAAAAAAAAA=","subType":"0"}},"keyId":0}},"$readPreference":{"mode":"primaryPreferred"},"$db":"Restaurant"},"planSummary":"IXSCAN { type: 1 }","keysExamined":1,"docsExamined":1,"nMatched":1,"nModified":1,"nUpserted":0,"numYields":0,"queryHash":"2A1623C7","planCacheKey":"CDFEBC4E","reslen":278,"locks":{"ParallelBatchWriterMode":{"acquireCount":{"r":2}},"FeatureCompatibilityVersion":{"acquireCount":{"w":2}},"ReplicationStateTransition":{"acquireCount":{"w":3}},"Global":{"acquireCount":{"w":2}},"Database":{"acquireCount":{"w":2}},"Collection":{"acquireCount":{"w":2}},"Mutex":{"acquireCount":{"r":2}}},"flowControl":{"acquireCount":1,"timeAcquiringMicros":1},"readConcern":{"level":"local","provenance":"implicitDefault"},"writeConcern":{"w":"majority","wtimeout":0,"provenance":"implicitDefault"},"storage":{"data":{"bytesRead":152,"timeReadingMicros":2}},"remote":"127.0.0.1:51205","protocol":"op_msg","durationMillis":13}}')
 
 def test_query_analyzer():
-    type, pattern = analyze_query_pattern(slow_insert)
-    assert pattern == {} and type == "insert"
-    type, pattern = analyze_query_pattern(slow_find)
-    assert pattern == {"size": 1} and type == "find"
-    type, pattern = analyze_query_pattern(slow_aggregate)
-    assert pattern == {"size": {"$in": 1}} and type == "aggregate"
-    type, pattern = analyze_query_pattern(slow_cmd)
-    assert pattern == {} and type == "command"
-    type, pattern = analyze_query_pattern(slow_getmore)
-    assert pattern == {"size": {"$in": 1}} and type == "getmore"
-    type, pattern = analyze_query_pattern(slow_delete)
-    assert pattern == {"type": 1} and type == "remove"
-    type, pattern = analyze_query_pattern(slow_delete_cmd)
-    assert pattern == [{"type": 1}] and type == "remove.$cmd"
-    type, pattern = analyze_query_pattern(slow_update)
-    assert pattern == {"type": 1} and type == "update"
-    type, pattern = analyze_query_pattern(slow_update_cmd)
-    assert pattern == [{"type": 1}] and type == "update.$cmd"
+    pattern = analyze_query_pattern(slow_insert)
+    assert pattern["pattern"] == {} and pattern["type"] == "insert"
+    pattern = analyze_query_pattern(slow_find)
+    assert pattern["pattern"] == {"size": 1} and pattern["type"] == "find"
+    pattern = analyze_query_pattern(slow_aggregate)
+    assert pattern["pattern"] == {"size": {"$in": 1}} and pattern["type"] == "aggregate"
+    pattern = analyze_query_pattern(slow_cmd)
+    assert pattern["pattern"] == {} and pattern["type"] == "command"
+    pattern = analyze_query_pattern(slow_getmore)
+    assert pattern["pattern"] == {"size": {"$in": 1}} and pattern["type"] == "getmore"
+    pattern = analyze_query_pattern(slow_delete)
+    assert pattern["pattern"] == {"type": 1} and pattern["type"] == "remove"
+    pattern = analyze_query_pattern(slow_delete_cmd)
+    assert pattern["pattern"] == [{"type": 1}] and pattern["type"] == "remove.$cmd"
+    pattern = analyze_query_pattern(slow_update)
+    assert pattern["pattern"] == {"type": 1} and pattern["type"] == "update"
+    pattern = analyze_query_pattern(slow_update_cmd)
+    assert pattern["pattern"] == [{"type": 1}] and pattern["type"] == "update.$cmd"
 
 
 def test_query_to_shape_complex():

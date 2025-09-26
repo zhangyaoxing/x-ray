@@ -1,3 +1,6 @@
+from libs.log_analysis.shared import json_hash
+
+
 DATA_TYPES = ["$binary", "$date", "$numberLong", "$numberInt", "$numberDecimal", "$oid", "$timestamp"]
 QUERY_OPERATORS = ["$all", "$size", "$elemMatch", # Array operators
                     "$bitsAllClear", "$bitsAllSet", "$bitsAnyClear", "$bitsAnySet", # Bitwise operators
@@ -64,14 +67,23 @@ def analyze_query_pattern(log_line):
 
     if isinstance(query, list):
         # For list of queries, e.g., update.$cmd, remove.$cmd
-        patterns = []
+        patterns = {}
         for q in query:
             q_pattern = query_to_pattern(q.get("q", {}))
-            patterns.append(q_pattern)
-        return query_type, patterns
+            q_hash = json_hash(q_pattern, 4)
+            patterns[q_hash] = q_pattern
+        return {
+            "type": query_type,
+            "pattern": list(patterns.values()),
+            "hash": list(patterns.keys())
+        }
     else:
         # For single query
-        return query_type, query_to_pattern(query)
+        return {
+            "type": query_type,
+            "pattern": query_to_pattern(query),
+            "hash": json_hash(query, 4)
+        }
 
 def query_to_pattern(query):
     shape = {}
