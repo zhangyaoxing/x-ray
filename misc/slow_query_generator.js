@@ -39,4 +39,12 @@ db.pizzas.aggregate([
     { $group: { _id: "$size", count: { $sum: 1 } } },
     { $sort: { count: -1 } }
 ])
+db.pizzas.findAndModify({
+    query: { type: "pineapple" },
+    update: { $set: { price: 20 } }
+});
+db.pizzas.updateOne({type: "pineapple"}, {$set: {price: 10}});
+db.pizzas.updateOne({type: "pineapple"}, {$set: {price: 5}});
+db.pizzas.updateOne({type: "pineapple"}, {$set: {price: {$inc: -1}}});
+db.pizzas.deleteOne({type: "pineapple"});
 db.setProfilingLevel(0, 100);

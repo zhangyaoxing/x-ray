@@ -1,6 +1,6 @@
 from libs.log_analysis.log_items.base_item import BaseItem
 from bson import json_util
-from libs.log_analysis.query_analyzer import analyze_query_shape
+from libs.log_analysis.query_analyzer import analyze_query_pattern
 from libs.log_analysis.shared import escape_markdown, json_hash
 
 class TopSlowItem(BaseItem):
@@ -27,17 +27,18 @@ class TopSlowItem(BaseItem):
         keys_examined = attr.get("keysExamined", 0)
         docs_examined = attr.get("docsExamined", 0)
         plan_summary = attr.get("planSummary", "")
-        query_shape = analyze_query_shape(log_line)
+        query_type, query_pattern = analyze_query_pattern(log_line)
         if query_hash == "":
             # Some command doesn't have queryHash, e.g., getMore
             # If so, we generate one based on the query shape
-            query_hash = json_hash(query_shape if query_shape else {}, 4)
+            query_hash = json_hash(query_pattern if query_pattern else {}, 4)
         slow_query = self._cache.get(query_hash, None)
         if slow_query is None:
             slow_query = {}
             self._cache[query_hash] = slow_query
         slow_query.update({
             "query_hash": query_hash,
+            "query_pattern": query_pattern,
             "duration": slow_query.get("duration", 0) + duration,
             "n_returned": slow_query.get("n_returned", 0) + n_returned,
             "keys_examined": slow_query.get("keys_examined", 0) + keys_examined,
