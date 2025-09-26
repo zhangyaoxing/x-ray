@@ -67,7 +67,7 @@ class Framework:
             item = item_cls(batch_folder, item_config)
             self._items.append(item)
             self._logger.info(f"Log analyze item loaded: {bold(cyan(item_name))}")
-        log_file = get_script_path(self._file_path)
+        log_file = self._file_path
         rate = self._config.get("sample_rate", 1.0)
         # Read the log file line by line and pass each line to the log items for analysis
         with open(log_file, "r", encoding="utf-8", errors="ignore") as f:

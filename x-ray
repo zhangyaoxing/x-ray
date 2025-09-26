@@ -82,7 +82,7 @@ For more information on specific commands, use:
     log_parser.add_argument("-s", "--checkset", help="Checkset to run. Defaults to \"default\".", type=str, default="default")
     log_parser.add_argument("-o", "--output", help="Output folder path. Defaults to \"output/\".", type=str, default="output/")
     log_parser.add_argument("-f", "--format", help="Output format (markdown/html). Defaults to \"markdown\".", type=str, default="html", choices=["markdown", "html"])
-    log_parser.add_argument("-r", "--rate", help="Log sampling rate (e.g., 1 for all logs, 0.1 for 10% logs). Defaults to 1.", type=float, default=1.0)
+    log_parser.add_argument("-r", "--rate", help="Log sampling rate (e.g., 1 for all logs, 0.1 for 10%% logs). Defaults to 1.", type=float, default=1.0)
     log_parser.add_argument("--top", help="Top N slow queries. Defaults to 10.", type=int, default=10)
     
     return parser
