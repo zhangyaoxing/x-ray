@@ -208,3 +208,4 @@ __marimo__/
 
 output/
 .DS_Store
+export_secret.sh
