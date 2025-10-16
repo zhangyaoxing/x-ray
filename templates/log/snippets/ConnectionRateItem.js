@@ -87,6 +87,7 @@ ips.forEach(ip => {
 });
 
 const ctx_byip = document.getElementById('canvas_{name}_byip').getContext('2d');
+const displayLegend = datasets_byip.length <= MAX_LEGENDS;
 var chart2 = new Chart(ctx_byip, {
     type: 'bar',
     data: {
@@ -105,7 +106,7 @@ var chart2 = new Chart(ctx_byip, {
             },
             legend: { 
                 position: 'top',
-                display: false
+                display: displayLegend
             }
         },
         responsive: true,
