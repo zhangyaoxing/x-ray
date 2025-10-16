@@ -35,9 +35,11 @@ class WEFItem(BaseItem):
 
     def review_results_markdown(self, f):
         super().review_results_markdown(f)
-        f.write(f"|ID|Severity|Message|Count|\n")
+        f.write("<div id=\"wef_positioner\"></div>\n\n")
+        f.write(f"|Code|Severity|Message|Count|\n")
         f.write(f"|---|---|---|---|\n")
         rows = []
+        i = 0
         with open(self._output_file, "r") as data:
             for line in data:
                 line_json = json_util.loads(line)
@@ -45,7 +47,11 @@ class WEFItem(BaseItem):
                 severity = line_json.get("severity", "Unknown").upper()
                 msg = line_json.get("msg", "")
                 count = len(line_json.get("timestamp", []))
-                rows.append(f"|{id}|{severity}|{escape_markdown(msg)}|{count}|\n")
+                rows.append(f"|[{id}](#{i})|{severity}|{escape_markdown(msg)}|{count}|\n")
+                i += 1
         rows = sorted(rows, key=lambda x: x.lower())
         for row in rows:
             f.write(row)
+        f.write(f"```json\n")
+        f.write(f"// Click error code to review sample log line...\n")
+        f.write(f"```\n")
