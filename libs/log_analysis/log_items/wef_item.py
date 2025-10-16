@@ -1,3 +1,4 @@
+from random import randint
 from libs.log_analysis.log_items.base_item import BaseItem
 from libs.log_analysis.shared import escape_markdown, json_hash
 from bson import json_util
@@ -31,6 +32,24 @@ class WEFItem(BaseItem):
 
     def finalize(self):
         self._cache = list(self._cache.values())
+        # Ask AI about the warning/error/fatal messages
+        if ai_key != "":
+            self._logger.info(bold(cyan("AI API key found.")) + " Analyzing W/E/F logs with AI. This can take a few minutes...")
+            from openai import OpenAI
+            client = OpenAI()
+
+            if env == "development":
+                cache = [self._cache[randint(0, len(self._cache) - 1)]] if len(self._cache) > 0 else []
+                self._logger.info(yellow(f"Running in development mode. Only process ONE random log entry with AI."))
+                self._logger.info(yellow(f"Log ID: {cache[0]['id']}"))
+            for item in cache:
+                response = client.responses.create(
+                    model="gpt-5",
+                    input=f"Tell me about this MongoDB log. Keep the answer as short as possible: {str(item['sample'])}",
+                )
+                item["ai_analysis"] = response.output_text
+                self._logger.debug(f"AI analyzed log: {item['id']}")
+        
         super().finalize()
 
     def review_results_markdown(self, f):

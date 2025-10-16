@@ -14,7 +14,12 @@ for (var i = 0; i < anchors.length; i++) {
             highlighted = -1;
         } else {
             sample.textContent = JSON.stringify(row.sample, null, 2);
-            highlighted = index;            
+            if (row.ai_analysis) {
+                sample.textContent += "\n\n// AI Analysis: \n";
+                const analysis = row.ai_analysis.split("\n").map(line => "// " + line).join("\n");
+                sample.textContent += analysis;
+            }
+            highlighted = index;
         }
         delete sample.dataset.highlighted;
         hljs.highlightElement(sample);

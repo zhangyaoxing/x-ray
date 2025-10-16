@@ -9,6 +9,7 @@ from pathlib import Path
 levels = logging._nameToLevel
 level = os.getenv("LOG_LEVEL", "INFO")
 env = os.getenv("ENV", "production")
+ai_key = os.getenv("OPENAI_API_KEY", "")
 if (level not in levels):
     level = "INFO"
 log_level = levels[level]
