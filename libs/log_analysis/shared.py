@@ -69,3 +69,4 @@ def format_json_md(json_data, indent=2):
     return json_str
 
 MAX_DATA_POINTS = 32
+AI_MODEL = "gpt-5"

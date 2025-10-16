@@ -88,9 +88,9 @@ x-ray log [-h] [-s CHECKSET] [-o OUTPUT] [-f {markdown,html}] [log_file]
 | `-r`, `--rate`     | Sample rate. Only analyze a subset of logs.       |    `1`    |
 | `--top`            | When analyzing the slow queries, only list top N. |   `10`    |
 
-#### AI Analysis
+#### 3.2.3 AI Analysis
 If you have OpenAI API key set in the environment variable, x-ray will use AI to analyze the warning/error/fatal logs.
 ```bash
 export OPENAI_API_KEY=<your api key>
 ```
-x-ray will first grab all warning/error/fatal logs, deduplicate by `id` (Error code), then analyze the deduplicated logs.
+x-ray will deduplicate logs by `id`, then analyze the deduplicated logs.

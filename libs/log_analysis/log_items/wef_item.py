@@ -3,6 +3,7 @@ from libs.log_analysis.log_items.base_item import BaseItem
 from libs.log_analysis.shared import escape_markdown, json_hash
 from bson import json_util
 from libs.utils import *
+from libs.log_analysis.shared import AI_MODEL
 
 class WEFItem(BaseItem):
     def __init__(self, output_folder, config):
@@ -34,7 +35,7 @@ class WEFItem(BaseItem):
         self._cache = list(self._cache.values())
         # Ask AI about the warning/error/fatal messages
         if ai_key != "":
-            self._logger.info(bold(cyan("AI API key found.")) + " Analyzing W/E/F logs with AI. This can take a few minutes...")
+            self._logger.info(bold(green("AI API key found.")) + f" Analyzing W/E/F logs with AI ({green(bold(AI_MODEL))}). This can take a few minutes...")
             from openai import OpenAI
             client = OpenAI()
 
@@ -44,7 +45,7 @@ class WEFItem(BaseItem):
                 self._logger.info(yellow(f"Log ID: {cache[0]['id']}"))
             for item in cache:
                 response = client.responses.create(
-                    model="gpt-5",
+                    model=AI_MODEL,
                     input=f"Tell me about this MongoDB log. Keep the answer as short as possible: {str(item['sample'])}",
                 )
                 item["ai_analysis"] = response.output_text
