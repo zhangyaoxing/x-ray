@@ -49,9 +49,9 @@ class TopSlowItem(BaseItem):
             "sample": log_line if "sample" not in slow_query else slow_query["sample"],
         })
 
-    def finalize(self):
+    def finalize_analysis(self):
         self._cache = list(sorted(self._cache.values(), key=lambda item: item["duration"], reverse=True)[:self._top_n])
-        super().finalize()
+        super().finalize_analysis()
 
     def review_results_markdown(self, f):
         super().review_results_markdown(f)

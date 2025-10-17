@@ -92,7 +92,7 @@ class Framework:
                     continue
         for item in self._items:
             try:
-                item.finalize()
+                item.finalize_analysis()
             except Exception as e:
                 self._logger.warning(yellow(f"Log analysis item '{item.name}' finalize failed: {e}"))
                 continue

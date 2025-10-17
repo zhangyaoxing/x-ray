@@ -40,8 +40,7 @@ class BaseItem(object):
     def description(self, value):
         self._description = value
 
-    # TODO: This is not finalizing the class, just the data collection. Rename it.
-    def finalize(self):
+    def finalize_analysis(self):
         self._write_output()
 
     def review_results_markdown(self, f):

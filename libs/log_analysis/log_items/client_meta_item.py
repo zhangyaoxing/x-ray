@@ -32,7 +32,7 @@ class ClientMetaItem(BaseItem):
             self._cache[doc_hash]["ips"] = {}
         self._cache[doc_hash]["ips"][ip] = self._cache[doc_hash]["ips"].get(ip, 0) + 1
 
-    def finalize(self):
+    def finalize_analysis(self):
         cache = []
         for v in self._cache.values():
             doc = v["doc"]
@@ -42,7 +42,7 @@ class ClientMetaItem(BaseItem):
                 "ips": ips
             })
         self._cache = cache
-        super().finalize()
+        super().finalize_analysis()
         # Based on the server version, find out minimum compatible driver versions.
         with open(COMPATIBILITY_MATRIX_JSON, "r") as f:
             compatibility_matrix = json.load(f)

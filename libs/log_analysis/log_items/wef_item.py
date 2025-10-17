@@ -31,7 +31,7 @@ class WEFItem(BaseItem):
         else:
             self._cache[id]["timestamp"].append(timestamp)
 
-    def finalize(self):
+    def finalize_analysis(self):
         self._cache = list(self._cache.values())
         # Ask AI about the warning/error/fatal messages
         if ai_key != "":
@@ -51,7 +51,7 @@ class WEFItem(BaseItem):
                 item["ai_analysis"] = response.output_text
                 self._logger.debug(f"AI analyzed log: {item['id']}")
         
-        super().finalize()
+        super().finalize_analysis()
 
     def review_results_markdown(self, f):
         super().review_results_markdown(f)
