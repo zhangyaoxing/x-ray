@@ -12,6 +12,7 @@ class SlowRateItem(BaseItem):
         self._cache = {}
         self.name = "Slow Rate"
         self.description = "Analyse the rate of slow queries."
+        self._show_reset = True
 
     def analyze(self, log_line):
         msg = log_line.get("msg", "")

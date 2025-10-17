@@ -35,7 +35,26 @@ chart1 = new Chart(ctx, {
   options: {
     responsive: true,
     plugins: {
-      legend: { position: 'top' }
+      legend: { position: 'top' },
+      zoom: {
+          zoom: {
+              wheel: {
+                  enabled: true
+              },
+              pinch: {
+                  enabled: true
+              },
+              drag: {
+                  enabled: true
+              },
+              mode: 'x'
+          },
+          pan: {
+              enabled: true,
+              mode: 'x',
+              modifierKey: 'shift'
+          }
+      }
     },
     scales: {
       y: {
@@ -120,4 +139,7 @@ function scaleCharts(scale) {
     chart1.data.datasets[0].data = scaleData(count, scale);
     chart1.data.datasets[1].data = scaleData(total_slow_ms, scale);
     chart1.update();
+}
+resetButton.onclick = function() {
+    chart1.resetZoom();
 }

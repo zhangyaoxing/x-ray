@@ -126,6 +126,25 @@ const configDuration = {
                         ];
                     }
                 }
+            },
+            zoom: {
+                zoom: {
+                    wheel: {
+                        enabled: true
+                    },
+                    pinch: {
+                        enabled: true
+                    },
+                    drag: {
+                        enabled: true
+                    },
+                    mode: 'x'
+                },
+                pan: {
+                    enabled: true,
+                    mode: 'x',
+                    modifierKey: 'shift'
+                }
             }
         },
         scales: {
@@ -188,6 +207,25 @@ const configScanned = {
                             `Time: ${new Date(point.x).toLocaleString()}`
                         ];
                     }
+                }
+            },
+            zoom: {
+                zoom: {
+                    wheel: {
+                        enabled: true
+                    },
+                    pinch: {
+                        enabled: true
+                    },
+                    drag: {
+                        enabled: true
+                    },
+                    mode: 'x'
+                },
+                pan: {
+                    enabled: true,
+                    mode: 'x',
+                    modifierKey: 'shift'
                 }
             }
         },
@@ -252,6 +290,25 @@ const configScannedObj = {
                             `Time: ${new Date(point.x).toLocaleString()}`
                         ];
                     }
+                }
+            },
+            zoom: {
+                zoom: {
+                    wheel: {
+                        enabled: true
+                    },
+                    pinch: {
+                        enabled: true
+                    },
+                    drag: {
+                        enabled: true
+                    },
+                    mode: 'x'
+                },
+                pan: {
+                    enabled: true,
+                    mode: 'x',
+                    modifierKey: 'shift'
                 }
             }
         },
@@ -318,4 +375,10 @@ for (let i = 0; i < links.length; i++) {
         canvas.style.display = "block";
         this.classList.add('in-view');
     });
+}
+
+resetButton.onclick = function() {
+    chart1.resetZoom();
+    chart2.resetZoom();
+    chart3.resetZoom();
 }

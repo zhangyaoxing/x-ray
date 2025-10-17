@@ -8,6 +8,7 @@ class ConnectionRateItem(BaseItem):
         self._cache = {}
         self.name = "Connection Rate"
         self.description = "Analyse the rate of connections created and ended over a specified time window."
+        self._show_reset = True
 
     def analyze(self, log_line):
         msg = log_line.get("msg", "")

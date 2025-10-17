@@ -5,6 +5,7 @@ class SlowChartItem(BaseItem):
         self.name = "Slow Operations Chart"
         self.description = "Generate a scatter plot showing slow operations over time, with each point representing a slow query colored by namespace."
         self._show_scaler = False
+        self._show_reset = True
         self._cache = {}
     
     def analyze(self, log_line):

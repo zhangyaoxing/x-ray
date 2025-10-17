@@ -13,6 +13,7 @@ class BaseItem(object):
         self._logger = logging.getLogger(__name__)
         self._row_count = 0
         self._show_scaler = True
+        self._show_reset = False
         self._server_version = None
         os.remove(self._output_file) if os.path.isfile(self._output_file) else None
 
@@ -55,9 +56,12 @@ class BaseItem(object):
         f.write(f"## {self.name}\n\n")
         f.write(f"{self.description}\n\n")
         if self._show_scaler:
-            f.write(f"*Total data points: `{self._row_count}`, displaying every ")
+            f.write("<div style=\"display: none;\">\n")
+            f.write(f"*Total data points: `{self._row_count}`, displaying every <input type=\"range\" id=\"slider_{self.__class__.__name__}\" min=\"1\" max=\"{scale * 2}\" value=\"{scale}\">")
             f.write(f"<code id=\"sliderValue_{self.__class__.__name__}\">{scale}</code> point(s).*\n\n")
-            f.write(f"<input type=\"range\" id=\"slider_{self.__class__.__name__}\" min=\"1\" max=\"{scale * 2}\" value=\"{scale}\">\n\n")
+            f.write("</div>\n\n")
+        if self._show_reset:
+            f.write(f"<input type=\"button\" id=\"reset_{self.__class__.__name__}\" value=\"Reset\">\n\n")
         f.write("<script type=\"text/javascript\">\n")
         f.write("document.addEventListener('DOMContentLoaded', function() {\n")
         if self._show_scaler:
@@ -71,6 +75,8 @@ class BaseItem(object):
             f.write("  onSlide(slider, sliderValue, scaleCharts);\n")
             f.write("}\n")
             f.write("var scale = parseInt(sliderValue.innerText);\n")
+        if self._show_reset:
+            f.write(f"var resetButton = document.getElementById('reset_{self.__class__.__name__}');\n")
         f.write(f"var data = [\n")
         with open(self._output_file, "r") as data:
             for line in data:

@@ -47,7 +47,26 @@ var chart1 = new Chart(ctx, {
                 display: true,
                 text: 'Connection Create/Destroy Rate Over Time'
             },
-            legend: { position: 'top' }
+            legend: { position: 'top' },
+            zoom: {
+                zoom: {
+                    wheel: {
+                        enabled: true
+                    },
+                    pinch: {
+                        enabled: true
+                    },
+                    drag: {
+                        enabled: true
+                    },
+                    mode: 'x'
+                },
+                pan: {
+                    enabled: true,
+                    mode: 'x',
+                    modifierKey: 'shift'
+                }
+            }
         },
         scales: {
             y: {
@@ -107,6 +126,25 @@ var chart2 = new Chart(ctx_byip, {
             legend: { 
                 position: 'top',
                 display: displayLegend
+            },
+            zoom: {
+                zoom: {
+                    wheel: {
+                        enabled: true
+                    },
+                    pinch: {
+                        enabled: true
+                    },
+                    drag: {
+                        enabled: true
+                    },
+                    mode: 'x'
+                },
+                pan: {
+                    enabled: true,
+                    mode: 'x',
+                    modifierKey: 'shift'
+                }
             }
         },
         responsive: true,
@@ -134,4 +172,9 @@ function scaleCharts(scale) {
         stack: ds.stack
     }));
     chart2.update();
+}
+
+resetButton.onclick = function() {
+    chart1.resetZoom();
+    chart2.resetZoom();
 }
