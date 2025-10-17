@@ -144,6 +144,12 @@ const configDuration = {
                     enabled: true,
                     mode: 'x',
                     modifierKey: 'shift'
+                },
+                limits: {
+                    x: {
+                        min: "original",
+                        max: "original"
+                    }
                 }
             }
         },
@@ -226,6 +232,12 @@ const configScanned = {
                     enabled: true,
                     mode: 'x',
                     modifierKey: 'shift'
+                },
+                limits: {
+                    x: {
+                        min: "original",
+                        max: "original"
+                    }
                 }
             }
         },
@@ -309,6 +321,12 @@ const configScannedObj = {
                     enabled: true,
                     mode: 'x',
                     modifierKey: 'shift'
+                },
+                limits: {
+                    x: {
+                        min: "original",
+                        max: "original"
+                    }
                 }
             }
         },
