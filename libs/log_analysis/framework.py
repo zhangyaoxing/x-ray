@@ -104,7 +104,8 @@ class Framework:
         self._logger.info(f"Saving results to: {green(output_file)}")
 
         with open(output_file, "w") as f:
-            f.write(f"# Log Analysis Report for {self._file_path}\n")
+            f.write(f"# Log Analysis Report\n")
+            f.write(f"Log path: `{self._file_path}`\n")
             for item in self._items:
                 try:
                     item.review_results_markdown(f)
