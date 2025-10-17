@@ -10,7 +10,8 @@
         "ext-mongodb:PHP": [1, 15],
         "PyMongo": [3, 7],
         "mongo-ruby-driver": [8, 0],
-        "mongo-rust-driver": [2, 0]
+        "mongo-rust-driver": [2, 0],
+        "mongo-scala-driver": [4, 7]
     },
     "4.4": {
         "mongoc": [1, 17],
@@ -23,7 +24,8 @@
         "ext-mongodb:PHP": [1, 15],
         "PyMongo": [3, 7],
         "mongo-ruby-driver": [8, 0],
-        "mongo-rust-driver": [2, 0]
+        "mongo-rust-driver": [2, 0],
+        "mongo-scala-driver": [4, 7]
     },
     "5.0": {
         "mongoc": [1, 18],
@@ -36,7 +38,8 @@
         "ext-mongodb:PHP": [1, 15],
         "PyMongo": [3, 7],
         "mongo-ruby-driver": [8, 0],
-        "mongo-rust-driver": [2, 0]
+        "mongo-rust-driver": [2, 0],
+        "mongo-scala-driver": [4, 7]
     },
     "6.0": {
         "mongoc": [1, 22],
@@ -49,7 +52,8 @@
         "nodejs": [4, 8],
         "PyMongo": [4, 2],
         "mongo-ruby-driver": [8, 0],
-        "mongo-rust-driver": [2, 6]
+        "mongo-rust-driver": [2, 6],
+        "mongo-scala-driver": [4, 7]
     },
     "7.0": {
         "mongoc": [1, 24],
@@ -63,7 +67,8 @@
         "ext-mongodb:PHP": [1, 16],
         "PyMongo": [4, 4],
         "mongo-ruby-driver": [8, 0],
-        "mongo-rust-driver": [2, 6]
+        "mongo-rust-driver": [2, 6],
+        "mongo-scala-driver": [4, 10]
     },
     "8.0": {
         "mongoc": [1, 28],
@@ -77,6 +82,7 @@
         "ext-mongodb:PHP": [1, 20],
         "PyMongo": [4, 9],
         "mongo-ruby-driver": [9, 0],
-        "mongo-rust-driver": [3, 1]
+        "mongo-rust-driver": [3, 1],
+        "mongo-scala-driver": [5, 2]
     }
 }
