@@ -4,7 +4,7 @@ import os
 from libs.log_analysis.shared import MAX_DATA_POINTS, to_ejson, to_json
 from bson import json_util
 
-from libs.utils import get_script_path
+from libs.utils import get_script_path, get_version
 
 class BaseItem(object):
     def __init__(self, output_folder: str, config):
@@ -13,10 +13,13 @@ class BaseItem(object):
         self._logger = logging.getLogger(__name__)
         self._row_count = 0
         self._show_scaler = True
+        self._server_version = None
         os.remove(self._output_file) if os.path.isfile(self._output_file) else None
 
     def analyze(self, log_line):
-        raise NotImplementedError("Subclasses must implement the analyze method.")
+        log_id = log_line.get("id", "")
+        if log_id == 23403: # Build Info
+            self._server_version = get_version(log_line)
 
     def review_results(self):
         raise NotImplementedError("Subclasses must implement the review_results method.")
@@ -37,7 +40,7 @@ class BaseItem(object):
     def description(self, value):
         self._description = value
 
-    
+    # TODO: This is not finalizing the class, just the data collection. Rename it.
     def finalize(self):
         self._write_output()
 
