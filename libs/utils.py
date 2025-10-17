@@ -5,6 +5,7 @@ import re
 from inspect import getsourcefile
 from os.path import abspath, dirname
 from pathlib import Path
+from libs.version import Version
 
 levels = logging._nameToLevel
 level = os.getenv("LOG_LEVEL", "INFO")
@@ -82,6 +83,15 @@ def truncate_content(content: str, delimiter='[ \t]', max_words=MAX_CONTENT_WORD
 def tooltip_html(full, truncated) -> str:
     html = f"<span class=\"tooltip\" data-tip=\"{full}\">{truncated}</span>"
     return html
+
+def get_version(log_line):
+    log_id = log_line.get("id", "")
+    if log_id != 23403:
+        return None
+    attr = log_line.get("attr", {})
+    build_info = attr.get("buildInfo", {})
+    version = build_info.get("version", "Unknown")
+    return Version.parse(version)
 
 def color_code(code): return f"\x1b[{code}m"
 def colorize(code: int, s: str) -> str: return f"{color_code(code)}{str(s).replace(color_code(0), color_code(code))}{color_code(0)}"
