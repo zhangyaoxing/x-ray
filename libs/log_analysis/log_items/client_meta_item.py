@@ -44,7 +44,8 @@ class ClientMetaItem(BaseItem):
         self._cache = cache
         super().finalize_analysis()
         # Based on the server version, find out minimum compatible driver versions.
-        with open(COMPATIBILITY_MATRIX_JSON, "r") as f:
+        matrix_path = get_script_path(COMPATIBILITY_MATRIX_JSON)
+        with open(matrix_path, "r") as f:
             compatibility_matrix = json.load(f)
         server_compatible_version = self._server_version.to_compatibility_str() if self._server_version else "Unknown"
         driver_matrix = compatibility_matrix.get(server_compatible_version, {})

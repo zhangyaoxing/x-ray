@@ -32,6 +32,7 @@ build:
 			--add-data="templates:templates" \
 			--add-data="config.json:." \
 			--add-data="libs:libs" \
+			--add-data="compatibility_matrix.json:." \
 			x-ray; \
 	else \
 		$(PYTHON) -m PyInstaller x-ray.spec; \
