@@ -105,7 +105,7 @@ class Framework:
 
         with open(output_file, "w") as f:
             f.write(f"# Log Analysis Report\n")
-            f.write(f"Generated on: {str(datetime.now(tz=timezone.utc))} UTC\n\n")
+            f.write(f"Generated on: `{str(datetime.now(tz=timezone.utc))} UTC`\n\n")
             f.write(f"Log path: `{self._file_path}`\n\n")
             f.write("Histogram chart instructions:\n\n")
             f.write("- **zoom in/out:** _mouse wheel or pinch_\n")

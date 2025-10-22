@@ -9,6 +9,7 @@ class InfoItem(BaseItem):
         self.description = "Basic information about the instance."
         self._cache = {}
         self._show_scaler = False
+        # TODO: use `id` instead of msg strings
         self._msgs = [
             "Process Details",
             "Node is a member of a replica set",
@@ -53,7 +54,7 @@ class InfoItem(BaseItem):
             "port": attr.get("port", "Unknown")
         }
     def _process_replica_set(self, attr):
-        self._cache["replica_set"] = attr.get("config", {})
+        self._cache["replica_set"] = attr
 
     def _process_feature_compatibility(self, attr):
         self._cache["fcv"] = attr.get("featureCompatibilityVersion", "Unknown")
@@ -118,13 +119,14 @@ class InfoItem(BaseItem):
             f.write("### Operating System\n\n")
             f.write(f"- {os.get('name', 'Unknown')}\n")
             f.write(f"- {os.get('version', 'Unknown')}\n\n")
-        replica_set = self._cache.get("replica_set", None)
+        replica_set = self._cache.get("replica_set", {})
+        rs_config = replica_set.get("config", None)
         if replica_set:
             f.write("### Replica Set Config\n\n")
-            f.write(f"Replica Set Name: `{replica_set.get('_id', 'Unknown')}`\n\n")
+            f.write(f"Replica Set Name: `{rs_config.get('_id', 'Unknown')}`, member state: `{replica_set.get('memberState', 'Unknown')}`\n\n")
             f.write("|Member|Host|Arbiter|Priority|Votes|Hidden|Delay|\n")
             f.write("|------|----|-------|--------|-----|------|-----|\n")
-            for member in replica_set.get("members", []):
+            for member in rs_config.get("members", []):
                 f.write(f"|{member.get('_id', 'Unknown')}|{member.get('host', 'Unknown')}|{member.get('arbiterOnly', False)}|{member.get('priority', 0)}|{member.get('votes', 0)}|{member.get('hidden', False)}|{member.get('secondaryDelaySecs', 0)}|\n")
             f.write("\n")
         command_line_options = self._cache.get("command_line_options", None)
