@@ -32,6 +32,8 @@ class Framework:
         now = str(datetime.now(tz=timezone.utc))
         self._timestamp = re.sub(r"[:\- ]", "", now.split(".")[0])
         self._logger.debug(to_json(self._config))
+        self._log_start = None
+        self._log_end = None
         if env == "development":
             self._logger.info(yellow("Running in development mode."))
 
@@ -70,6 +72,7 @@ class Framework:
         log_file = self._file_path
         rate = self._config.get("sample_rate", 1.0)
         # Read the log file line by line and pass each line to the log items for analysis
+        log_line = None
         with open(log_file, "r", encoding="utf-8", errors="ignore") as f:
             counter = 0
             for line in f:
@@ -81,6 +84,8 @@ class Framework:
                     continue
                 try:
                     log_line = json_util.loads(line)
+                    if self._log_start is None:
+                        self._log_start = log_line.get("t", None)
                     for item in self._items:
                         try:
                             item.analyze(log_line)
@@ -90,6 +95,7 @@ class Framework:
                 except Exception as e:
                     self._logger.warning(yellow(f"Failed to parse log line as JSON: {line.strip()}"))
                     continue
+        self._log_end = log_line.get("t", None) if log_line else None
         for item in self._items:
             try:
                 item.finalize_analysis()
@@ -105,8 +111,9 @@ class Framework:
 
         with open(output_file, "w") as f:
             f.write(f"# Log Analysis Report\n")
-            f.write(f"Generated on: `{str(datetime.now(tz=timezone.utc))} UTC`\n\n")
+            f.write(f"Generated at: `{str(datetime.now(tz=timezone.utc))} UTC`\n\n")
             f.write(f"Log path: `{self._file_path}`\n\n")
+            f.write(f"Log analysis period: `{self._log_start.isoformat()}` to `{self._log_end.isoformat()}`\n\n")
             f.write("Histogram chart instructions:\n\n")
             f.write("- **zoom in/out:** _mouse wheel or pinch_\n")
             f.write("- **pan:** _shift+drag_\n")
