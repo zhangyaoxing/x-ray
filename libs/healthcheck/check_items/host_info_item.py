@@ -74,7 +74,7 @@ class HostInfoItem(BaseItem):
                     extra = extra["extra"]
                 table["rows"].append([
                     m["host"],
-                    f"{extra['cpuString']} ({system['cpuArch']}) {extra['cpuFrequencyMHz']} MHz",
+                    f"{extra.get('cpuString', '(Unknown CPU)')} ({system['cpuArch']}) {extra.get('cpuFrequencyMHz', 'n/a')} MHz",
                     f"{system['numCores']}c",
                     format_size(system["memSizeMB"] * 1024**2),
                     f"{os['name']} {os['version']}",
