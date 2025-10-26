@@ -15,8 +15,8 @@ class SlowRateItem(BaseItem):
         self._show_reset = True
 
     def analyze(self, log_line):
-        msg = log_line.get("msg", "")
-        if msg != "Slow query":
+        log_id = log_line.get("id", "")
+        if log_id != 51803:  # Slow query
             return
         time = log_line.get("t")
         ts = math.floor(time.timestamp())

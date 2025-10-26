@@ -9,21 +9,21 @@ class InfoItem(BaseItem):
         self.description = "Basic information about the instance."
         self._cache = {}
         self._show_scaler = False
-        # TODO: use `id` instead of msg strings
-        self._msgs = [
-            "Process Details",
-            "Node is a member of a replica set",
-            "current featureCompatibilityVersion value",
-            "Build Info",
-            "Operating System",
-            "Options set by command line",
-            "Certificate information",
-            "MongoDB starting"
+
+        self._ids = [
+            20721, # Process Details
+            20722, # Node is a member of a replica set
+            5853300, # current featureCompatibilityVersion value
+            23403, # Build Info
+            51765, # Operating System
+            21951, # Options set by command line
+            4913010, # Certificate information
+            4615611 # MongoDB starting
         ]
 
     def analyze(self, log_line):
-        msg = log_line.get("msg", "")
-        index = self._msgs.index(msg) if msg in self._msgs else -1
+        log_id = log_line.get("id", "")
+        index = self._ids.index(log_id) if log_id in self._ids else -1
         attr = log_line.get("attr", {})
         if index == 0 or index == 7:
             # Process Details

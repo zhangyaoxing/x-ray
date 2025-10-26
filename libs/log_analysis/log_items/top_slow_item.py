@@ -16,8 +16,8 @@ class TopSlowItem(BaseItem):
         self._cache = {}
 
     def analyze(self, log_line):
-        msg = log_line.get("msg", "")
-        if msg != "Slow query":
+        log_id = log_line.get("id", "")
+        if log_id != 51803:  # Slow query
             return
         attr = log_line.get("attr", {})
         duration = attr.get("durationMillis", 0)

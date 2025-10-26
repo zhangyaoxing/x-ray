@@ -11,10 +11,10 @@ class ConnectionRateItem(BaseItem):
         self._show_reset = True
 
     def analyze(self, log_line):
-        msg = log_line.get("msg", "")
-        if msg not in ["Connection accepted", "Connection ended"]:
+        log_id = log_line.get("id", "")
+        if log_id not in [22943, 22944]:  # Connection accepted/ended
             return
-        counter = "created" if msg == "Connection accepted" else "ended"
+        counter = "created" if log_id == 22943 else "ended"
         time = log_line.get("t")
         ts = math.floor(time.timestamp())
         time_min = datetime.fromtimestamp(ts - (ts % 60))
