@@ -93,6 +93,7 @@ function onClick(event, activeElements) {
         }
         delete code.dataset.highlighted;
         hljs.highlightElement(code);
+        code.scrollIntoView({behavior: 'smooth'});
     }
 }
 const configDuration = {

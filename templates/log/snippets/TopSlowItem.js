@@ -18,5 +18,6 @@ for (var i = 0; i < anchors.length; i++) {
         }
         delete sample.dataset.highlighted;
         hljs.highlightElement(sample);
+        sample.scrollIntoView({behavior: "smooth"});
     });
 }
