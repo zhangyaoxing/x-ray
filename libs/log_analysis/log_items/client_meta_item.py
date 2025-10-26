@@ -22,7 +22,11 @@ class ClientMetaItem(BaseItem):
             return
         attr = log_line.get("attr", {})
         ip = attr["remote"].split(":")[0]
-        doc = attr["doc"]
+        doc = {
+            "driver": attr["doc"].get("driver", {}),
+            "os": attr["doc"].get("os", {}),
+            "platform": attr["doc"].get("platform", "")
+        }
         doc_hash = json_hash(doc)
         if doc_hash not in self._cache:
             self._cache[doc_hash] = {
