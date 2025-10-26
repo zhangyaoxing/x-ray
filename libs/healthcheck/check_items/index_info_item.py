@@ -16,16 +16,21 @@ class IndexInfoItem(BaseItem):
         self._description += "- Whether there are unused indexes in the collection.\n"
         self._description += "- Whether there are redundant indexes in the collection.\n"
 
-    def _num_indexes_check(self, ns, index_stats, num_indexes, host):
+    def _num_indexes_check(self, ns, index_stats, max_num_indexes, host):
         """ Check for the number of indexes in the collection.
         """
+        # Get the unique index names
+        unique_indexes = set()
+        for index in index_stats:
+            unique_indexes.add(index.get("name"))
+        num_indexes = len(unique_indexes)
         test_result = []
-        if len(index_stats) > num_indexes:
+        if num_indexes > max_num_indexes:
             test_result.append({
                 "host": host,
                 "severity": SEVERITY.MEDIUM,
                 "title": "Too Many Indexes",
-                "description": f"Collection `{ns}` has more than `{num_indexes}` indexes, which can cause potential write performance issues."
+                "description": f"Collection `{ns}` has more than `{max_num_indexes}` indexes (`{num_indexes}` indexes detected), which can cause potential write performance issues."
             })
         return test_result
     
