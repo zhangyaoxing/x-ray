@@ -65,7 +65,7 @@ class Framework:
                 self._logger.warning(yellow(f"Log item '{item_name}' not found. Skipping."))
                 continue
             # The config for the item can be specified in the `item_config` section, under the item class name.
-            item_config = ls.get("item_config", {}).get(item_name, {})
+            item_config = self._config.get("item_config", {}).get(item_name, {})
             item = item_cls(batch_folder, item_config)
             self._items.append(item)
             self._logger.info(f"Log analyze item loaded: {bold(cyan(item_name))}")
