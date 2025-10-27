@@ -1,9 +1,9 @@
 from random import randint
+from libs.ai import MODEL_NAME, GPT_MODEL, analyze_log_line_gpt, analyze_log_line_local, load_model
 from libs.log_analysis.log_items.base_item import BaseItem
 from libs.log_analysis.shared import escape_markdown, json_hash
 from bson import json_util
 from libs.utils import *
-from libs.log_analysis.shared import AI_MODEL
 
 class WEFItem(BaseItem):
     def __init__(self, output_folder, config):
@@ -12,6 +12,7 @@ class WEFItem(BaseItem):
         self.name = "Warning/Error/Fatal Logs"
         self.description = "Visualize warning, error, and fatal log messages."
         self._show_scaler = False
+        self._ai_support = self.config.get("ai_support", False)
 
     def analyze(self, log_line):
         severity = log_line.get("s", "").lower()
@@ -33,24 +34,24 @@ class WEFItem(BaseItem):
 
     def finalize_analysis(self):
         self._cache = list(self._cache.values())
-        # Ask AI about the warning/error/fatal messages
-        if ai_key != "":
-            self._logger.info(bold(green("AI API key found.")) + f" Analyzing W/E/F logs with AI ({green(bold(AI_MODEL))}). This can take a few minutes...")
-            from openai import OpenAI
-            client = OpenAI()
-
+        cache = self._cache
+        if self._ai_support == "local":
+            tokenizer, model, gen_config = load_model(MODEL_NAME)
+            self._logger.info(f"Local AI model ({green(bold(MODEL_NAME))}) loaded for W/E/F log analysis.")
+        elif self._ai_support == "gpt":
             if env == "development":
                 cache = [self._cache[randint(0, len(self._cache) - 1)]] if len(self._cache) > 0 else []
                 self._logger.info(yellow(f"Running in development mode. Only process ONE random log entry with AI."))
                 self._logger.info(yellow(f"Log ID: {cache[0]['id']}"))
-            for item in cache:
-                response = client.responses.create(
-                    model=AI_MODEL,
-                    input=f"Tell me about this MongoDB log. Keep the answer as short as possible: {str(item['sample'])}",
-                )
-                item["ai_analysis"] = response.output_text
-                self._logger.debug(f"AI analyzed log: {item['id']}")
-        
+            self._logger.info(f"Using GPT model ({green(bold(GPT_MODEL))}) for W/E/F log analysis. This can take a few minutes...")
+
+        for item in cache:
+            if self._ai_support == "local":
+                item["ai_analysis"] = analyze_log_line_local(item["sample"], tokenizer, model, gen_config)
+            else:
+                item["ai_analysis"] = analyze_log_line_gpt(item["sample"])
+            self._logger.debug(f"AI analyzed log: {item['id']}")
+
         super().finalize_analysis()
 
     def review_results_markdown(self, f):

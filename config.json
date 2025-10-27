@@ -44,6 +44,11 @@
                 "items": ["ConnectionRateItem", "SlowRateItem", "ClientMetaItem", "TopSlowItem", "SlowChartItem", "WEFItem", "InfoItem"]
             }
         },
+        "item_config": {
+            "WEFItem": {
+                "ai_support": "local"
+            }
+        },
         "template": "log/full.html"
     }
 }

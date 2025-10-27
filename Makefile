@@ -15,8 +15,21 @@ init:
 	@echo "Creating virtual environment..."
 	python3 -m venv .venv
 	@echo "Installing dependencies..."
-	.venv/bin/pip install -r requirements.txt
-	@echo "Project initialized successfully! Activate the virtual environment with: source .venv/bin/activate"
+	$(PYTHON) -m pip install -r requirements.txt
+	@read -p "Do you want to enable local AI model support? (y/N): " ans; \
+	if [ "$$ans" = "y" ] || [ "$$ans" = "Y" ]; then \
+		DEFAULT_MODEL="Qwen/Qwen2.5-0.5B-Instruct"; \
+		read -p "Choose AI model (default: $$DEFAULT_MODEL): " model_name; \
+		if [ -z "$$model_name" ]; then \
+			model_name="$$DEFAULT_MODEL"; \
+		fi; \
+		hf download $$model_name; \
+		echo "Local AI model $$model_name installed."; \
+		echo "\033[33mPlease also change 'ai_support' to \"local\" in config.json\033[0m"; \
+	else \
+		echo "Skipping local AI model installation."; \
+	fi
+	@printf 'Project initialized successfully! Activate the virtual environment with: \033[33msource .venv/bin/activate\033[0m\n'
 
 # Install dependencies
 deps:
