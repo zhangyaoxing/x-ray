@@ -9,14 +9,13 @@ This project aims to create tools for MongoDB analysis and diagnosis. So far 2 m
 | :-----------: | :-------------: | :--------: |
 | >=4.2 &check; |  >=4.2 &check;  |  &cross;   |
 
+Older versions are not tested.
 
 ### Log Analysis
 Log analysis requires JSON format logs, which is supported since 4.4.
 |  Replica Set  | Sharded Cluster |  Standalone   |
 | :-----------: | :-------------: | :-----------: |
 | >=4.4 &check; |  >=4.4 &check;  | >=4.4 &check; |
-
-Older versions are not tested.
 
 ## 2 Building
 The tool is tested with `Python 3.9.22`.
