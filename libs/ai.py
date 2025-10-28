@@ -1,6 +1,5 @@
 import logging
 from libs.utils import *
-from openai import OpenAI
 
 MODEL_NAME = "Qwen/Qwen2.5-0.5B-Instruct"
 GPT_MODEL = "gpt-5"
@@ -57,6 +56,7 @@ def analyze_log_line_gpt(log_line):
     if ai_key == "":
         logger.warning("No AI API key found. Skipping AI analysis.")
         return ""
+    from openai import OpenAI
     client = OpenAI()
     prompt = f"Analyze this MongoDB log line and give me the shortest answer: {str(log_line)}"
     response = client.responses.create(
