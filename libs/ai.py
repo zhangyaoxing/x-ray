@@ -1,7 +1,4 @@
-import json
 import logging
-import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM, GenerationConfig
 from libs.utils import *
 from openai import OpenAI
 
@@ -9,14 +6,28 @@ MODEL_NAME = "Qwen/Qwen2.5-0.5B-Instruct"
 GPT_MODEL = "gpt-5"
 
 logger = logging.getLogger(__name__)
+
 def detect_device():
-    if torch.cuda.is_available():
-        return "cuda"
-    elif getattr(torch.backends, "mps", None) and torch.backends.mps.is_available():
-        return "mps"
-    return "cpu"
+    try:
+        import torch
+        if torch.cuda.is_available():
+            return "cuda"
+        elif getattr(torch.backends, "mps", None) and torch.backends.mps.is_available():
+            return "mps"
+        return "cpu"
+    except ImportError:
+        logger.error("torch is not installed. Please install it with: pip install torch")
+        raise
 
 def load_model(model_name):
+    try:
+        import torch
+        from transformers import AutoTokenizer, AutoModelForCausalLM, GenerationConfig
+    except ImportError as e:
+        logger.error(f"Required AI libraries not installed: {e}")
+        logger.error("Please install with: pip install torch transformers")
+        raise
+    
     device = detect_device()
     logger.info(f"Using device: {green(device)}")
     tokenizer = AutoTokenizer.from_pretrained(model_name)

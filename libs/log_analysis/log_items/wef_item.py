@@ -1,5 +1,4 @@
 from random import randint
-from libs.ai import MODEL_NAME, GPT_MODEL, analyze_log_line_gpt, analyze_log_line_local, load_model
 from libs.log_analysis.log_items.base_item import BaseItem
 from libs.log_analysis.shared import escape_markdown, json_hash
 from bson import json_util
@@ -35,6 +34,16 @@ class WEFItem(BaseItem):
     def finalize_analysis(self):
         self._cache = list(self._cache.values())
         cache = self._cache
+        
+        # Lazy import AI modules (only if needed)
+        if self._ai_support in ["local"]:
+            try:
+                from libs.ai import MODEL_NAME, GPT_MODEL, analyze_log_line_gpt, analyze_log_line_local, load_model
+            except ImportError as e:
+                self._logger.error(f"AI support enabled but AI libraries not available: {e}")
+                self._logger.error("Please install AI dependencies or disable AI support in config.json")
+                self._ai_support = False
+        
         if self._ai_support == "local":
             tokenizer, model, gen_config = load_model(MODEL_NAME)
             self._logger.info(f"Local AI model ({green(bold(MODEL_NAME))}) loaded for W/E/F log analysis.")
@@ -48,9 +57,11 @@ class WEFItem(BaseItem):
         for item in cache:
             if self._ai_support == "local":
                 item["ai_analysis"] = analyze_log_line_local(item["sample"], tokenizer, model, gen_config)
-            else:
+            elif self._ai_support == "gpt":
                 item["ai_analysis"] = analyze_log_line_gpt(item["sample"])
-            self._logger.debug(f"AI analyzed log: {item['id']}")
+
+            if self._ai_support:
+                self._logger.debug(f"AI analyzed log: {item['id']}")
 
         super().finalize_analysis()
 
