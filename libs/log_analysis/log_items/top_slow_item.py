@@ -20,6 +20,10 @@ class TopSlowItem(BaseItem):
         if log_id != 51803:  # Slow query
             return
         attr = log_line.get("attr", {})
+        ns = attr.get("ns", "")
+        # Skip system namespaces
+        if ns.startswith("admin.") or ns.startswith("local.") or ns.startswith("config."):
+            return
         duration = attr.get("durationMillis", 0)
         has_sort = attr.get("hasSortStage", False)
         query_hash = attr.get("queryHash", "")
@@ -27,7 +31,6 @@ class TopSlowItem(BaseItem):
         keys_examined = attr.get("keysExamined", 0)
         docs_examined = attr.get("docsExamined", 0)
         plan_summary = attr.get("planSummary", "")
-        ns = attr.get("ns", "")
         query_pattern = analyze_query_pattern(log_line)
         if query_hash == "":
             # Some command doesn't have queryHash, e.g., getMore
