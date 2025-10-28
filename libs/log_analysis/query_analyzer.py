@@ -20,6 +20,7 @@ COMPLEX_OPERATORS = ["$elemMatch", "$and", "$or", "$not", "$nor", "$expr", "$jso
 def analyze_query_pattern(log_line):
     query_type = "command"
     query = {}
+    sort = {}
     msg = log_line.get("msg", "")
     if msg != "Slow query":
         return None
@@ -44,9 +45,11 @@ def analyze_query_pattern(log_line):
         first_stage = query[0] if len(query) > 0 else {}
         if "$match" in first_stage:
             query = first_stage["$match"]
+        # TODO: enumerate all stages to find out $sort stage.
     elif "find" in command:
         query_type = "find"
         query = command.get("filter", {})
+        sort = command.get("sort", {})
     elif "getMore" in command:
         query_type = "getmore"
         query = attr.get("originatingCommand", {}).get("filter", {})
@@ -64,6 +67,7 @@ def analyze_query_pattern(log_line):
     elif "findAndModify" in command:
         query_type = "findandmodify"
         query = command.get("query", {})
+        sort = command.get("sort", {})
 
     if isinstance(query, list):
         # For list of queries, e.g., update.$cmd, remove.$cmd
@@ -82,7 +86,11 @@ def analyze_query_pattern(log_line):
         return {
             "type": query_type,
             "pattern": query_to_pattern(query),
-            "hash": json_hash(query, 4)
+            "sort": sort,
+            "hash": json_hash({
+                "query": query,
+                "sort": sort
+            }, 4)
         }
 
 def query_to_pattern(query):
