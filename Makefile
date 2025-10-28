@@ -9,47 +9,48 @@ PYTHON = .venv/bin/python
 # Default target
 all: deps build
 
-# Initialize project in a new environment
-init:
-	@echo "Initializing project in a new environment..."
-	@echo "Creating virtual environment..."
-	python3 -m venv .venv
-	@echo "Installing dependencies..."
-	$(PYTHON) -m pip install -r requirements.txt
-	@read -p "Do you want to enable local AI model support? (y/N): " ans; \
-	if [ "$$ans" = "y" ] || [ "$$ans" = "Y" ]; then \
-		DEFAULT_MODEL="Qwen/Qwen2.5-0.5B-Instruct"; \
-		read -p "Choose AI model (default: $$DEFAULT_MODEL): " model_name; \
-		if [ -z "$$model_name" ]; then \
-			model_name="$$DEFAULT_MODEL"; \
-		fi; \
-		hf download $$model_name; \
-		echo "Local AI model $$model_name installed."; \
-		echo "\033[33mPlease also change 'ai_support' to \"local\" in config.json\033[0m"; \
-	else \
-		echo "Skipping local AI model installation."; \
-	fi
-	@printf 'Project initialized successfully! Activate the virtual environment with: \033[33msource .venv/bin/activate\033[0m\n'
-
 # Install dependencies
 deps:
+	@echo "Creating virtual environment..."
+	python3 -m venv .venv
+	@echo "Activate virtual environment: \033[33msource .venv/bin/activate\033[0m"
 	@echo "Installing dependencies..."
 	$(PYTHON) -m pip install -r requirements.txt
 
-# Build executable
-build:
-	@echo "Building executable..."
-	@if [ ! -f x-ray.spec ]; then \
-		echo "Creating spec file since it does not exist..."; \
-		$(PYTHON) -m PyInstaller --onefile --name $(PROJECT_NAME) \
-			--add-data="templates:templates" \
-			--add-data="config.json:." \
-			--add-data="libs:libs" \
-			--add-data="compatibility_matrix.json:." \
-			x-ray; \
-	else \
-		$(PYTHON) -m PyInstaller x-ray.spec; \
-	fi
+# Build executable (default to lightweight build)
+build: build-lite
+
+# Build executable without AI support (lightweight)
+build-lite:
+	@echo "Building lightweight executable (without AI support)..."
+	$(PYTHON) -m PyInstaller --onefile --name $(PROJECT_NAME) \
+		--add-data="templates:templates" \
+		--add-data="config.json:." \
+		--add-data="libs:libs" \
+		--add-data="compatibility_matrix.json:." \
+		--exclude-module torch \
+		--exclude-module torchvision \
+		--exclude-module transformers \
+		--exclude-module numpy \
+		--exclude-module scipy \
+		x-ray
+	@echo "✓ Lightweight build complete: dist/x-ray (~11MB)"
+
+# Build executable with AI support (includes torch, transformers)
+build-ai:
+	@echo "Building full executable (with AI support)..."
+	$(PYTHON) -m PyInstaller --onefile --name $(PROJECT_NAME)-ai \
+		--add-data="templates:templates" \
+		--add-data="config.json:." \
+		--add-data="libs:libs" \
+		--add-data="compatibility_matrix.json:." \
+		--hidden-import torch \
+		--hidden-import transformers \
+		--hidden-import transformers.models.qwen2 \
+		--hidden-import tokenizers \
+		x-ray
+	@echo "✓ Full build complete: dist/x-ray-ai (~2GB+)"
+	@echo "⚠ Note: This does NOT include model weights. Models will be downloaded on first use."
 
 # Clean build artifacts
 clean:
@@ -61,46 +62,25 @@ clean:
 	find . -type d -name "*.egg-info" -exec rm -rf {} +
 	find . -type f -name "*.pyc" -delete
 
-# Create virtual environment
-venv:
-	@echo "Creating virtual environment..."
-	python3 -m venv .venv
-	@echo "Activate virtual environment: source .venv/bin/activate"
-
-# Run tests (if any)
-test:
-	@echo "Running tests..."
-	# Uncomment the next line if tests are available
-	# $(PYTHON) -m pytest tests/
-
-# Create distribution package
-dist: build
-	@echo "Creating distribution package..."
-	mkdir -p dist/package
-	cp dist/$(PROJECT_NAME) dist/package/
-	cp -r templates dist/package/
-	cp config.json dist/package/
-	cp README.md dist/package/
-	cd dist && tar -czf $(PROJECT_NAME)-package.tar.gz package
-	@echo "Distribution package created: dist/$(PROJECT_NAME)-package.tar.gz"
-
 # Help information
 help:
 	@echo "X-Ray Project Makefile"
 	@echo ""
 	@echo "Available commands:"
-	@echo "  make init     - Initialize project in a new environment (create venv and install dependencies)"
-	@echo "  make deps     - Install all dependencies"
-	@echo "  make build    - Build executable"
-	@echo "  make clean    - Clean build artifacts"
-	@echo "  make all      - Install dependencies and build executable"
-	@echo "  make venv     - Create virtual environment"
-	@echo "  make test     - Run tests (if any)"
-	@echo "  make dist     - Create complete distribution package"
-	@echo "  make help     - Display this help information"
+	@echo "  make deps       - Install all dependencies including virtual environment setup"
+	@echo "  make build      - Build executable (default: lightweight version without AI)"
+	@echo "  make build-lite - Build lightweight executable without AI support (~15MB)"
+	@echo "  make build-ai   - *Experimental* Build full executable with AI libraries (~2GB, models downloaded separately)"
+	@echo "  make clean      - Clean build artifacts"
+	@echo "  make all        - Install dependencies and build executable"
+	@echo "  make help       - Display this help information"
+	@echo ""
+	@echo "Build modes:"
+	@echo "  build-lite: Excludes torch/transformers (recommended for distribution)"
+	@echo "  build-ai:   Includes AI libraries but NOT model weights (downloaded on first use)"
 	@echo ""
 	@echo "Examples:"
-	@echo "  make init     - First-time setup in a new environment"
-	@echo "  make          - Default operation (install dependencies and build)"
-	@echo "  make clean    - Clean build artifacts"
-	@echo "  make dist     - Create distribution package"
+	@echo "  make deps       - First-time setup in a new environment"
+	@echo "  make build      - Build without AI (recommended for distribution)"
+	@echo "  make build-ai   - Build with AI support (for local AI analysis)"
+	@echo "  make clean      - Clean build artifacts"
