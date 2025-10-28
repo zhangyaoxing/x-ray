@@ -2,8 +2,8 @@ import logging
 from libs.utils import *
 
 MODEL_NAME = "Qwen/Qwen2.5-0.5B-Instruct"
-GPT_MODEL = "gpt-5"
 MAX_NEW_TOKENS = 256
+GPT_MODEL = "gpt-5"
 
 logger = logging.getLogger(__name__)
 

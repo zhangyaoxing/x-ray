@@ -4,21 +4,32 @@ This project aims to create tools for MongoDB analysis and diagnosis. So far 2 m
 - Log analysis module (Under construction).
 
 ## 1 Compatibility Matrix
+### Health Check
 |  Replica Set  | Sharded Cluster | Standalone |
 | :-----------: | :-------------: | :--------: |
 | >=4.2 &check; |  >=4.2 &check;  |  &cross;   |
 
+
+### Log Analysis
+Log analysis requires JSON format logs, which is supported since 4.4.
+|  Replica Set  | Sharded Cluster |  Standalone   |
+| :-----------: | :-------------: | :-----------: |
+| >=4.4 &check; |  >=4.4 &check;  | >=4.4 &check; |
+
 Older versions are not tested.
 
-## 2 Dependencies
+## 2 Building
 The tool is tested with `Python 3.9.22`.
 ```bash
-make init # if it's the first time you build the project
-make
+make deps # if it's the first time you build the project
+make # equial to `make build` and `make build-lite`
 ```
 The compiled executable is in the folder `./dist/`.
 
-For developers the `make init` will be enough to prepare the environment so you can run this tool in the IDE.
+For developers the `make deps` will be enough to prepare the environment so you can run this tool in the IDE.
+
+You can also build the tool with AI modules for log analysis. For more details refer to: [Build with AI Support](https://github.com/zhangyaoxing/x-ray/wiki/Build-with-AI-Support).
+
 
 ## 3 Using the Tool
 ```bash
@@ -87,10 +98,3 @@ x-ray log [-h] [-s CHECKSET] [-o OUTPUT] [-f {markdown,html}] [log_file]
 | `-f`, `--format`   | Output format. Can be `markdown` or `html`.       |  `html`   |
 | `-r`, `--rate`     | Sample rate. Only analyze a subset of logs.       |    `1`    |
 | `--top`            | When analyzing the slow queries, only list top N. |   `10`    |
-
-#### 3.2.3 AI Analysis
-If you have OpenAI API key set in the environment variable, x-ray will use AI to analyze the warning/error/fatal logs.
-```bash
-export OPENAI_API_KEY=<your api key>
-```
-x-ray will deduplicate logs by `id`, then analyze the deduplicated logs.
