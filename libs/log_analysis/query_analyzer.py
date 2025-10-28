@@ -83,12 +83,13 @@ def analyze_query_pattern(log_line):
         }
     else:
         # For single query
+        q_pattern = query_to_pattern(query)
         return {
             "type": query_type,
-            "pattern": query_to_pattern(query),
+            "pattern": q_pattern,
             "sort": sort,
             "hash": json_hash({
-                "query": query,
+                "query": q_pattern,
                 "sort": sort
             }, 4)
         }

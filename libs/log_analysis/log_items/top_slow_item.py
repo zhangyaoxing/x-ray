@@ -34,8 +34,9 @@ class TopSlowItem(BaseItem):
         query_pattern = analyze_query_pattern(log_line)
         if query_hash == "":
             # Some command doesn't have queryHash, e.g., getMore
-            # If so, we generate one based on the query shape
+            # If so, we generate one based on the query shape and sort
             query_hash = json_hash(query_pattern if query_pattern else {}, 4)
+            # query_hash = query_pattern.get("hash", "N/A") if query_pattern else "N/A"
         slow_query = self._cache.get(query_hash, None)
         if slow_query is None:
             slow_query = {}
