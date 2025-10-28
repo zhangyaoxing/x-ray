@@ -46,7 +46,7 @@
         },
         "item_config": {
             "WEFItem": {
-                "ai_support": "local"
+                "ai_support": "none"
             }
         },
         "template": "log/full.html"

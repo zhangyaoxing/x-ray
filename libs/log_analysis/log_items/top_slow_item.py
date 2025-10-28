@@ -27,6 +27,7 @@ class TopSlowItem(BaseItem):
         keys_examined = attr.get("keysExamined", 0)
         docs_examined = attr.get("docsExamined", 0)
         plan_summary = attr.get("planSummary", "")
+        ns = attr.get("ns", "")
         query_pattern = analyze_query_pattern(log_line)
         if query_hash == "":
             # Some command doesn't have queryHash, e.g., getMore
@@ -38,6 +39,7 @@ class TopSlowItem(BaseItem):
             self._cache[query_hash] = slow_query
         slow_query.update({
             "query_hash": query_hash,
+            "ns": ns,
             "query_pattern": query_pattern,
             "duration": slow_query.get("duration", 0) + duration,
             "n_returned": slow_query.get("n_returned", 0) + n_returned,
@@ -50,13 +52,14 @@ class TopSlowItem(BaseItem):
         })
 
     def finalize_analysis(self):
-        self._cache = list(sorted(self._cache.values(), key=lambda item: item["duration"], reverse=True)[:self._top_n])
+        self._cache = list(sorted(self._cache.values(), key=lambda item: item["count"], reverse=True)[:self._top_n])
+        # self._cache = list(sorted(self._cache.values(), key=lambda item: item["duration"], reverse=True)[:self._top_n])
         super().finalize_analysis()
 
     def review_results_markdown(self, f):
         super().review_results_markdown(f)
         f.write("<div id=\"top_slow_positioner\"></div>\n\n")
-        f.write(f"|Query Hash|Type|Pattern|Details|Plan Summary|\n")
+        f.write(f"|Query Hash|Op|Pattern|Details|Plan Summary|\n")
         f.write(f"|---|---|---|---|---|\n")
         # Total Duration (ms)|Count|Avg Duration (ms)|Scanned / Returned|ScannedObj / Returned|Has Sort
         i = 0
@@ -64,8 +67,9 @@ class TopSlowItem(BaseItem):
             for line in data:
                 line_json = json_util.loads(line)
                 query_hash = line_json.get("query_hash", "N/A")
+                ns = line_json.get("ns", "N/A")
                 query_pattern = line_json.get("query_pattern", {})
-                type = query_pattern.get("type", "UNKNOWN")
+                op = query_pattern.get("type", "UNKNOWN")
                 pattern = query_pattern.get("pattern", {})
                 # query_hash = query_hash if query_hash != "" else "N/A"
                 duration = line_json.get("duration", 0)
@@ -89,7 +93,7 @@ class TopSlowItem(BaseItem):
                 plan_summary = escape_markdown(plan_summary if plan_summary != "" else "N/A")
                 cols = [
                     f"[{query_hash}](#{i})", 
-                    f"{type}", 
+                    f"`{op}` on `{ns}`", 
                     f"<pre>{format_json_md(pattern)}</pre>", 
                     f"<pre>{format_json_md(details)}</pre>", 
                     f"{plan_summary}"
