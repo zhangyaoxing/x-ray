@@ -35,7 +35,7 @@ build-lite:
 		--exclude-module numpy \
 		--exclude-module scipy \
 		x-ray
-	@echo "\033[32m✓ Lightweight build complete: dist/x-ray (~11MB)\033[0m"
+	@echo "\033[32m✓ Lightweight build complete: dist/x-ray\033[0m"
 
 # Build executable with AI support (includes torch, transformers)
 build-ai:
@@ -50,7 +50,7 @@ build-ai:
 		--hidden-import transformers.models.qwen2 \
 		--hidden-import tokenizers \
 		x-ray
-	@echo "\033[32m✓ Full build complete: dist/x-ray-ai (~2GB+)\033[0m"
+	@echo "\033[32m✓ Full build complete: dist/x-ray-ai\033[0m"
 	@echo "\033[33m⚠ Note: This does NOT include model weights. Models will be downloaded on first use.\033[0m"
 
 # Clean build artifacts
