@@ -16,7 +16,7 @@ for (var i = 0; i < anchors.length; i++) {
             sample.textContent = JSON.stringify(row.sample, null, 2);
             if (row.ai_analysis) {
                 sample.textContent += "\n\n// AI Analysis: \n";
-                const analysis = row.ai_analysis.split("\n").map(line => "// " + line).join("\n");
+                const analysis = row.ai_analysis.split(/(?<=[\n.!;])\W+/).map(line => "// " + line).join("\n");
                 sample.textContent += analysis;
             }
             highlighted = index;

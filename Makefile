@@ -28,6 +28,7 @@ build-lite:
 		--add-data="config.json:." \
 		--add-data="libs:libs" \
 		--add-data="compatibility_matrix.json:." \
+		--hidden-import=openai \
 		--exclude-module torch \
 		--exclude-module torchvision \
 		--exclude-module transformers \

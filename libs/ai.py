@@ -3,6 +3,7 @@ from libs.utils import *
 
 MODEL_NAME = "Qwen/Qwen2.5-0.5B-Instruct"
 GPT_MODEL = "gpt-5"
+MAX_NEW_TOKENS = 256
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +38,7 @@ def load_model(model_name):
     )
     model.eval()
     gen_config = GenerationConfig(
-        max_new_tokens=100,
+        max_new_tokens=MAX_NEW_TOKENS,
         max_length=None,
         do_sample=False,
         eos_token_id=tokenizer.eos_token_id,

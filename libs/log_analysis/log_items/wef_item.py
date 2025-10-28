@@ -36,23 +36,27 @@ class WEFItem(BaseItem):
         cache = self._cache
         
         # Lazy import AI modules (only if needed)
-        if self._ai_support in ["local"]:
+        if self._ai_support == "local":
             try:
-                from libs.ai import MODEL_NAME, GPT_MODEL, analyze_log_line_gpt, analyze_log_line_local, load_model
+                from libs.ai import MODEL_NAME, analyze_log_line_local, load_model
+                tokenizer, model, gen_config = load_model(MODEL_NAME)
+                self._logger.info(f"Local AI model ({green(bold(MODEL_NAME))}) loaded for W/E/F log analysis. This can take a few minutes...")
             except ImportError as e:
                 self._logger.error(f"AI support enabled but AI libraries not available: {e}")
                 self._logger.error("Please install AI dependencies or disable AI support in config.json")
                 self._ai_support = False
-        
-        if self._ai_support == "local":
-            tokenizer, model, gen_config = load_model(MODEL_NAME)
-            self._logger.info(f"Local AI model ({green(bold(MODEL_NAME))}) loaded for W/E/F log analysis.")
         elif self._ai_support == "gpt":
-            if env == "development":
-                cache = [self._cache[randint(0, len(self._cache) - 1)]] if len(self._cache) > 0 else []
-                self._logger.info(yellow(f"Running in development mode. Only process ONE random log entry with AI."))
-                self._logger.info(yellow(f"Log ID: {cache[0]['id']}"))
-            self._logger.info(f"Using GPT model ({green(bold(GPT_MODEL))}) for W/E/F log analysis. This can take a few minutes...")
+            try:
+                from libs.ai import GPT_MODEL, analyze_log_line_gpt
+                if env == "development":
+                    cache = [self._cache[randint(0, len(self._cache) - 1)]] if len(self._cache) > 0 else []
+                    self._logger.info(yellow(f"Running in development mode. Only process ONE random log entry with AI."))
+                    self._logger.info(yellow(f"Log ID: {cache[0]['id']}"))
+                self._logger.info(f"Using GPT model ({green(bold(GPT_MODEL))}) for W/E/F log analysis. This can take a few minutes...")
+            except ImportError as e:
+                self._logger.error(f"AI support enabled but AI libraries not available: {e}")
+                self._logger.error("Please install AI dependencies or disable AI support in config.json")
+                self._ai_support = False
 
         for item in cache:
             if self._ai_support == "local":
