@@ -125,7 +125,7 @@ def log_analysis_command(args):
     try:
         config = load_config(args.config)["log"]
         config["sample_rate"] = args.rate
-        config["top"] = args.top
+        config["item_config"]["TopSlowItem"]["top"] = args.top
     except FileNotFoundError:
         logger.error(f"Config file not found: {args.config}")
         logger.info("Please provide a valid path to config.json using the -c/--config argument")
