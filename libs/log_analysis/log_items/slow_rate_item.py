@@ -9,7 +9,7 @@ import math
 class SlowRateItem(BaseItem):
     def __init__(self, output_folder: str, config):
         super(SlowRateItem, self).__init__(output_folder, config)
-        self._cache = {}
+        self._cache = None
         self.name = "Slow Rate"
         self.description = "Analyse the rate of slow queries."
         self._show_reset = True
@@ -22,15 +22,17 @@ class SlowRateItem(BaseItem):
         ts = math.floor(time.timestamp())
         time_min = datetime.fromtimestamp(ts - (ts % 60))
 
-        if self._cache.get("time", None) != time_min:
-            if self._cache != {}:
-                self._write_output()
+        if self._cache is None or self._cache.get("time", None) != time_min:
+            # First time or new minute bucket
             self._cache = {
                 "time": time_min,
                 "total_slow_ms": 0,
                 "count": 0,
                 "byNs": {}
             }
+            if self._cache is not None:
+                # New minute, write previous minute's data
+                self._write_output()
         attr = log_line.get("attr", {})
         slow_ms = attr.get("durationMillis", 0)
         ns = attr.get("ns", "unknown")

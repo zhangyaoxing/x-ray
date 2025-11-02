@@ -65,19 +65,19 @@ class BaseItem(object):
         f.write("<script type=\"text/javascript\">\n")
         f.write("document.addEventListener('DOMContentLoaded', function() {\n")
         if self._show_scaler:
-            f.write(f"var slider = document.getElementById('slider_{self.__class__.__name__}');\n")
-            f.write(f"var sliderValue = document.getElementById('sliderValue_{self.__class__.__name__}');\n")
+            f.write(f"let slider = document.getElementById('slider_{self.__class__.__name__}');\n")
+            f.write(f"let sliderValue = document.getElementById('sliderValue_{self.__class__.__name__}');\n")
             f.write("slider.oninput = function() {\n")
-            f.write(f"  var value = parseInt(slider.value);\n")
+            f.write(f"  let value = parseInt(slider.value);\n")
             f.write(f"  sliderValue.textContent = value;\n")
             f.write("}\n")
             f.write("slider.onchange = function() {\n")
             f.write("  onSlide(slider, sliderValue, scaleCharts);\n")
             f.write("}\n")
-            f.write("var scale = parseInt(sliderValue.innerText);\n")
+            f.write("let scale = parseInt(sliderValue.innerText);\n")
         if self._show_reset:
-            f.write(f"var resetButton = document.getElementById('reset_{self.__class__.__name__}');\n")
-        f.write(f"var data = [\n")
+            f.write(f"let resetButton = document.getElementById('reset_{self.__class__.__name__}');\n")
+        f.write(f"let data = [\n")
         with open(self._output_file, "r") as data:
             for line in data:
                 # The data is in EJSON format, convert it to JSON
@@ -93,11 +93,12 @@ class BaseItem(object):
         f.write("</script>\n")
 
     def _write_output(self):
-        if self._cache is None:
-            self._logger.debug(f"Cache is empty, nothing to write for {self.__class__.__name__}")
-            return
         # Open file steam and write the cache to file
+        # Even if the cache is None, we still write to indicate no data
         with open(self._output_file, "a") as f:
+            if self._cache is None:
+                self._logger.debug(f"Cache is empty, nothing to write for {self.__class__.__name__}")
+                return
             if isinstance(self._cache, list):
                 for item in self._cache:
                     f.write(to_ejson(item))
