@@ -40,7 +40,7 @@
             "program": "x-ray",
             "console": "integratedTerminal",
             "args": [
-                "-c", "config_test.json",
+                "-c", "config.json",
                 "log",
                 "-r", "1",
                 "misc/example.log"
