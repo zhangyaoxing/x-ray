@@ -1,13 +1,27 @@
 data = data[0];
 let valueHostMapping = {};
 let hostValueMapping = {};
+const COLOR_MAPPING = {
+    "STARTUP": 'rgba(153, 102, 255, 1)',
+    "PRIMARY": 'rgba(54, 197, 22, 0.87)',
+    "SECONDARY": 'rgba(216, 216, 40, 1)',
+    "RECOVERING": 'rgba(255, 159, 64, 1)',
+    "STARTUP2": 'rgba(102, 29, 248, 1)',
+    "UNKNOWN": 'rgba(0, 0, 0, 1)',
+    "ARBITER": 'rgba(51, 74, 247, 1)',
+    "DOWN": 'rgba(128, 0, 0, 1)',
+    "ROLLBACK": 'rgba(255, 99, 132, 1)',
+    "REMOVED": 'rgba(201, 203, 207, 1)'
+}
 const datasets = Object.keys(data).map((host, index) => {
-    value = index + 1;
+    let value = index + 1;
+    // Some events doesn't carry state info, so we need to track the latest state
+    let state = "UNKNOWN";
     const points = data[host].map(event => {
         const timestamp = new Date(event.timestamp);
         hostValueMapping[host] = value;
         valueHostMapping[value.toString()] = host;
-        return {
+        let point = {
             x: timestamp.getTime(),
             y: value,
             timestamp: timestamp,
@@ -15,6 +29,12 @@ const datasets = Object.keys(data).map((host, index) => {
             details: event.details,
             id: event.id
         };
+        if ([21215, 21216, 21358].includes(event.id)) {
+            // State changed, update the latest state
+            state = event.details.new_state || "UNKNOWN";
+        }
+        point.state = state;
+        return point;
     });
     
     return {
@@ -25,9 +45,16 @@ const datasets = Object.keys(data).map((host, index) => {
         borderWidth: 10,
         pointBackgroundColor: "white",
         pointRadius: 5,
-        pointBorderWidth: 1,
+        pointBorderWidth: 0,
         pointHoverRadius: 8,
-        fill: false
+        fill: false,
+        segment: {
+            borderColor: ctx => {
+                const state = ctx.p0.raw.state;
+                const color = COLOR_MAPPING[state] || 'rgba(0, 0, 0, 1)';
+                return color;
+            }
+        }
     };
 });
 
@@ -105,7 +132,7 @@ const chart = new Chart(ctx, {
                             detail = `${dataPoint.details.new_state}`;
                         } else if (id == 21358) {
                             // state change
-                            detail = `${dataPoint.details.from} → ${dataPoint.details.to}`;
+                            detail = `${dataPoint.details.old_state} → ${dataPoint.details.new_state}`;
                         } else if (id == 4615660) {
                             // priority takeover
                             detail = 'Priority Takeover';

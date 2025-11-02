@@ -91,8 +91,8 @@ class StateTraceItem(BaseItem):
                 "event": "StateTransition",
                 "details": {
                     "msg": msg,
-                    "from": old_state,
-                    "to": new_state
+                    "old_state": old_state,
+                    "new_state": new_state
                 }
             })
         if log_id == 4615660:
