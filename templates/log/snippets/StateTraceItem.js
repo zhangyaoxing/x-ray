@@ -2,16 +2,16 @@ data = data[0];
 let valueHostMapping = {};
 let hostValueMapping = {};
 const COLOR_MAPPING = {
-    "STARTUP": 'rgba(153, 102, 255, 1)',
-    "PRIMARY": 'rgba(54, 197, 22, 0.87)',
-    "SECONDARY": 'rgba(216, 216, 40, 1)',
-    "RECOVERING": 'rgba(255, 159, 64, 1)',
-    "STARTUP2": 'rgba(102, 29, 248, 1)',
-    "UNKNOWN": 'rgba(0, 0, 0, 1)',
-    "ARBITER": 'rgba(51, 74, 247, 1)',
-    "DOWN": 'rgba(128, 0, 0, 1)',
-    "ROLLBACK": 'rgba(255, 99, 132, 1)',
-    "REMOVED": 'rgba(201, 203, 207, 1)'
+    "STARTUP": 'rgba(153, 102, 255, 0.6)',
+    "PRIMARY": 'rgba(54, 197, 22, 0.6)',
+    "SECONDARY": 'rgba(249, 224, 0, 0.6)',
+    "RECOVERING": 'rgba(255, 159, 64, 0.6)',
+    "STARTUP2": 'rgba(102, 29, 248, 0.6)',
+    "UNKNOWN": 'rgba(0, 0, 0, 0.6)',
+    "ARBITER": 'rgba(51, 74, 247, 0.6)',
+    "DOWN": 'rgba(128, 0, 0, 0.6)',
+    "ROLLBACK": 'rgba(255, 99, 132, 0.6)',
+    "REMOVED": 'rgba(201, 203, 207, 0.6)',
 }
 const datasets = Object.keys(data).map((host, index) => {
     let value = index + 1;
@@ -46,6 +46,7 @@ const datasets = Object.keys(data).map((host, index) => {
         pointBackgroundColor: "white",
         pointRadius: 5,
         pointBorderWidth: 0,
+        pointBorderColor: 'rgba(0, 0, 0, 0.5)',
         pointHoverRadius: 8,
         fill: false,
         segment: {

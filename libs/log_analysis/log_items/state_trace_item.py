@@ -16,6 +16,7 @@ class StateTraceItem(BaseItem):
         self._cache = {}
         self._myself = "self"
         self._show_reset = True
+        self._last_log = None
 
     def analyze(self, log_line):
         super().analyze(log_line)
@@ -108,6 +109,22 @@ class StateTraceItem(BaseItem):
                 "event": "Priority Takeover",
                 "details": {"msg": msg}
             })
+        self._last_log = log_line
+    def finalize_analysis(self):
+        if not self._last_log:
+            return
+        # Because we are using line chart to describe the state changes,
+        # we need to add a final point to indicate the last known state.
+        # Otherwise, the chart will end abruptly at the last event.
+        for host, events in self._cache.items():
+            events.append({
+                "id": -1,
+                "host": host,
+                "timestamp": self._last_log.get("t", "") if self._last_log else "",
+                "event": "LogEnd",
+                "details": {"msg": "End of log"}
+            })
+        super().finalize_analysis()
     def review_results_markdown(self, f):
         super().review_results_markdown(f)
         f.write(f"<canvas id=\"canvas_{self.__class__.__name__}\" height=\"300\" width=\"400\"></canvas>\n")
