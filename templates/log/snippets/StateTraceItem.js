@@ -20,15 +20,22 @@ const datasets = Object.keys(data).map((host, index) => {
     return {
         label: host,
         data: points,
-        pointRadius: 6,
-        pointHoverRadius: 8,
         showLine: true,
         tension: 0,
-        fill: true
+        borderWidth: 10,
+        pointBackgroundColor: "white",
+        pointRadius: 5,
+        pointBorderWidth: 1,
+        pointHoverRadius: 8,
+        fill: false
     };
 });
 
-const ctx = document.getElementById('canvas_{name}').getContext('2d');
+const canvas = document.getElementById('canvas_{name}')
+const height = Object.keys(data).length * 30;
+canvas.style.height = `${height}px`;
+canvas.height = height;
+const ctx = canvas.getContext('2d');
 const chart = new Chart(ctx, {
     type: 'line',
     data: {
@@ -36,6 +43,7 @@ const chart = new Chart(ctx, {
     },
     options: {
         responsive: true,
+        maintainAspectRatio: true,
         scales: {
             x: {
                 type: 'linear',
@@ -54,9 +62,6 @@ const chart = new Chart(ctx, {
                         const timeStr = date.toISOString().match(/(?<=T)[^\.Z]+/)[0];
                         return timeStr;
                     }
-                },
-                grid: {
-                    color: 'rgba(0, 0, 0, 0.05)'
                 }
             },
             y: {
@@ -75,9 +80,6 @@ const chart = new Chart(ctx, {
                         size: 14,
                         weight: 'bold'
                     }
-                },
-                grid: {
-                    color: 'rgba(0, 0, 0, 0.1)'
                 }
             }
         },
@@ -91,28 +93,30 @@ const chart = new Chart(ctx, {
                         const dataPoint = context.raw;
                         const date = dataPoint.timestamp;
                         const timeStr = date.toISOString();
+                        const id = dataPoint.id;
+                        let detail = "";
+                        if (id == 21392) {
+                            // config change
+                            const v = dataPoint.details.config.version;
+                            const t = dataPoint.details.config.term;
+                            detail = `{version: ${v}, term: ${t}}`;
+                        } else if (id == 21215 || id == 21216) {
+                            // new state
+                            detail = `${dataPoint.details.new_state}`;
+                        } else if (id == 21358) {
+                            // state change
+                            detail = `${dataPoint.details.from} → ${dataPoint.details.to}`;
+                        } else if (id == 4615660) {
+                            // priority takeover
+                            detail = 'Priority Takeover';
+                        }
                         return [
                             `Event: ${dataPoint.event}`,
                             `Log ID: ${dataPoint.id}`,
                             `Time: ${timeStr}`,
-                            `Message: ${dataPoint.details.msg || ''}`
+                            `Message: ${dataPoint.details.msg || ''}`,
+                            `${detail}`
                         ];
-                    },
-                    afterLabel: function(context) {
-                        const dataPoint = context.raw;
-                        const id = dataPoint.id;
-                        if (id == 21392) {
-                            const v = dataPoint.details.config.version;
-                            const t = dataPoint.details.config.term;
-                            return `{version: ${v}, term: ${t}}`;
-                        } else if (id == 21215 || id == 21216) {
-                            return `${dataPoint.details.new_state}`;
-                        } else if (id == 21358) {
-                            return `${dataPoint.details.from} → ${dataPoint.details.to}`;
-                        } else if (id == 4615660) {
-                            return 'Priority Takeover';
-                        }
-                        return '';
                     }
                 },
                 backgroundColor: 'rgba(0, 0, 0, 0.8)',
@@ -127,15 +131,7 @@ const chart = new Chart(ctx, {
                 displayColors: true
             },
             legend: {
-                display: true,
-                position: 'top',
-                labels: {
-                    font: {
-                        size: 12
-                    },
-                    padding: 15,
-                    usePointStyle: true
-                }
+                display: false
             },
             title: {
                 display: true,
@@ -145,6 +141,31 @@ const chart = new Chart(ctx, {
                     weight: 'bold'
                 },
                 padding: 20
+            },
+            zoom: {
+                zoom: {
+                    wheel: {
+                        enabled: true
+                    },
+                    pinch: {
+                        enabled: true
+                    },
+                    drag: {
+                        enabled: true
+                    },
+                    mode: 'x'
+                },
+                pan: {
+                    enabled: true,
+                    mode: 'x',
+                    modifierKey: 'shift'
+                },
+                limits: {
+                    x: {
+                        min: "original",
+                        max: "original"
+                    }
+                }
             }
         },
         interaction: {
@@ -153,3 +174,6 @@ const chart = new Chart(ctx, {
         }
     }
 });
+resetButton.onclick = function() {
+    chart.resetZoom();
+}

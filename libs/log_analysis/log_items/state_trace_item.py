@@ -15,6 +15,7 @@ class StateTraceItem(BaseItem):
         self.description = "Visualize member state trace logs to understand system state changes over time."
         self._cache = {}
         self._myself = "self"
+        self._show_reset = True
 
     def analyze(self, log_line):
         super().analyze(log_line)
@@ -109,4 +110,4 @@ class StateTraceItem(BaseItem):
             })
     def review_results_markdown(self, f):
         super().review_results_markdown(f)
-        f.write(f"<canvas id=\"canvas_{self.__class__.__name__}\" height=\"200\"></canvas>\n")
+        f.write(f"<canvas id=\"canvas_{self.__class__.__name__}\" height=\"300\" width=\"400\"></canvas>\n")
