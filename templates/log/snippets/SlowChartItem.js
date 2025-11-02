@@ -116,14 +116,14 @@ const configDuration = {
                 callbacks: {
                     title: function(context) {
                         const point = context[0].raw;
-                        return new Date(point.x).toLocaleString();
+                        return new Date(point.x).toISOString();
                     },
                     label: function(context) {
                         const point = context.raw;
                         return [
                             `Namespace: ${context.dataset.label}`,
                             `Duration: ${point.y}ms`,
-                            `Time: ${new Date(point.x).toLocaleString()}`
+                            `Time: ${new Date(point.x).toISOString()}`
                         ];
                     }
                 }
@@ -164,7 +164,9 @@ const configDuration = {
                 },
                 ticks: {
                     callback: function(t) {
-                        return new Date(t).toLocaleTimeString();
+                        const date = new Date(t);
+                        const timeStr = date.toISOString().match(/(?<=T)[^\.Z]+/)[0];
+                        return timeStr;
                     },
                     maxTicksLimit: 10
                 }
@@ -204,14 +206,14 @@ const configScanned = {
                 callbacks: {
                     title: function(context) {
                         const point = context[0].raw;
-                        return new Date(point.x).toLocaleString();
+                        return new Date(point.x).toISOString();
                     },
                     label: function(context) {
                         const point = context.raw;
                         return [
                             `Namespace: ${context.dataset.label}`,
                             `Scanned: ${point.y}`,
-                            `Time: ${new Date(point.x).toLocaleString()}`
+                            `Time: ${new Date(point.x).toISOString()}`
                         ];
                     }
                 }
@@ -252,7 +254,9 @@ const configScanned = {
                 },
                 ticks: {
                     callback: function(t) {
-                        return new Date(t).toLocaleTimeString();
+                        const date = new Date(t);
+                        const timeStr = date.toISOString().match(/(?<=T)[^\.Z]+/)[0];
+                        return timeStr;
                     },
                     maxTicksLimit: 10
                 }
@@ -293,14 +297,14 @@ const configScannedObj = {
                 callbacks: {
                     title: function(context) {
                         const point = context[0].raw;
-                        return new Date(point.x).toLocaleString();
+                        return new Date(point.x).toISOString();
                     },
                     label: function(context) {
                         const point = context.raw;
                         return [
                             `Namespace: ${context.dataset.label}`,
                             `Scanned Obj: ${point.y}`,
-                            `Time: ${new Date(point.x).toLocaleString()}`
+                            `Time: ${new Date(point.x).toISOString()}`
                         ];
                     }
                 }
@@ -341,7 +345,9 @@ const configScannedObj = {
                 },
                 ticks: {
                     callback: function(t) {
-                        return new Date(t).toLocaleTimeString();
+                        const date = new Date(t);
+                        const timeStr = date.toISOString().match(/(?<=T)[^\.Z]+/)[0];
+                        return timeStr;
                     },
                     maxTicksLimit: 10
                 }
