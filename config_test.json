@@ -40,7 +40,7 @@
         "sample_rate": 1.0,
         "logsets": {
             "default": {
-                "items": ["ConnectionRateItem", "SlowRateItem", "ClientMetaItem", "TopSlowItem", "SlowChartItem", "WEFItem", "InfoItem"]
+                "items": ["ConnectionRateItem", "SlowRateItem", "ClientMetaItem", "TopSlowItem", "SlowChartItem", "StateTraceItem", "WEFItem", "InfoItem"]
             }
         },
         "item_config": {
