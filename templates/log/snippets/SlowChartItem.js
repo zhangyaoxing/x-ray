@@ -131,31 +131,7 @@ const configDuration = {
                     }
                 }
             },
-            zoom: {
-                zoom: {
-                    wheel: {
-                        enabled: true
-                    },
-                    pinch: {
-                        enabled: true
-                    },
-                    drag: {
-                        enabled: true
-                    },
-                    mode: 'x'
-                },
-                pan: {
-                    enabled: true,
-                    mode: 'x',
-                    modifierKey: 'shift'
-                },
-                limits: {
-                    x: {
-                        min: "original",
-                        max: "original"
-                    }
-                }
-            }
+            zoom: ZOOM_OPTIONS
         },
         scales: {
             x: {
@@ -224,31 +200,7 @@ const configScanned = {
                     }
                 }
             },
-            zoom: {
-                zoom: {
-                    wheel: {
-                        enabled: true
-                    },
-                    pinch: {
-                        enabled: true
-                    },
-                    drag: {
-                        enabled: true
-                    },
-                    mode: 'x'
-                },
-                pan: {
-                    enabled: true,
-                    mode: 'x',
-                    modifierKey: 'shift'
-                },
-                limits: {
-                    x: {
-                        min: "original",
-                        max: "original"
-                    }
-                }
-            }
+            zoom: ZOOM_OPTIONS
         },
         scales: {
             x: {
@@ -318,31 +270,7 @@ const configScannedObj = {
                     }
                 }
             },
-            zoom: {
-                zoom: {
-                    wheel: {
-                        enabled: true
-                    },
-                    pinch: {
-                        enabled: true
-                    },
-                    drag: {
-                        enabled: true
-                    },
-                    mode: 'x'
-                },
-                pan: {
-                    enabled: true,
-                    mode: 'x',
-                    modifierKey: 'shift'
-                },
-                limits: {
-                    x: {
-                        min: "original",
-                        max: "original"
-                    }
-                }
-            }
+            zoom: ZOOM_OPTIONS
         },
         scales: {
             x: {

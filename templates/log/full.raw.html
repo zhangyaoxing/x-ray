@@ -18,6 +18,31 @@
         VIEWPORT_WIDTH = 1200;
         MAX_LEGENDS = 15;
         ANIMATION_DURATION = 100;
+        ZOOM_OPTIONS = {
+            zoom: {
+                wheel: {
+                    enabled: true
+                },
+                pinch: {
+                    enabled: true
+                },
+                drag: {
+                    enabled: true
+                },
+                mode: 'x'
+            },
+            pan: {
+                enabled: true,
+                mode: 'x',
+                modifierKey: 'shift'
+            },
+            limits: {
+                x: {
+                    min: "original",
+                    max: "original"
+                }
+            }
+        };
         data = {};
         linkElms = [];
         titleElms = [];

@@ -39,25 +39,7 @@ chart1 = new Chart(ctx, {
         },
         plugins: {
             legend: { position: 'top' },
-            zoom: {
-                zoom: {
-                    wheel: {
-                        enabled: true
-                    },
-                    pinch: {
-                        enabled: true
-                    },
-                    drag: {
-                        enabled: true
-                    },
-                    mode: 'x'
-                },
-                pan: {
-                    enabled: true,
-                    mode: 'x',
-                    modifierKey: 'shift'
-                }
-            }
+            zoom: ZOOM_OPTIONS
         },
         scales: {
             y: {

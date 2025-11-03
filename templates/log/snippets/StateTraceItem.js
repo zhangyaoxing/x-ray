@@ -194,31 +194,7 @@ const chart = new Chart(ctx, {
                 },
                 padding: 20
             },
-            zoom: {
-                zoom: {
-                    wheel: {
-                        enabled: true
-                    },
-                    pinch: {
-                        enabled: true
-                    },
-                    drag: {
-                        enabled: true
-                    },
-                    mode: 'x'
-                },
-                pan: {
-                    enabled: true,
-                    mode: 'x',
-                    modifierKey: 'shift'
-                },
-                limits: {
-                    x: {
-                        min: "original",
-                        max: "original"
-                    }
-                }
-            }
+            zoom: ZOOM_OPTIONS
         },
         interaction: {
             mode: 'nearest',
