@@ -233,6 +233,12 @@
     </style>
 </head>
 <body class="markdown-body">
+    <script type="text/javascript">
+        const ROOT_STYLES = getComputedStyle(document.body);
+        const FG_COLOR = ROOT_STYLES.getPropertyValue('--fgColor-default').trim() || '#333333';
+        const BG_COLOR = ROOT_STYLES.getPropertyValue('--bgColor-default').trim() || '#ffffff';
+        Chart.defaults.color = FG_COLOR;
+    </script>
     <div id="outline">
         <a href="#" id="collapse-outline">&#x25C0;</a>
         <b>Report Outline</b>

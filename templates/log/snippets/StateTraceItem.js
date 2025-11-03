@@ -2,16 +2,16 @@ data = data[0];
 let valueHostMapping = {};
 let hostValueMapping = {};
 const COLOR_MAPPING = {
-    "STARTUP": 'rgba(102, 29, 248, 0.6)',
-    "PRIMARY": 'rgba(54, 197, 22, 0.6)',
-    "SECONDARY": 'rgba(249, 224, 0, 0.6)',
-    "RECOVERING": 'rgba(255, 159, 64, 0.6)',
-    "STARTUP2": 'rgba(153, 102, 255, 0.6)',
-    "UNKNOWN": 'rgba(0, 0, 0, 0.6)',
-    "ARBITER": 'rgba(51, 182, 247, 0.6)',
-    "DOWN": 'rgba(128, 0, 0, 0.6)',
-    "ROLLBACK": 'rgba(255, 99, 132, 0.6)',
-    "REMOVED": 'rgba(201, 203, 207, 0.6)',
+    "STARTUP": 'rgba(102, 29, 248, 0.85)',
+    "PRIMARY": 'rgba(54, 197, 22, 0.85)',
+    "SECONDARY": 'rgba(249, 224, 0, 0.85)',
+    "RECOVERING": 'rgba(255, 159, 64, 0.85)',
+    "STARTUP2": 'rgba(153, 102, 255, 0.85)',
+    "UNKNOWN": 'rgba(0, 0, 0, 0.85)',
+    "ARBITER": 'rgba(51, 182, 247, 0.85)',
+    "DOWN": 'rgba(128, 0, 0, 0.85)',
+    "ROLLBACK": 'rgba(255, 99, 132, 0.85)',
+    "REMOVED": 'rgba(201, 203, 207, 0.85)',
 }
 const datasets = Object.keys(data).map((host, index) => {
     let value = index + 1;
@@ -43,11 +43,15 @@ const datasets = Object.keys(data).map((host, index) => {
         showLine: true,
         tension: 0,
         borderWidth: 10,
-        pointBackgroundColor: "white",
-        pointRadius: 5,
-        pointBorderWidth: 0,
-        pointBorderColor: 'rgba(0, 0, 0, 0.5)',
+        pointBackgroundColor: FG_COLOR,
+        pointBorderColor: FG_COLOR,
+        pointBorderWidth: 2,
+        pointRadius: 7,
+        pointStyle: "line",
+        pointRotation: 90,
         pointHoverRadius: 8,
+        pointHoverBorderWidth: 4,
+        pointHoverBorderColor: 'rgba(0, 255, 255, 0.85)',
         fill: false,
         segment: {
             borderColor: ctx => {
@@ -80,11 +84,7 @@ const chart = new Chart(ctx, {
                 type: 'linear',
                 title: {
                     display: true,
-                    text: 'Time',
-                    font: {
-                        size: 14,
-                        weight: 'bold'
-                    }
+                    text: 'Time'
                 },
                 ticks: {
                     callback: function(value) {
@@ -107,10 +107,6 @@ const chart = new Chart(ctx, {
                 title: {
                     display: true,
                     text: 'Replica Set Members',
-                    font: {
-                        size: 14,
-                        weight: 'bold'
-                    }
                 }
             }
         },
@@ -126,6 +122,7 @@ const chart = new Chart(ctx, {
                                 fillStyle: COLOR_MAPPING[state],
                                 strokeStyle: COLOR_MAPPING[state],
                                 lineWidth: 0,
+                                fontColor: FG_COLOR,
                                 hidden: false,
                             };
                         });
@@ -134,9 +131,6 @@ const chart = new Chart(ctx, {
                     boxWidth: 20,
                     boxHeight: 10,
                     padding: 15,
-                    font: {
-                        size: 12
-                    }
                 }
             },
             tooltip: {
@@ -175,23 +169,12 @@ const chart = new Chart(ctx, {
                     }
                 },
                 backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                titleFont: {
-                    size: 14,
-                    weight: 'bold'
-                },
-                bodyFont: {
-                    size: 12
-                },
                 padding: 12,
                 displayColors: true
             },
             title: {
                 display: true,
                 text: 'State Transition Timeline',
-                font: {
-                    size: 16,
-                    weight: 'bold'
-                },
                 padding: 20
             },
             zoom: ZOOM_OPTIONS
