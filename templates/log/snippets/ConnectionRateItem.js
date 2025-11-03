@@ -42,6 +42,9 @@ var chart1 = new Chart(ctx, {
     },
     options: {
         responsive: true,
+        animation: {
+            duration: ANIMATION_DURATION
+        },
         plugins: {
             title: {
                 display: true,

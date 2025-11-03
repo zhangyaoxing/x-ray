@@ -70,6 +70,9 @@ const chart = new Chart(ctx, {
         datasets: datasets
     },
     options: {
+        animation: {
+            duration: ANIMATION_DURATION
+        },
         responsive: true,
         maintainAspectRatio: true,
         scales: {

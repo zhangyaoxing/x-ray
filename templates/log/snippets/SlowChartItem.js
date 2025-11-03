@@ -103,6 +103,9 @@ const configDuration = {
     },
     options: {
         responsive: true,
+        animation: {
+            duration: ANIMATION_DURATION
+        },
         plugins: {
             title: {
                 display: true,
@@ -193,6 +196,9 @@ const configScanned = {
     },
     options: {
         responsive: true,
+        animation: {
+            duration: ANIMATION_DURATION
+        },
         plugins: {
             title: {
                 display: true,
@@ -284,6 +290,9 @@ const configScannedObj = {
     },
     options: {
         responsive: true,
+        animation: {
+            duration: ANIMATION_DURATION
+        },
         plugins: {
             title: {
                 display: true,
