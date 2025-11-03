@@ -2,13 +2,13 @@ data = data[0];
 let valueHostMapping = {};
 let hostValueMapping = {};
 const COLOR_MAPPING = {
-    "STARTUP": 'rgba(153, 102, 255, 0.6)',
+    "STARTUP": 'rgba(102, 29, 248, 0.6)',
     "PRIMARY": 'rgba(54, 197, 22, 0.6)',
     "SECONDARY": 'rgba(249, 224, 0, 0.6)',
     "RECOVERING": 'rgba(255, 159, 64, 0.6)',
-    "STARTUP2": 'rgba(102, 29, 248, 0.6)',
+    "STARTUP2": 'rgba(153, 102, 255, 0.6)',
     "UNKNOWN": 'rgba(0, 0, 0, 0.6)',
-    "ARBITER": 'rgba(51, 74, 247, 0.6)',
+    "ARBITER": 'rgba(51, 182, 247, 0.6)',
     "DOWN": 'rgba(128, 0, 0, 0.6)',
     "ROLLBACK": 'rgba(255, 99, 132, 0.6)',
     "REMOVED": 'rgba(201, 203, 207, 0.6)',
@@ -112,6 +112,30 @@ const chart = new Chart(ctx, {
             }
         },
         plugins: {
+            legend: {
+                display: true,
+                position: 'top',
+                labels: {
+                    generateLabels: function(chart) {
+                        return Object.keys(COLOR_MAPPING).map(state => {
+                            return {
+                                text: state,
+                                fillStyle: COLOR_MAPPING[state],
+                                strokeStyle: COLOR_MAPPING[state],
+                                lineWidth: 0,
+                                hidden: false,
+                            };
+                        });
+                    },
+                    usePointStyle: false, // rectangle style
+                    boxWidth: 20,
+                    boxHeight: 10,
+                    padding: 15,
+                    font: {
+                        size: 12
+                    }
+                }
+            },
             tooltip: {
                 callbacks: {
                     title: function(context) {
@@ -157,9 +181,6 @@ const chart = new Chart(ctx, {
                 },
                 padding: 12,
                 displayColors: true
-            },
-            legend: {
-                display: false
             },
             title: {
                 display: true,

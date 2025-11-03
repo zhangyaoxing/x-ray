@@ -65,7 +65,10 @@ class StateTraceItem(BaseItem):
             # New state
             host = log_line.get("attr", {}).get("hostAndPort", {})
             # match new state from msg
-            new_state = msg.split(" ")[-1] if msg else "unknown"
+            new_state = msg.split(" ")[-1] if msg else "UNKNOWN"
+            # normalize RS_DOWN to DOWN because according to the document DOWN is the correct state name.
+            if new_state == "RS_DOWN":
+                new_state = "DOWN"
             if host not in self._cache:
                 self._cache[host] = []
             self._cache[host].append({
