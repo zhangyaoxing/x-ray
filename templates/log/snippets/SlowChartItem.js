@@ -113,7 +113,11 @@ const configDuration = {
             },
             legend: {
                 display: true,
-                position: 'top'
+                position: 'top',
+                labels: {
+                    usePointStyle: true,
+                    generateLabels: genDefaultLegendLabels
+                }
             },
             tooltip: {
                 callbacks: {
@@ -182,7 +186,11 @@ const configScanned = {
             },
             legend: {
                 display: true,
-                position: 'top'
+                position: 'top',
+                labels: {
+                    usePointStyle: true,
+                    generateLabels: genDefaultLegendLabels
+                }
             },
             tooltip: {
                 callbacks: {
@@ -252,7 +260,11 @@ const configScannedObj = {
             },
             legend: {
                 display: true,
-                position: 'top'
+                position: 'top',
+                labels: {
+                    usePointStyle: true,
+                    generateLabels: genDefaultLegendLabels
+                }
             },
             tooltip: {
                 callbacks: {

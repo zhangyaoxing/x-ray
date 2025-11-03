@@ -163,6 +163,22 @@
             const lightness = Math.floor(Math.random() * 20) + 50;  // 50-70%
             return `hsla(${hue}, ${saturation}%, ${lightness}%, ${alpha})`;
         }
+        function genDefaultLegendLabels(chart) {
+            const original = Chart.defaults.plugins.legend.labels.generateLabels(chart);
+            return original.map((label, index) => {
+                const dataset = chart.data.datasets[index];
+                const type = dataset.type;
+                if (type === 'line') {
+                    label.pointStyle = "line";
+                    label.lineWidth = 4;
+                } else if (type === 'bar' || type === "pie") {
+                    label.pointStyle = "rect";
+                } else {
+                    label.pointStyle = "circle";
+                }
+                return label;
+            });
+        }
     </script>
     <style>
         .markdown-body {

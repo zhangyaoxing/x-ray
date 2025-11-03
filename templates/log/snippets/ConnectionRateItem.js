@@ -18,12 +18,14 @@ var chart1 = new Chart(ctx, {
             {
                 label: 'Connections Created',
                 data: scaleData(created, scale),
+                type: 'bar',
                 stack: 'Stack 0',
                 backgroundColor: 'rgba(54, 162, 235, 0.7)'
             },
             {
                 label: 'Connections Ended',
                 data: scaleData(ended, scale),
+                type: 'bar',
                 stack: 'Stack 0',
                 backgroundColor: 'rgba(255, 99, 132, 0.7)'
             },
@@ -50,7 +52,13 @@ var chart1 = new Chart(ctx, {
                 display: true,
                 text: 'Connection Create/Destroy Rate Over Time'
             },
-            legend: { position: 'top' },
+            legend: { 
+                position: 'top',
+                labels: {
+                    usePointStyle: true,
+                    generateLabels: genDefaultLegendLabels
+                }
+            },
             zoom: ZOOM_OPTIONS
         },
         scales: {
@@ -99,6 +107,7 @@ var chart2 = new Chart(ctx_byip, {
         datasets: datasets_byip.map(ds => ({
             label: ds.label,
             data: scaleData(ds.data, scale),
+            type: 'bar',
             stack: ds.stack
         }))
     },
@@ -110,7 +119,11 @@ var chart2 = new Chart(ctx_byip, {
             },
             legend: { 
                 position: 'top',
-                display: displayLegend
+                display: displayLegend,
+                labels: {
+                    usePointStyle: true,
+                    generateLabels: genDefaultLegendLabels
+                }
             },
             zoom: ZOOM_OPTIONS
         },

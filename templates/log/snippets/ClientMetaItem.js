@@ -27,7 +27,13 @@ var chart = new Chart(ctx, {
                 display: true,
                 text: 'Client By Driver'
             },
-            legend: { position: 'right' }
+            legend: {
+                position: 'right',
+                labels: {
+                    usePointStyle: true,
+                    pointStyle: 'rect'
+                }
+            }
         }
     }
 });
@@ -61,7 +67,13 @@ var chart = new Chart(ctx_ip, {
                 display: true,
                 text: 'Client By IP'
             },
-            legend: { position: 'right' }
+            legend: {
+                position: 'right',
+                labels: {
+                    usePointStyle: true,
+                    pointStyle: 'rect'
+                }
+            }
         }
     }
 });
