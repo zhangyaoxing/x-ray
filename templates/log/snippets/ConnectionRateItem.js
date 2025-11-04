@@ -50,7 +50,7 @@ var chart1 = new Chart(ctx, {
         plugins: {
             title: {
                 display: true,
-                text: 'Connection Create/Destroy Rate Over Time'
+                text: 'Connection Create/Ended Rate Over Time'
             },
             legend: { 
                 position: 'top',
