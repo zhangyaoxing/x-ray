@@ -5,7 +5,7 @@ import math
 class ConnectionRateItem(BaseItem):
     def __init__(self, output_folder: str, config):
         super(ConnectionRateItem, self).__init__(output_folder, config)
-        self._cache = {}
+        self._cache = None
         self.name = "Connection Rate"
         self.description = "Analyse the rate of connections created and ended over a specified time window."
         self._show_reset = True
@@ -14,6 +14,8 @@ class ConnectionRateItem(BaseItem):
         log_id = log_line.get("id", "")
         if log_id not in [22943, 22944]:  # Connection accepted/ended
             return
+        if self._cache is None:
+            self._cache = {}
         counter = "created" if log_id == 22943 else "ended"
         time = log_line.get("t")
         ts = math.floor(time.timestamp())

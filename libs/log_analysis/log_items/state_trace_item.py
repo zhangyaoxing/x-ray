@@ -2,7 +2,8 @@ from libs.log_analysis.log_items.base_item import BaseItem
 
 class StateTraceItem(BaseItem):
     LOG_IDS = [
-        4615611, # starting (To identify myself)
+        4615611, # starting (for rs members)
+        20721, # starting (for shard members)
         21392, # new configuration applied
         21215, # new state
         21216, # new state
@@ -13,7 +14,7 @@ class StateTraceItem(BaseItem):
         super().__init__(output_folder, config)
         self.name = "Member State Trace"
         self.description = "Visualize member state trace logs to understand system state changes over time."
-        self._cache = {}
+        self._cache = None
         self._myself = "self"
         self._show_reset = True
         self._last_log = None
@@ -23,6 +24,8 @@ class StateTraceItem(BaseItem):
         log_id = log_line.get("id", "")
         if log_id not in self.LOG_IDS:
             return
+        if self._cache is None:
+            self._cache = {}
         msg = log_line.get("msg", "")
         if log_id == 4615611:
             # Identify myself
@@ -114,19 +117,18 @@ class StateTraceItem(BaseItem):
             })
         self._last_log = log_line
     def finalize_analysis(self):
-        if not self._last_log:
-            return
-        # Because we are using line chart to describe the state changes,
-        # we need to add a final point to indicate the last known state.
-        # Otherwise, the chart will end abruptly at the last event.
-        for host, events in self._cache.items():
-            events.append({
-                "id": -1,
-                "host": host,
-                "timestamp": self._last_log.get("t", "") if self._last_log else "",
-                "event": "LogEnd",
-                "details": {"msg": "End of log"}
-            })
+        if self._last_log:
+            # Because we are using line chart to describe the state changes,
+            # we need to add a final point to indicate the last known state.
+            # Otherwise, the chart will end abruptly at the last event.
+            for host, events in self._cache.items():
+                events.append({
+                    "id": -1,
+                    "host": host,
+                    "timestamp": self._last_log.get("t", "") if self._last_log else "",
+                    "event": "LogEnd",
+                    "details": {"msg": "End of log"}
+                })
         super().finalize_analysis()
     def review_results_markdown(self, f):
         super().review_results_markdown(f)

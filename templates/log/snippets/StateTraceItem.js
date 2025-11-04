@@ -1,4 +1,4 @@
-data = data[0];
+data = data[0] || {};
 let valueHostMapping = {};
 let hostValueMapping = {};
 const COLOR_MAPPING = {
@@ -64,7 +64,10 @@ const datasets = Object.keys(data).map((host, index) => {
 });
 
 const canvas = document.getElementById('canvas_{name}')
-const height = Object.keys(data).length * 30;
+let height = Object.keys(data).length * 30;
+if (height == 0) {
+    height = 90;
+}
 canvas.style.height = `${height}px`;
 canvas.height = height;
 const ctx = canvas.getContext('2d');
