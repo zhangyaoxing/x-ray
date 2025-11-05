@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 import random
 import re
-from libs.healthcheck.shared import to_json, to_markdown_id, irresponsive_nodes
+from libs.healthcheck.shared import to_json, str_to_md_id, irresponsive_nodes
 from libs.utils import *
 import logging
 import markdown

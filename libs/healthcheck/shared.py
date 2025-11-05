@@ -57,7 +57,7 @@ def to_json(obj, indent=0):
             return json_util._json_convert(obj)
     return json_util.dumps(obj, default=custom_json_serialize, separators=separators, indent=indent)
 
-def to_markdown_id(str):
+def str_to_md_id(str):
     id = str.lower()
     id = id.replace(' ', '-')
     id = re.sub(r'[^a-z0-9\-]', '', id)
@@ -350,14 +350,3 @@ def enum_result_items(result, **kwargs):
                     func_config_member(set_name, member, level="config_member")
                 else:
                     func_shard_member(set_name, member, level="shard_member")
-
-def format_json_md(json_data, indent=2):
-    """
-    Format JSON data as a markdown code block.
-    If indent is None or 0, returns a compressed JSON string without line breaks.
-    """
-    if indent is None or indent == 0:
-        json_str = json_util.dumps(json_data, separators=(',', ': '))
-    else:
-        json_str = json_util.dumps(json_data, indent=indent).replace("\n", "<br />")
-    return json_str

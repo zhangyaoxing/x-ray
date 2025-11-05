@@ -1,11 +1,9 @@
 from datetime import datetime, timezone
 import random
 import re
-from libs.healthcheck.shared import to_json, to_markdown_id, irresponsive_nodes
+from libs.healthcheck.shared import to_json
 from libs.utils import *
 import logging
-import importlib
-import pkgutil
 import markdown
 from bson import json_util
 

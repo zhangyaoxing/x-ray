@@ -137,6 +137,18 @@ def escape_markdown(text):
         text = text.replace(key, value)
     return text
 
+def format_json_md(json_data, indent=2):
+    """
+    Format JSON data as a markdown code block.
+    If indent is None or 0, returns a compressed JSON string without line breaks.
+    """
+    if indent is None or indent == 0:
+        json_str = json_util.dumps(json_data, separators=(',', ': '))
+    else:
+        json_str = json_util.dumps(json_data, indent=indent).replace("\n", "<br />")
+    return json_str
+
+
 def color_code(code): return f"\x1b[{code}m"
 def colorize(code: int, s: str) -> str: return f"{color_code(code)}{str(s).replace(color_code(0), color_code(code))}{color_code(0)}"
 def green(s: str) -> str: return colorize(32, s)

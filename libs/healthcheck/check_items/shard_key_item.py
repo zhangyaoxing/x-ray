@@ -1,6 +1,6 @@
 from libs.healthcheck.check_items.base_item import BaseItem
-from libs.healthcheck.shared import SEVERITY, discover_nodes, enum_all_nodes, enum_result_items, format_json_md
-from libs.utils import format_size, escape_markdown
+from libs.healthcheck.shared import SEVERITY, discover_nodes, enum_all_nodes, enum_result_items
+from libs.utils import format_size, escape_markdown, format_json_md
 
 class ShardKeyItem(BaseItem):
     def __init__(self, output_folder, config=None):

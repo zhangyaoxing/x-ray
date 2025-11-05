@@ -3,8 +3,6 @@ import hashlib
 from libs.utils import *
 from bson import json_util
 
-# TODO: some of these functions should be merged with shared.py in healthcheck, and moved to libs/utils.py
-
 def to_json(obj, indent=None):
     def custom_serializer(o):
         if isinstance(o, datetime):
@@ -17,16 +15,5 @@ def json_hash(data, digest_size=8):
     json_str = to_json(data, indent=None)
     h = hashlib.blake2b(json_str.encode("utf-8"), digest_size=digest_size)
     return h.digest().hex().upper()
-
-def format_json_md(json_data, indent=2):
-    """
-    Format JSON data as a markdown code block.
-    If indent is None or 0, returns a compressed JSON string without line breaks.
-    """
-    if indent is None or indent == 0:
-        json_str = json_util.dumps(json_data, separators=(',', ': '))
-    else:
-        json_str = json_util.dumps(json_data, indent=indent).replace("\n", "<br />")
-    return json_str
 
 MAX_DATA_POINTS = 1024
