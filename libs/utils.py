@@ -148,6 +148,16 @@ def format_json_md(json_data, indent=2):
         json_str = json_util.dumps(json_data, indent=indent).replace("\n", "<br />")
     return json_str
 
+def to_json_internal(obj, indent=None, *args, **kwargs):
+    cls_maps = kwargs.get("cls_maps", [])
+    def custom_serializer(o):
+        for map in cls_maps:
+            cls = map.get("class", None)
+            func = map.get("func", None)
+            if cls and func and isinstance(o, cls):
+                return func(o)
+        return json_util.default(o)
+    return json.dumps(obj, indent=indent, default=custom_serializer)
 
 def color_code(code): return f"\x1b[{code}m"
 def colorize(code: int, s: str) -> str: return f"{color_code(code)}{str(s).replace(color_code(0), color_code(code))}{color_code(0)}"

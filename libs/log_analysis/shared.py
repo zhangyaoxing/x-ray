@@ -1,15 +1,13 @@
 from datetime import datetime
 import hashlib
 from libs.utils import *
-from bson import json_util
 
 def to_json(obj, indent=None):
-    def custom_serializer(o):
-        if isinstance(o, datetime):
-            return o.isoformat()
-        else:
-            return json_util.default(o)
-    return json.dumps(obj, indent=indent, default=custom_serializer)
+    cls_maps = [{
+        "class": datetime,
+        "func": lambda o: o.isoformat()
+    }]
+    return to_json_internal(obj, indent=indent, cls_maps=cls_maps)
 
 def json_hash(data, digest_size=8):
     json_str = to_json(data, indent=None)
