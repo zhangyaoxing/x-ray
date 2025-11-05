@@ -1,5 +1,5 @@
 from libs.healthcheck.check_items.base_item import BaseItem
-from libs.healthcheck.shared import MAX_MONGOS_PING_LATENCY, SEVERITY, ServerVersion, discover_nodes, enum_all_nodes, enum_result_items
+from libs.healthcheck.shared import MAX_MONGOS_PING_LATENCY, SEVERITY, discover_nodes, enum_all_nodes, enum_result_items
 from libs.utils import *
 
 class BuildInfoItem(BaseItem):
@@ -21,8 +21,8 @@ class BuildInfoItem(BaseItem):
             client = node["client"]
             raw_result = client.admin.command("buildInfo")
             test_result = []
-            eol_version = ServerVersion(self._config.get("eol_version", [4, 4, 0]))
-            running_version = ServerVersion(raw_result.get("versionArray", None))
+            eol_version = Version(self._config.get("eol_version", [4, 4, 0]))
+            running_version = Version(raw_result.get("versionArray", None))
             if running_version < eol_version:
                 test_result.append({
                     "host": host,

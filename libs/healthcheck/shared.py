@@ -27,43 +27,6 @@ class SEVERITY(Enum):
     LOW = 3
     INFO = 4
 
-class ServerVersion():
-    def __init__(self, version_array):
-        if not isinstance(version_array, list) or len(version_array) > 4:
-            raise ValueError("Invalid version array")
-        while len(version_array) < 4:
-            version_array.append(0)
-        self.version_array = version_array
-
-    def __lt__(self, other):
-        if not isinstance(other, ServerVersion):
-            return NotImplemented
-        return self.version_array < other.version_array
-    def __le__(self, other):
-        if not isinstance(other, ServerVersion):
-            return NotImplemented
-        return self.version_array <= other.version_array
-    def __eq__(self, other):
-        if not isinstance(other, ServerVersion):
-            return NotImplemented
-        return self.version_array == other.version_array
-    def __ne__(self, other):
-        if not isinstance(other, ServerVersion):
-            return NotImplemented
-        return self.version_array != other.version_array
-    def __gt__(self, other):
-        if not isinstance(other, ServerVersion):
-            return NotImplemented
-        return self.version_array > other.version_array
-    def __ge__(self, other):
-        if not isinstance(other, ServerVersion):
-            return NotImplemented
-        return self.version_array >= other.version_array
-    def __str__(self):
-        return ".".join(str(x) for x in self.version_array)
-    def __repr__(self):
-        return f"ServerVersion({self.version_array})"
-
 MAX_MONGOS_PING_LATENCY = 60  # seconds
 RESERVED_CONN_OPTIONS = [
     "tls",

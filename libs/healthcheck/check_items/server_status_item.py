@@ -214,8 +214,6 @@ class ServerStatusItem(BaseItem):
     def review_result(self):
         result = self.captured_sample
         result1, result2 = result
-        v50 = ServerVersion([5, 0, 0])
-        v63 = ServerVersion([6, 3, 0])
         data = []
         conn_table = {
             "type": "table",
