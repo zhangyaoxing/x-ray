@@ -151,8 +151,8 @@ def format_json_md(json_data, **kwargs):
     return json_str
 
 def to_ejson(obj, **kwargs):
-    indent = kwargs.get("indent", 2)
-    kwargs["indent"] = indent
+    indent = kwargs.pop("indent", 2)
+    separators = kwargs.pop("separators", None)
     cls_maps = [{
         "class": Enum,
         "func": lambda o: o.name
@@ -169,8 +169,8 @@ def to_ejson(obj, **kwargs):
             if cls and func and isinstance(o, cls):
                 return func(o)
         return json_util.default(o)
-
-    return json_util.dumps(obj, default=custom_serializer, **kwargs)
+    # Must use json.dumps because bson.json_util.dumps has its own serializer behavior and won't call our custom_serializer.
+    return json.dumps(obj, indent=indent, separators=separators, default=custom_serializer)
 
 def json_hash(data, digest_size=8):
     json_str = to_ejson(data, indent=None)

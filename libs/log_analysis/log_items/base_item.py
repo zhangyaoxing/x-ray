@@ -114,12 +114,12 @@ class BaseItem(object):
                 return
             if isinstance(self._cache, list):
                 for item in self._cache:
-                    f.write(to_ejson(item))
+                    f.write(to_ejson(item, indent=None))
                     f.write("\n")
                     self._row_count += 1
                 self._logger.debug(f"Wrote {len(self._cache)} records to {self._output_file} for {self.__class__.__name__}")
             else:
-                f.write(to_ejson(self._cache))
+                f.write(to_ejson(self._cache, indent=None))
                 f.write("\n")
                 self._row_count += 1
                 self._logger.debug(f"Wrote 1 record to {self._output_file} for {self.__class__.__name__}")
