@@ -1,11 +1,11 @@
 import logging
 import os
 
-from libs.log_analysis.shared import MAX_DATA_POINTS, to_ejson, to_json
+from libs.log_analysis.shared import MAX_DATA_POINTS, to_json
 from bson import json_util
-
 from libs.utils import get_script_path
 from libs.version import Version
+from libs.utils import to_ejson
 
 def get_version(log_line):
     """

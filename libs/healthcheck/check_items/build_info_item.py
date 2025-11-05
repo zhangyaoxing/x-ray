@@ -1,6 +1,7 @@
 from libs.healthcheck.check_items.base_item import BaseItem
 from libs.healthcheck.shared import MAX_MONGOS_PING_LATENCY, SEVERITY, discover_nodes, enum_all_nodes, enum_result_items
 from libs.utils import *
+from libs.version import Version
 
 class BuildInfoItem(BaseItem):
     def __init__(self, output_folder: str, config: dict = None):

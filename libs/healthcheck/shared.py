@@ -351,23 +351,6 @@ def enum_result_items(result, **kwargs):
                 else:
                     func_shard_member(set_name, member, level="shard_member")
 
-def format_size(bytes, decimal=2):
-    """
-    Format the size in bytes to a human-readable string.
-
-    Args:
-        bytes (int): The size in bytes.
-        decimal (int): The number of decimal places to include.
-
-    Returns:
-        str: The formatted size string.
-    """
-    for unit in ["B", "KB", "MB", "GB", "TB"]:
-        if bytes < 1024:
-            return f"{bytes:.{decimal}f} {unit}"
-        bytes /= 1024
-    return f"{bytes:.{decimal}f} PB"
-
 def escape_markdown(text):
     """
     Escape markdown special characters.

@@ -7,7 +7,7 @@ import re
 from inspect import getsourcefile
 from os.path import abspath, dirname
 from pathlib import Path
-from libs.version import Version
+from bson import json_util
 
 levels = logging._nameToLevel
 level = os.getenv("LOG_LEVEL", "INFO")
@@ -97,6 +97,26 @@ def load_classes(package_name="libs.log_analysis.log_items"):
                 class_map[attr] = obj
     logger.debug(f"Loaded getMongoData analysis classes: {list(class_map.keys())}")
     return class_map
+
+def to_ejson(obj, indent=None):
+    return json_util.dumps(obj, indent=indent)
+
+def format_size(bytes, decimal=2):
+    """
+    Format the size in bytes to a human-readable string.
+
+    Args:
+        bytes (int): The size in bytes.
+        decimal (int): The number of decimal places to include.
+
+    Returns:
+        str: The formatted size string.
+    """
+    for unit in ["B", "KB", "MB", "GB", "TB"]:
+        if bytes < 1024:
+            return f"{bytes:.{decimal}f} {unit}"
+        bytes /= 1024
+    return f"{bytes:.{decimal}f} PB"
 
 def color_code(code): return f"\x1b[{code}m"
 def colorize(code: int, s: str) -> str: return f"{color_code(code)}{str(s).replace(color_code(0), color_code(code))}{color_code(0)}"

@@ -2,6 +2,7 @@ from libs.log_analysis.log_items.base_item import BaseItem
 from libs.log_analysis.shared import escape_markdown, json_hash
 from bson import json_util
 from libs.utils import *
+from libs.version import Version
 from re import search, split
 
 COMPATIBILITY_MATRIX_JSON = "compatibility_matrix.json"
