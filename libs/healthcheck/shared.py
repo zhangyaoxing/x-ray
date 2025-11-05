@@ -46,8 +46,11 @@ def to_json(obj, indent=0):
     cls_maps = [{
         "class": SEVERITY,
         "func": lambda o: o.name
+    }, {
+        "class": datetime,
+        "func": lambda o: o.isoformat()
     }]
-    return to_json_internal(obj, indent=indent, cls_maps=cls_maps)
+    return to_ejson(obj, indent=indent, cls_maps=cls_maps)
 
 def str_to_md_id(str):
     id = str.lower()

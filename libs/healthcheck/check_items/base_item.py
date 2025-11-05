@@ -3,7 +3,7 @@ import logging
 import gzip
 from bson import json_util
 from libs.healthcheck.shared import SEVERITY, to_json
-from libs.utils import env
+from libs.utils import env, to_ejson
 
 def colorize_severity(severity: SEVERITY) -> str:
     if severity == SEVERITY.HIGH:
@@ -120,10 +120,10 @@ class BaseItem:
     def captured_sample(self, data):
         if self.cache_file_name.endswith('.gz'):
             with gzip.open(self.cache_file_name, 'wt') as f:
-                f.write(to_json(data))
+                f.write(to_ejson(data))
         else:
             with open(self.cache_file_name, "w") as f:
-                f.write(to_json(data))
+                f.write(to_ejson(data))
 
     @property
     def cache_file_name(self):

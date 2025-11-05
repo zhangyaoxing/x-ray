@@ -4,10 +4,13 @@ import json
 import logging
 import pkgutil
 import re
+import hashlib
 from inspect import getsourcefile
 from os.path import abspath, dirname
 from pathlib import Path
 from bson import json_util
+from enum import Enum
+from libs.version import Version
 
 levels = logging._nameToLevel
 level = os.getenv("LOG_LEVEL", "INFO")
@@ -98,9 +101,6 @@ def load_classes(package_name="libs.log_analysis.log_items"):
     logger.debug(f"Loaded getMongoData analysis classes: {list(class_map.keys())}")
     return class_map
 
-def to_ejson(obj, indent=None):
-    return json_util.dumps(obj, indent=indent)
-
 def format_size(bytes, decimal=2):
     """
     Format the size in bytes to a human-readable string.
@@ -137,19 +137,31 @@ def escape_markdown(text):
         text = text.replace(key, value)
     return text
 
-def format_json_md(json_data, indent=2):
+def format_json_md(json_data, **kwargs):
     """
     Format JSON data as a markdown code block.
     If indent is None or 0, returns a compressed JSON string without line breaks.
     """
+    indent = kwargs.get("indent", 2)
     if indent is None or indent == 0:
-        json_str = json_util.dumps(json_data, separators=(',', ': '))
+        kwargs["separators"] = (',', ': ')
+        json_str = to_ejson(json_data, **kwargs)
     else:
-        json_str = json_util.dumps(json_data, indent=indent).replace("\n", "<br />")
+        json_str = to_ejson(json_data, **kwargs).replace(" ", "&nbsp;").replace("\n", "<br>")
     return json_str
 
-def to_json_internal(obj, indent=None, *args, **kwargs):
-    cls_maps = kwargs.get("cls_maps", [])
+def to_ejson(obj, **kwargs):
+    indent = kwargs.get("indent", 2)
+    kwargs["indent"] = indent
+    cls_maps = [{
+        "class": Enum,
+        "func": lambda o: o.name
+    }, {
+        "class": Version,
+        "func": lambda o: str(o)
+    }]
+    cls_maps.extend(kwargs.pop("cls_maps", []))
+    
     def custom_serializer(o):
         for map in cls_maps:
             cls = map.get("class", None)
@@ -157,7 +169,13 @@ def to_json_internal(obj, indent=None, *args, **kwargs):
             if cls and func and isinstance(o, cls):
                 return func(o)
         return json_util.default(o)
-    return json.dumps(obj, indent=indent, default=custom_serializer)
+
+    return json_util.dumps(obj, default=custom_serializer, **kwargs)
+
+def json_hash(data, digest_size=8):
+    json_str = to_ejson(data, indent=None)
+    h = hashlib.blake2b(json_str.encode("utf-8"), digest_size=digest_size)
+    return h.digest().hex().upper()
 
 def color_code(code): return f"\x1b[{code}m"
 def colorize(code: int, s: str) -> str: return f"{color_code(code)}{str(s).replace(color_code(0), color_code(code))}{color_code(0)}"

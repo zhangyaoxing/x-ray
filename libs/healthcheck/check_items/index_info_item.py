@@ -180,7 +180,7 @@ class IndexInfoItem(BaseItem):
                 capture_time = item["captureTime"]
                 for stats in item["indexStats"]:
                     component = stats.get("shard", set_name)
-                    key_md = escape_markdown(format_json_md(stats["key"], 0))
+                    key_md = (format_json_md(stats["key"], indent=None))
                     access = stats["accesses"]
                     ops = access.get("ops", 0)
                     since = access.get("since", None)
@@ -192,7 +192,7 @@ class IndexInfoItem(BaseItem):
                         [escape_markdown(component), 
                          escape_markdown(ns), 
                          escape_markdown(stats["name"]),
-                         f"{key_md}{options_md}",
+                         f"`{key_md}`{options_md}",
                          access_per_hour]
                     )
 
