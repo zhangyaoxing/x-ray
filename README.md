@@ -21,7 +21,7 @@ Log analysis requires JSON format logs, which is supported since 4.4.
 The tool is tested with `Python 3.9.22`.
 ```bash
 make deps # if it's the first time you build the project
-make # equial to `make build` and `make build-lite`
+make # equal to `make build` and `make build-lite`
 ```
 The compiled executable is in the folder `./dist/`.
 
