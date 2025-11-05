@@ -10,18 +10,7 @@ import markdown
 from bson import json_util
 
 logger = logging.getLogger(__name__)
-def load_log_classes(package_name="libs.log_analysis.log_items"):
-    class_map = {}
-    package = importlib.import_module(package_name)
-    for _, module_name, _ in pkgutil.iter_modules(package.__path__):
-        module = importlib.import_module(f"{package_name}.{module_name}")
-        for attr in dir(module):
-            obj = getattr(module, attr)
-            if isinstance(obj, type):
-                class_map[attr] = obj
-    logger.debug(f"Loaded log analysis classes: {list(class_map.keys())}")
-    return class_map
-LOG_CLASSES = load_log_classes()
+LOG_CLASSES = load_classes("libs.log_analysis.log_items")
 
 class Framework:
     def __init__(self, file_path: str, config: dict):

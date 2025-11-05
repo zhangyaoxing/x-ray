@@ -4,7 +4,20 @@ import os
 from libs.log_analysis.shared import MAX_DATA_POINTS, to_ejson, to_json
 from bson import json_util
 
-from libs.utils import get_script_path, get_version
+from libs.utils import get_script_path
+from libs.version import Version
+
+def get_version(log_line):
+    """
+    Extract and parse the version information from a log line.
+    """
+    log_id = log_line.get("id", "")
+    if log_id != 23403:
+        return None
+    attr = log_line.get("attr", {})
+    build_info = attr.get("buildInfo", {})
+    version = build_info.get("version", "Unknown")
+    return Version.parse(version)
 
 class BaseItem(object):
     def __init__(self, output_folder: str, config):

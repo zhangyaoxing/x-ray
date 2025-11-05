@@ -8,17 +8,7 @@ import importlib
 import pkgutil
 import markdown
 
-def load_checklist_classes(package_name="libs.healthcheck.check_items"):
-    class_map = {}
-    package = importlib.import_module(package_name)
-    for _, module_name, _ in pkgutil.iter_modules(package.__path__):
-        module = importlib.import_module(f"{package_name}.{module_name}")
-        for attr in dir(module):
-            obj = getattr(module, attr)
-            if isinstance(obj, type):
-                class_map[attr] = obj
-    return class_map
-CHECKLIST_CLASSES = load_checklist_classes()
+CHECKLIST_CLASSES = load_classes("libs.healthcheck.check_items")
 
 class Framework:
     def __init__(self, config: dict):

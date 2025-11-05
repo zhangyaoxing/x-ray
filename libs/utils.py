@@ -1,6 +1,8 @@
+import importlib
 import os
 import json
 import logging
+import pkgutil
 import re
 from inspect import getsourcefile
 from os.path import abspath, dirname
@@ -84,14 +86,17 @@ def tooltip_html(full, truncated) -> str:
     html = f"<span class=\"tooltip\" data-tip=\"{full}\">{truncated}</span>"
     return html
 
-def get_version(log_line):
-    log_id = log_line.get("id", "")
-    if log_id != 23403:
-        return None
-    attr = log_line.get("attr", {})
-    build_info = attr.get("buildInfo", {})
-    version = build_info.get("version", "Unknown")
-    return Version.parse(version)
+def load_classes(package_name="libs.log_analysis.log_items"):
+    class_map = {}
+    package = importlib.import_module(package_name)
+    for _, module_name, _ in pkgutil.iter_modules(package.__path__):
+        module = importlib.import_module(f"{package_name}.{module_name}")
+        for attr in dir(module):
+            obj = getattr(module, attr)
+            if isinstance(obj, type):
+                class_map[attr] = obj
+    logger.debug(f"Loaded getMongoData analysis classes: {list(class_map.keys())}")
+    return class_map
 
 def color_code(code): return f"\x1b[{code}m"
 def colorize(code: int, s: str) -> str: return f"{color_code(code)}{str(s).replace(color_code(0), color_code(code))}{color_code(0)}"
