@@ -1,6 +1,6 @@
 from random import randint
 from libs.log_analysis.log_items.base_item import BaseItem
-from libs.log_analysis.shared import escape_markdown, json_hash
+from libs.log_analysis.shared import json_hash
 from bson import json_util
 from libs.utils import *
 

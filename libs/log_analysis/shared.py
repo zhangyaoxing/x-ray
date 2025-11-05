@@ -18,15 +18,6 @@ def json_hash(data, digest_size=8):
     h = hashlib.blake2b(json_str.encode("utf-8"), digest_size=digest_size)
     return h.digest().hex().upper()
 
-def escape_markdown(text):
-    """
-    Escape markdown special characters.
-    """
-    if not isinstance(text, str):
-        text = str(text)
-    # Escape underscores, asterisks, backticks, and other special characters
-    return text.replace('_', '\\_').replace('*', '\\*').replace('`', '\\`').replace('|', '\\|').replace('<', '&lt;').replace('>', '&gt;')
-
 def format_json_md(json_data, indent=2):
     """
     Format JSON data as a markdown code block.

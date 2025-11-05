@@ -118,6 +118,25 @@ def format_size(bytes, decimal=2):
         bytes /= 1024
     return f"{bytes:.{decimal}f} PB"
 
+def escape_markdown(text):
+    """
+    Escape markdown special characters.
+    """
+    ESCAPE_MAP = {
+        '_': '\\_',
+        '*': '\\*',
+        '`': '\\`',
+        '|': '\\|',
+        '<': '&lt;',
+        '>': '&gt;'
+    }
+    if not isinstance(text, str):
+        text = str(text)
+    # Escape underscores, asterisks, backticks, and other special characters
+    for key, value in ESCAPE_MAP.items():
+        text = text.replace(key, value)
+    return text
+
 def color_code(code): return f"\x1b[{code}m"
 def colorize(code: int, s: str) -> str: return f"{color_code(code)}{str(s).replace(color_code(0), color_code(code))}{color_code(0)}"
 def green(s: str) -> str: return colorize(32, s)

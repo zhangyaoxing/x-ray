@@ -351,15 +351,6 @@ def enum_result_items(result, **kwargs):
                 else:
                     func_shard_member(set_name, member, level="shard_member")
 
-def escape_markdown(text):
-    """
-    Escape markdown special characters.
-    """
-    if not isinstance(text, str):
-        text = str(text)
-    # Escape underscores, asterisks, backticks, and other special characters
-    return text.replace('_', '\\_').replace('*', '\\*').replace('`', '\\`')
-
 def format_json_md(json_data, indent=2):
     """
     Format JSON data as a markdown code block.

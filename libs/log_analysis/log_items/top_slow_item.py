@@ -1,7 +1,8 @@
 from libs.log_analysis.log_items.base_item import BaseItem
 from bson import json_util
 from libs.log_analysis.query_analyzer import analyze_query_pattern
-from libs.log_analysis.shared import escape_markdown, format_json_md, json_hash, to_json
+from libs.log_analysis.shared import format_json_md, json_hash, to_json
+from libs.utils import escape_markdown
 
 class TopSlowItem(BaseItem):
     """
