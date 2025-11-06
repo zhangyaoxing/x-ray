@@ -1,4 +1,5 @@
 """Shared utilities for health check modules."""
+
 from enum import Enum
 import re
 import logging

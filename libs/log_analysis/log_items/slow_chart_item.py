@@ -1,5 +1,6 @@
-"""Generate a scatter plot showing slow operations over time, 
+"""Generate a scatter plot showing slow operations over time,
 with each point representing a slow query colored by namespace."""
+
 from libs.log_analysis.log_items.base_item import BaseItem
 
 

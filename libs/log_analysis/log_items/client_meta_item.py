@@ -1,4 +1,5 @@
 """Client Metadata Log Item checks for client metadata in the log."""
+
 from re import search, split
 import json
 from bson import json_util
@@ -12,6 +13,7 @@ COMPATIBILITY_MATRIX_JSON = "compatibility_matrix.json"
 
 class ClientMetaItem(BaseItem):
     _driver_matrix = None
+
     def __init__(self, output_folder: str, config):
         super(ClientMetaItem, self).__init__(output_folder, config)
         self._cache = {}

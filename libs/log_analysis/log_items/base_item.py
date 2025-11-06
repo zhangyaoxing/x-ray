@@ -22,6 +22,7 @@ def get_version(log_line):
 
 class BaseItem(object):
     _cache = None
+
     def __init__(self, output_folder: str, config):
         self.config = config
         self._output_file = os.path.join(output_folder, f"{self.__class__.__name__}.json")
@@ -37,7 +38,6 @@ class BaseItem(object):
         log_id = log_line.get("id", "")
         if log_id == 23403:  # Build Info
             self._server_version = get_version(log_line)
-
 
     @property
     def name(self):

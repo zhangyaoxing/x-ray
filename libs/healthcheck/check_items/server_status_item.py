@@ -114,8 +114,10 @@ class ServerStatusItem(BaseItem):
             return test_result, raw_result
 
         nodes = discover_nodes(client, parsed_uri)
+
         def func_all_first(set_name, node, **kwargs):
             return enumerator(set_name, node, func_req=func_first_req, **kwargs)
+
         result1 = enum_all_nodes(
             nodes,
             func_mongos_member=func_all_first,
@@ -126,8 +128,10 @@ class ServerStatusItem(BaseItem):
         # Sleep for 5s to capture next status.
         self._logger.info("Sleep %s to capture next server status.", green(f"{SERVER_STATUS_INTERVAL} seconds"))
         sleep(SERVER_STATUS_INTERVAL)
+
         def func_all_2nd(set_name, node, **kwargs):
             return enumerator(set_name, node, func_req=func_2nd_req, **kwargs)
+
         result2 = enum_all_nodes(
             nodes,
             func_mongos_member=func_all_2nd,
@@ -275,8 +279,8 @@ class ServerStatusItem(BaseItem):
         conn_table = {
             "type": "table",
             "caption": "Connections",
-            "notes": "- `Rejected` is only available for MongoDB 6.3 and later.\n" +
-                      "- `Threaded` is only available for MongoDB 5.0 and later.\n",
+            "notes": "- `Rejected` is only available for MongoDB 6.3 and later.\n"
+            + "- `Threaded` is only available for MongoDB 5.0 and later.\n",
             "columns": [
                 {"name": "Component", "type": "string"},
                 {"name": "Host", "type": "string"},
