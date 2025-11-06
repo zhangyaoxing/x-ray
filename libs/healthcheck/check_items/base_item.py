@@ -50,7 +50,7 @@ class BaseItem:
                 with gzip.open(self.cache_file_name, "rt") as f:
                     return json_util.loads(f.read())
             else:
-                with open(self.cache_file_name, "r") as f:
+                with open(self.cache_file_name, "r", encoding="utf-8") as f:
                     return json_util.loads(f.read())
         except FileNotFoundError:
             return None
@@ -86,10 +86,10 @@ class BaseItem:
             return result
         i = 0
         for j, block in enumerate(result_data):
-            type = block.get("type")
+            chart_type = block.get("type")
             caption = block.get("caption")
             notes = block.get("notes", "")
-            if type == "table":
+            if chart_type == "table":
                 result += f"#### ({i + 1}) {caption}\n"
                 result += f"{notes}\n"
                 header = [col.get("name", "(NOT SET)") for col in block.get("columns", [])]
@@ -103,14 +103,14 @@ class BaseItem:
                     result += "|" + "|".join(str(cell) for cell in row) + "|\n"
                 result += "\n"
                 i += 1
-            elif type in ["bar", "pie"]:
-                id = f"{self.__class__.__name__}_{j}"
-                result += f"<div class='{type}'><canvas class='{type}' id='{id}'></canvas></div>"
-                result += f"<script type='text/javascript'>\n"
-                result += f"  const canvas{id} = document.getElementById('{id}');\n"
-                result += f"  const chart{id} = new Chart(canvas{id}, {to_json(block)});\n"
-                result += f"  charts.push(chart{id});\n"
-                result += f"</script>\n"
+            elif chart_type in ["bar", "pie"]:
+                cid = f"{self.__class__.__name__}_{j}"
+                result += f"<div class='{chart_type}'><canvas class='{chart_type}' id='{cid}'></canvas></div>"
+                result += "<script type='text/javascript'>\n"
+                result += f"  const canvas{cid} = document.getElementById('{cid}');\n"
+                result += f"  const chart{cid} = new Chart(canvas{cid}, {to_json(block)});\n"
+                result += f"  charts.push(chart{cid});\n"
+                result += "</script>\n"
         return result
 
     @captured_sample.setter
@@ -119,7 +119,7 @@ class BaseItem:
             with gzip.open(self.cache_file_name, "wt") as f:
                 f.write(to_ejson(data))
         else:
-            with open(self.cache_file_name, "w") as f:
+            with open(self.cache_file_name, "w", encoding="utf-8") as f:
                 f.write(to_ejson(data))
 
     @property

@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 import argparse
 import logging
-from libs.utils import *
-from libs.healthcheck.framework import Framework as HealthCheckFramework
-from libs.log_analysis.framework import Framework as LogAnalysisFramework
+from getpass import getpass
 from pymongo import MongoClient
 from pymongo.uri_parser import parse_uri
-from getpass import getpass
+from libs.utils import load_config, green
+from libs.healthcheck.framework import Framework as HealthCheckFramework
+from libs.log_analysis.framework import Framework as LogAnalysisFramework
 
 
 def setup_parser():
@@ -148,7 +148,7 @@ def health_check_command(args):
     try:
         config = load_config(args.config)["healthcheck"]
     except FileNotFoundError:
-        logger.error(f"Config file not found: {args.config}")
+        logger.error("Config file not found: %s", args.config)
         logger.info("Please provide a valid path to config.json using the -c/--config argument")
         return 1
 
@@ -162,13 +162,13 @@ def health_check_command(args):
 
 def log_analysis_command(args):
     """Log analysis command"""
-    logger.info(f"Analyzing log file: {green(args.log_file)}")
+    logger.info("Analyzing log file: %s", args.log_file)
     try:
         config = load_config(args.config)["log"]
         config["sample_rate"] = args.rate
         config["item_config"]["TopSlowItem"]["top"] = args.top
     except FileNotFoundError:
-        logger.error(f"Config file not found: {args.config}")
+        logger.error("Config file not found: %s", args.config)
         logger.info("Please provide a valid path to config.json using the -c/--config argument")
         return 1
 
@@ -194,7 +194,7 @@ def main():
     elif args.command == "log":
         return log_analysis_command(args)
     else:
-        logger.error(f"Unknown command: {args.command}")
+        logger.error("Unknown command: %s", args.command)
         return 1
 
 

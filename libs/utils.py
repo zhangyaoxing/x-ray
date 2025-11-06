@@ -1,3 +1,5 @@
+"""Utility functions and classes for the X-Ray project."""
+
 import importlib
 import os
 import json
@@ -5,11 +7,11 @@ import logging
 import pkgutil
 import re
 import hashlib
+from enum import Enum
 from inspect import getsourcefile
 from os.path import abspath, dirname
 from pathlib import Path
 from bson import json_util
-from enum import Enum
 from libs.version import Version
 
 levels = logging._nameToLevel
@@ -21,7 +23,7 @@ if level not in levels:
 log_level = levels[level]
 logging.basicConfig(level=log_level)
 logger = logging.getLogger(__name__)
-logger.info(f"Using log level: {level}")
+logger.info("Using log level: %s", level)
 
 
 # The script can be started from other working folder. E.g. Invoked by a cron job.
@@ -39,46 +41,55 @@ def get_script_path(filename=None):
         script_folder = Path(dirname(abspath(getsourcefile(lambda: 0))))
         base_path = str((script_folder / "..").resolve())
 
-    if filename == None:
+    if filename is None:
         return base_path
     else:
         return str(Path(base_path) / filename)
 
 
-config = None
+def _load_config():
+    # Use a mutable container to hold cached config to avoid nonlocal assignment warnings.
+    config = None
+
+    def func(config_path="config.json"):
+        nonlocal config
+        if config is None:
+            try:
+                # First try to load from the path provided by the user
+                if os.path.isfile(config_path):
+                    with open(config_path, "r", encoding="utf-8") as f:
+                        config = json.load(f)
+                    logger.info("Loaded config from user-provided path: %s", config_path)
+                    return config
+
+                # Then try to load from the script path
+                script_config_path = get_script_path(config_path)
+                if os.path.isfile(script_config_path):
+                    with open(script_config_path, "r", encoding="utf-8") as f:
+                        config = json.load(f)
+                    logger.info("Loaded config from script path: %s", script_config_path)
+                    return config
+
+                # Finally, try current working directory
+                cwd_config_path = os.path.join(os.getcwd(), config_path)
+                if os.path.isfile(cwd_config_path):
+                    with open(cwd_config_path, "r", encoding="utf-8") as f:
+                        config = json.load(f)
+                    logger.info("Loaded config from current directory: %s", cwd_config_path)
+                    return config
+
+                # If all fails, raise an error
+                raise FileNotFoundError(f"Could not find config file: {config_path}")
+
+            except Exception as e:
+                logger.error("Failed to load config file: %s", e)
+                raise
+        return config
+
+    return func
 
 
-def load_config(config_path="config.json"):
-    global config
-    if not config:
-        try:
-            # First try to load from the path provided by the user
-            if os.path.isfile(config_path):
-                config = json.load(open(config_path))
-                logger.info(f"Loaded config from user-provided path: {config_path}")
-                return config
-
-            # Then try to load from the script path
-            script_config_path = get_script_path(config_path)
-            if os.path.isfile(script_config_path):
-                config = json.load(open(script_config_path))
-                logger.info(f"Loaded config from script path: {script_config_path}")
-                return config
-
-            # Finally, try current working directory
-            cwd_config_path = os.path.join(os.getcwd(), config_path)
-            if os.path.isfile(cwd_config_path):
-                config = json.load(open(cwd_config_path))
-                logger.info(f"Loaded config from current directory: {cwd_config_path}")
-                return config
-
-            # If all fails, raise an error
-            raise FileNotFoundError(f"Could not find config file: {config_path}")
-
-        except Exception as e:
-            logger.error(f"Failed to load config file: {e}")
-            raise
-    return config
+load_config = _load_config()
 
 
 MAX_CONTENT_WORDS = 3
@@ -107,11 +118,11 @@ def load_classes(package_name="libs.log_analysis.log_items"):
             obj = getattr(module, attr)
             if isinstance(obj, type):
                 class_map[attr] = obj
-    logger.debug(f"Loaded getMongoData analysis classes: {list(class_map.keys())}")
+    logger.debug("Loaded getMongoData analysis classes: %s", list(class_map.keys()))
     return class_map
 
 
-def format_size(bytes, decimal=2):
+def format_size(size_bytes, decimal=2):
     """
     Format the size in bytes to a human-readable string.
 
@@ -123,10 +134,10 @@ def format_size(bytes, decimal=2):
         str: The formatted size string.
     """
     for unit in ["B", "KB", "MB", "GB", "TB"]:
-        if bytes < 1024:
-            return f"{bytes:.{decimal}f} {unit}"
-        bytes /= 1024
-    return f"{bytes:.{decimal}f} PB"
+        if size_bytes < 1024:
+            return f"{size_bytes:.{decimal}f} {unit}"
+        size_bytes /= 1024
+    return f"{size_bytes:.{decimal}f} PB"
 
 
 def escape_markdown(text):
@@ -160,13 +171,13 @@ def format_json_md(json_data, **kwargs):
 def to_ejson(obj, **kwargs):
     indent = kwargs.pop("indent", 2)
     separators = kwargs.pop("separators", None)
-    cls_maps = [{"class": Enum, "func": lambda o: o.name}, {"class": Version, "func": lambda o: str(o)}]
+    cls_maps = [{"class": Enum, "func": lambda o: o.name}, {"class": Version, "func": str}]
     cls_maps.extend(kwargs.pop("cls_maps", []))
 
     def custom_serializer(o):
-        for map in cls_maps:
-            cls = map.get("class", None)
-            func = map.get("func", None)
+        for cls_map in cls_maps:
+            cls = cls_map.get("class", None)
+            func = cls_map.get("func", None)
             if cls and func and isinstance(o, cls):
                 return func(o)
         return json_util.default(o)

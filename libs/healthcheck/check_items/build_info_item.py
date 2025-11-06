@@ -1,6 +1,8 @@
+"""Build Info Check Item Module. Used to check MongoDB server build information."""
+
 from libs.healthcheck.check_items.base_item import BaseItem
 from libs.healthcheck.shared import MAX_MONGOS_PING_LATENCY, SEVERITY, discover_nodes, enum_all_nodes, enum_result_items
-from libs.utils import *
+from libs.utils import yellow
 from libs.version import Version
 
 
@@ -59,7 +61,7 @@ class BuildInfoItem(BaseItem):
         result = self.captured_sample
         table = {
             "type": "table",
-            "caption": f"Server Build Information",
+            "caption": "Server Build Information",
             "columns": [
                 {"name": "Component", "type": "string"},
                 {"name": "Host", "type": "string"},
