@@ -145,6 +145,7 @@ def format_json_md(json_data, **kwargs):
     indent = kwargs.get("indent", 2)
     if indent is None or indent == 0:
         kwargs["separators"] = (',', ': ')
+        kwargs["indent"] = None
         json_str = to_ejson(json_data, **kwargs)
     else:
         json_str = to_ejson(json_data, **kwargs).replace(" ", "&nbsp;").replace("\n", "<br>")
@@ -169,7 +170,9 @@ def to_ejson(obj, **kwargs):
             if cls and func and isinstance(o, cls):
                 return func(o)
         return json_util.default(o)
-    # Must use json.dumps because bson.json_util.dumps has its own serializer behavior and won't call our custom_serializer.
+    # Must use json.dumps because bson.json_util.dumps has its own serializer behavior,
+    # and won't always call our custom_serializer.
+    # It only calls when the object is not serializable by default.
     return json.dumps(obj, indent=indent, separators=separators, default=custom_serializer)
 
 def json_hash(data, digest_size=8):
