@@ -55,3 +55,8 @@ typing-inspection==0.4.2
 typing_extensions==4.15.0
 urllib3==2.5.0
 zipp==3.23.0
+
+# Development tools
+pylint==3.3.3
+black==25.1.0
+flake8==7.1.1

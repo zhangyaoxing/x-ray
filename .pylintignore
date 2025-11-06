@@ -1,0 +1,11 @@
+# Pylint ignore patterns
+.venv/
+build/
+dist/
+*.egg-info/
+__pycache__/
+.pytest_cache/
+.git/
+*.pyc
+*.pyo
+*.spec
