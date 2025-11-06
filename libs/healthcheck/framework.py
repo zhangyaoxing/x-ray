@@ -1,4 +1,3 @@
-
 from datetime import datetime, timezone
 import re
 from libs.healthcheck.shared import str_to_md_id, irresponsive_nodes
@@ -9,6 +8,7 @@ import pkgutil
 import markdown
 
 CHECKLIST_CLASSES = load_classes("libs.healthcheck.check_items")
+
 
 class Framework:
     def __init__(self, config: dict):
@@ -25,7 +25,7 @@ class Framework:
             batch_folder = f"{output_folder}{self._checkset_name}-{self._timestamp}/"
             Path(batch_folder).mkdir(parents=True, exist_ok=True)
         return batch_folder
-    
+
     def run_checks(self, checkset_name: str, *args, **kwargs):
         self._checkset_name = checkset_name
         # Create output folder if it doesn't exist
@@ -34,7 +34,9 @@ class Framework:
         # Dynamically load the checkset based on the name
         checksets = self._config.get("checksets", {})
         if not checkset_name in checksets:
-            self._logger.warning(yellow(f"Checkset '{checkset_name}' not found in configuration. Using default checkset."))
+            self._logger.warning(
+                yellow(f"Checkset '{checkset_name}' not found in configuration. Using default checkset.")
+            )
             checkset_name = "default"
         cs = checksets[checkset_name]
         self._logger.info(f"Running checkset: {bold(green(checkset_name))}")
@@ -65,7 +67,9 @@ class Framework:
             f.write("# Deployment Health Check\n\n")
             # Display irresponsive nodes
             f.write("## 0 Overview\n\n")
-            f.write(f"|<span style='color: red;'>HIGH</span>|<span style='color: orange;'>MEDIUM</span>|<span style='color: green;'>LOW</span>|<span style='color: gray;'>INFO</span>|\n")
+            f.write(
+                f"|<span style='color: red;'>HIGH</span>|<span style='color: orange;'>MEDIUM</span>|<span style='color: green;'>LOW</span>|<span style='color: gray;'>INFO</span>|\n"
+            )
             f.write("|---|---|---|---|\n")
             all_test_result = []
             for item in self._items:
@@ -80,7 +84,9 @@ class Framework:
                 f.write("The following nodes have been detected as irresponsive during the checks:\n\n")
                 for node in irresponsive_nodes:
                     f.write(f"- `{node['host']}`\n")
-                f.write("\n**<span style='color: red;'>All checks against the above nodes have been skipped.</span>**\n")
+                f.write(
+                    "\n**<span style='color: red;'>All checks against the above nodes have been skipped.</span>**\n"
+                )
             f.write("## 1 Review Test Results\n\n")
             for i, item in enumerate(self._items):
                 title = f"1.{i + 1} {item.name}"
@@ -90,7 +96,7 @@ class Framework:
                 f.write(f"{item.description}\n\n")
                 f.write(f"[Review Raw Results &rarr;](#{review_title_id})\n\n")
                 f.write(item.test_result_markdown)
-            
+
             f.write("## 2 Review Raw Results\n\n")
             for i, item in enumerate(self._items):
                 title = f"1.{i + 1} {item.name}"
@@ -108,18 +114,17 @@ class Framework:
                     md_text = md_file.read()
                 html = markdown.markdown(md_text, extensions=["tables", "toc"])
                 html = self._compact_html(html)
-                
+
                 with open(template_file, "r") as template:
                     template_content = template.read()
                     html = template_content.replace("{{ content }}", html)
                 f.write(html)
 
         self._logger.info(bold(green("All checks complete.")))
-    
+
     def _compact_html(self, html: str) -> str:
-        html = re.sub(r'>\s+<', '><', html)
-        html = re.sub(r'\s{2,}', ' ', html)
-        html = re.sub(r'\n\s*\n', '\n', html)
+        html = re.sub(r">\s+<", "><", html)
+        html = re.sub(r"\s{2,}", " ", html)
+        html = re.sub(r"\n\s*\n", "\n", html)
         html = html.strip()
         return html
-

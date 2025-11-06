@@ -4,6 +4,7 @@ from libs.log_analysis.shared import json_hash
 from bson import json_util
 from libs.utils import *
 
+
 class WEFItem(BaseItem):
     def __init__(self, output_folder, config):
         super().__init__(output_folder, config)
@@ -21,26 +22,23 @@ class WEFItem(BaseItem):
         msg = log_line.get("msg", "")
         id = log_line.get("id", "")
         if id not in self._cache:
-            self._cache[id] = {
-                "id": id,
-                "severity": severity,
-                "timestamp": [timestamp],
-                "msg": msg,
-                "sample": log_line
-            }
+            self._cache[id] = {"id": id, "severity": severity, "timestamp": [timestamp], "msg": msg, "sample": log_line}
         else:
             self._cache[id]["timestamp"].append(timestamp)
 
     def finalize_analysis(self):
         self._cache = list(self._cache.values())
         cache = self._cache
-        
+
         # Lazy import AI modules (only if needed)
         if self._ai_support == "local":
             try:
                 from libs.ai import MODEL_NAME, analyze_log_line_local, load_model
+
                 tokenizer, model, gen_config = load_model(MODEL_NAME)
-                self._logger.info(f"Local AI model ({green(bold(MODEL_NAME))}) loaded for W/E/F log analysis. This can take a few minutes...")
+                self._logger.info(
+                    f"Local AI model ({green(bold(MODEL_NAME))}) loaded for W/E/F log analysis. This can take a few minutes..."
+                )
             except ImportError as e:
                 self._logger.error(f"AI support enabled but AI libraries not available: {e}")
                 self._logger.error("Please install AI dependencies or disable AI support in config.json")
@@ -48,11 +46,16 @@ class WEFItem(BaseItem):
         elif self._ai_support == "gpt":
             try:
                 from libs.ai import GPT_MODEL, analyze_log_line_gpt
+
                 if env == "development":
                     cache = [self._cache[randint(0, len(self._cache) - 1)]] if len(self._cache) > 0 else []
-                    self._logger.info(yellow(f"Running in development mode. Only process ONE random log entry with AI."))
+                    self._logger.info(
+                        yellow(f"Running in development mode. Only process ONE random log entry with AI.")
+                    )
                     self._logger.info(yellow(f"Log ID: {cache[0]['id']}"))
-                self._logger.info(f"Using GPT model ({green(bold(GPT_MODEL))}) for W/E/F log analysis. This can take a few minutes...")
+                self._logger.info(
+                    f"Using GPT model ({green(bold(GPT_MODEL))}) for W/E/F log analysis. This can take a few minutes..."
+                )
             except ImportError as e:
                 self._logger.error(f"AI support enabled but AI libraries not available: {e}")
                 self._logger.error("Please install AI dependencies or disable AI support in config.json")
@@ -71,7 +74,7 @@ class WEFItem(BaseItem):
 
     def review_results_markdown(self, f):
         super().review_results_markdown(f)
-        f.write("<div id=\"wef_positioner\"></div>\n\n")
+        f.write('<div id="wef_positioner"></div>\n\n')
         f.write(f"|Code|Severity|Message|Count|\n")
         f.write(f"|---|---|---|---|\n")
         rows = []

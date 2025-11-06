@@ -2,20 +2,82 @@ from libs.log_analysis.shared import json_hash
 
 
 DATA_TYPES = ["$binary", "$date", "$numberLong", "$numberInt", "$numberDecimal", "$oid", "$timestamp"]
-QUERY_OPERATORS = ["$all", "$size", "$elemMatch", # Array operators
-                    "$bitsAllClear", "$bitsAllSet", "$bitsAnyClear", "$bitsAnySet", # Bitwise operators
-                    "$gt", "$gte", "$lt", "$lte", "$eq", "$ne", "$in", "$nin", # Comparison operators
-                    "$exists", "$type", # Data Type operators
-                    "$box", "$center", "$centerSphere", "$geoIntersects", "$geometry", "$geoWithin", 
-                    "$maxDistance", "$minDistance", "$near", "$nearSphere", "$polygon", # Geospatial operators
-                    "$and", "$or", "$not", "$nor", # Logical operators
-                    "$expr", "$jsonSchema", "$mod", "$regex", "$where", # Other operators
-                    "$text", "$comment"] # Text search operators
-SIMPLE_OPERATORS = ["$gt", "$gte", "$lt", "$lte", "$eq", "$ne", "$in", "$nin", "$exists", "$type", "$mod", 
-                    "$regex", "$size", "$all", "$bitsAllClear", "$bitsAllSet", "$bitsAnyClear", "$bitsAnySet", 
-                    "$box", "$center", "$centerSphere", "$geoIntersects", "$geometry", "$geoWithin", 
-                    "$maxDistance", "$minDistance", "$near", "$nearSphere", "$polygon", "$text", "$comment"]
+QUERY_OPERATORS = [
+    "$all",
+    "$size",
+    "$elemMatch",  # Array operators
+    "$bitsAllClear",
+    "$bitsAllSet",
+    "$bitsAnyClear",
+    "$bitsAnySet",  # Bitwise operators
+    "$gt",
+    "$gte",
+    "$lt",
+    "$lte",
+    "$eq",
+    "$ne",
+    "$in",
+    "$nin",  # Comparison operators
+    "$exists",
+    "$type",  # Data Type operators
+    "$box",
+    "$center",
+    "$centerSphere",
+    "$geoIntersects",
+    "$geometry",
+    "$geoWithin",
+    "$maxDistance",
+    "$minDistance",
+    "$near",
+    "$nearSphere",
+    "$polygon",  # Geospatial operators
+    "$and",
+    "$or",
+    "$not",
+    "$nor",  # Logical operators
+    "$expr",
+    "$jsonSchema",
+    "$mod",
+    "$regex",
+    "$where",  # Other operators
+    "$text",
+    "$comment",
+]  # Text search operators
+SIMPLE_OPERATORS = [
+    "$gt",
+    "$gte",
+    "$lt",
+    "$lte",
+    "$eq",
+    "$ne",
+    "$in",
+    "$nin",
+    "$exists",
+    "$type",
+    "$mod",
+    "$regex",
+    "$size",
+    "$all",
+    "$bitsAllClear",
+    "$bitsAllSet",
+    "$bitsAnyClear",
+    "$bitsAnySet",
+    "$box",
+    "$center",
+    "$centerSphere",
+    "$geoIntersects",
+    "$geometry",
+    "$geoWithin",
+    "$maxDistance",
+    "$minDistance",
+    "$near",
+    "$nearSphere",
+    "$polygon",
+    "$text",
+    "$comment",
+]
 COMPLEX_OPERATORS = ["$elemMatch", "$and", "$or", "$not", "$nor", "$expr", "$jsonSchema"]
+
 
 def analyze_query_pattern(log_line):
     query_type = "command"
@@ -76,11 +138,7 @@ def analyze_query_pattern(log_line):
             q_pattern = query_to_pattern(q.get("q", {}))
             q_hash = json_hash(q_pattern, 4)
             patterns[q_hash] = q_pattern
-        return {
-            "type": query_type,
-            "pattern": list(patterns.values()),
-            "hash": list(patterns.keys())
-        }
+        return {"type": query_type, "pattern": list(patterns.values()), "hash": list(patterns.keys())}
     else:
         # For single query
         q_pattern = query_to_pattern(query)
@@ -88,16 +146,14 @@ def analyze_query_pattern(log_line):
             "type": query_type,
             "pattern": q_pattern,
             "sort": sort,
-            "hash": json_hash({
-                "query": q_pattern,
-                "sort": sort
-            }, 4)
+            "hash": json_hash({"query": q_pattern, "sort": sort}, 4),
         }
+
 
 def query_to_pattern(query):
     shape = {}
     if isinstance(query, list):
-        shape = [ query_to_pattern(i) for i in query ]
+        shape = [query_to_pattern(i) for i in query]
         # If all elements are 1, simplify to 1
         if all(i == 1 for i in shape):
             shape = 1
@@ -109,10 +165,11 @@ def query_to_pattern(query):
                 shape[k] = _query_to_pattern(v)
     return shape
 
+
 def _query_to_pattern(query):
     shape = {}
     if isinstance(query, list):
-        shape = [ _query_to_pattern(i) for i in query ]
+        shape = [_query_to_pattern(i) for i in query]
         # If all elements are 1, simplify to 1
         if all(i == 1 for i in shape):
             shape = 1
@@ -127,4 +184,3 @@ def _query_to_pattern(query):
     else:
         shape = 1
     return shape
-    

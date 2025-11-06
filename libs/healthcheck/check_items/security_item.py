@@ -3,8 +3,9 @@ from libs.healthcheck.check_items.base_item import BaseItem
 from libs.healthcheck.shared import *
 from libs.utils import *
 
+
 class SecurityItem(BaseItem):
-    def __init__(self, output_folder, config = None):
+    def __init__(self, output_folder, config=None):
         super().__init__(output_folder, config)
         self._name = "Authentication & Security"
         self._description = "Collects & review security related information.\n\n"
@@ -21,11 +22,16 @@ class SecurityItem(BaseItem):
         parsed_uri = kwargs.get("parsed_uri")
 
         nodes = discover_nodes(client, parsed_uri)
+
         def func_node(name, node, **kwargs):
             client = node["client"]
             host = node["host"]
             if "pingLatencySec" in node and node["pingLatencySec"] > MAX_MONGOS_PING_LATENCY:
-                self._logger.warning(yellow(f"Skip {host} because it has been irresponsive for {node['pingLatencySec'] / 60:.2f} minutes."))
+                self._logger.warning(
+                    yellow(
+                        f"Skip {host} because it has been irresponsive for {node['pingLatencySec'] / 60:.2f} minutes."
+                    )
+                )
                 return None, None
             raw_result = client.admin.command("getCmdLineOpts")
             test_result = []
@@ -42,64 +48,80 @@ class SecurityItem(BaseItem):
             tls_enabled = net.get("tls", {}).get("mode", None)
             audit = "enabled" if audit_log.get("destination", None) is not None else "disabled"
             if authorization != "enabled":
-                test_result.append({
-                    "host": host,
-                    "severity": SEVERITY.HIGH,
-                    "title": "Authorization Disabled",
-                    "description": "Authorization is disabled, which may lead to unauthorized access."
-                })
+                test_result.append(
+                    {
+                        "host": host,
+                        "severity": SEVERITY.HIGH,
+                        "title": "Authorization Disabled",
+                        "description": "Authorization is disabled, which may lead to unauthorized access.",
+                    }
+                )
             if redact_logs != True:
-                test_result.append({
-                    "host": host,
-                    "severity": SEVERITY.MEDIUM,
-                    "title": "Log Redaction Disabled",
-                    "description": "Redaction of log is disabled, which may lead to sensitive information exposure."
-                })
+                test_result.append(
+                    {
+                        "host": host,
+                        "severity": SEVERITY.MEDIUM,
+                        "title": "Log Redaction Disabled",
+                        "description": "Redaction of log is disabled, which may lead to sensitive information exposure.",
+                    }
+                )
             if tls_enabled is None:
-                test_result.append({
-                    "host": host,
-                    "severity": SEVERITY.HIGH,
-                    "title": "TLS Disabled",
-                    "description": "TLS is disabled, which may lead to unencrypted connections."
-                })
+                test_result.append(
+                    {
+                        "host": host,
+                        "severity": SEVERITY.HIGH,
+                        "title": "TLS Disabled",
+                        "description": "TLS is disabled, which may lead to unencrypted connections.",
+                    }
+                )
             elif tls_enabled != "requireTLS":
-                test_result.append({
-                    "host": host,
-                    "severity": SEVERITY.MEDIUM,
-                    "title": "Optional TLS",
-                    "description": f"TLS is enabled but not set to `requireTLS`, current mode is `{tls_enabled}`."
-                })
+                test_result.append(
+                    {
+                        "host": host,
+                        "severity": SEVERITY.MEDIUM,
+                        "title": "Optional TLS",
+                        "description": f"TLS is enabled but not set to `requireTLS`, current mode is `{tls_enabled}`.",
+                    }
+                )
             if bind_ip == "0.0.0.0":
-                test_result.append({
-                    "host": host,
-                    "severity": SEVERITY.LOW,
-                    "title": "Unrestricted Bind IP",
-                    "description": "Bind IP is set to `0.0.0.0`. Your service may be exposed to the internet. Make sure to restrict it to specific IP addresses."
-                })
+                test_result.append(
+                    {
+                        "host": host,
+                        "severity": SEVERITY.LOW,
+                        "title": "Unrestricted Bind IP",
+                        "description": "Bind IP is set to `0.0.0.0`. Your service may be exposed to the internet. Make sure to restrict it to specific IP addresses.",
+                    }
+                )
             if port == 27017:
-                test_result.append({
-                    "host": host,
-                    "severity": SEVERITY.LOW,
-                    "title": "Default Port Used",
-                    "description": "Default port `27017` is used. Make sure to restrict access to this port."
-                })
-            
+                test_result.append(
+                    {
+                        "host": host,
+                        "severity": SEVERITY.LOW,
+                        "title": "Default Port Used",
+                        "description": "Default port `27017` is used. Make sure to restrict access to this port.",
+                    }
+                )
+
             if audit == "disabled":
-                test_result.append({
-                    "host": host,
-                    "severity": SEVERITY.HIGH,
-                    "title": "Auditing Disabled",
-                    "description": "Auditing is disabled, which may lead to unmonitored access."
-                })
+                test_result.append(
+                    {
+                        "host": host,
+                        "severity": SEVERITY.HIGH,
+                        "title": "Auditing Disabled",
+                        "description": "Auditing is disabled, which may lead to unmonitored access.",
+                    }
+                )
             self.append_test_results(test_result)
 
             return test_result, raw_result
 
-        result = enum_all_nodes(nodes, 
-                                func_rs_member=func_node, 
-                                func_mongos_member=func_node,
-                                func_shard_member=func_node,
-                                func_config_member=func_node)
+        result = enum_all_nodes(
+            nodes,
+            func_rs_member=func_node,
+            func_mongos_member=func_node,
+            func_shard_member=func_node,
+            func_config_member=func_node,
+        )
 
         self.captured_sample = result
 
@@ -118,10 +140,11 @@ class SecurityItem(BaseItem):
                 {"name": "Cluster Auth", "type": "string"},
                 {"name": "Log Redaction", "type": "string"},
                 {"name": "EAR", "type": "string"},
-                {"name": "Auditing", "type": "string"}
+                {"name": "Auditing", "type": "string"},
             ],
-            "rows": []
+            "rows": [],
         }
+
         def func_node(name, node, **kwargs):
             raw_result = node["rawResult"]
             host = node["host"]
@@ -141,16 +164,26 @@ class SecurityItem(BaseItem):
             bind_ip = net.get("bindIp", "127.0.0.1")
             cluster_auth = security.get("clusterAuthMode", "disabled")
             audit = "enabled" if audit_log.get("destination", None) is not None else "disabled"
-            table["rows"].append([escape_markdown(name), host, f"{bind_ip}:{port}", tls, authorization, cluster_auth, log_redaction, eat, audit])
+            table["rows"].append(
+                [
+                    escape_markdown(name),
+                    host,
+                    f"{bind_ip}:{port}",
+                    tls,
+                    authorization,
+                    cluster_auth,
+                    log_redaction,
+                    eat,
+                    audit,
+                ]
+            )
 
-        enum_result_items(raw_result,
-                          func_rs_member=func_node,
-                          func_mongos_member=func_node,
-                          func_shard_member=func_node,
-                          func_config_member=func_node)
+        enum_result_items(
+            raw_result,
+            func_rs_member=func_node,
+            func_mongos_member=func_node,
+            func_shard_member=func_node,
+            func_config_member=func_node,
+        )
 
-        return {
-            "name": self.name,
-            "description": self.description,
-            "data": [table]
-        }
+        return {"name": self.name, "description": self.description, "data": [table]}

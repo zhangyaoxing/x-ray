@@ -2,6 +2,7 @@ from libs.log_analysis.log_items.base_item import BaseItem
 from libs.log_analysis.shared import *
 from libs.utils import *
 
+
 class InfoItem(BaseItem):
     def __init__(self, output_folder, config):
         super().__init__(output_folder, config)
@@ -11,14 +12,14 @@ class InfoItem(BaseItem):
         self._show_scaler = False
 
         self._ids = [
-            20721, # Process Details
-            20722, # Node is a member of a replica set
-            5853300, # current featureCompatibilityVersion value
-            23403, # Build Info
-            51765, # Operating System
-            21951, # Options set by command line
-            4913010, # Certificate information
-            4615611 # MongoDB starting
+            20721,  # Process Details
+            20722,  # Node is a member of a replica set
+            5853300,  # current featureCompatibilityVersion value
+            23403,  # Build Info
+            51765,  # Operating System
+            21951,  # Options set by command line
+            4913010,  # Certificate information
+            4615611,  # MongoDB starting
         ]
 
     def analyze(self, log_line):
@@ -51,8 +52,9 @@ class InfoItem(BaseItem):
         self._cache["process"] = {
             "pid": attr.get("pid", "Unknown"),
             "host": attr.get("host", "Unknown"),
-            "port": attr.get("port", "Unknown")
+            "port": attr.get("port", "Unknown"),
         }
+
     def _process_replica_set(self, attr):
         self._cache["replica_set"] = attr
 
@@ -64,14 +66,12 @@ class InfoItem(BaseItem):
         self._cache["build_info"] = {
             "version": build_info.get("version", "Unknown"),
             "modules": build_info.get("modules", []),
-            "environment": build_info.get("environment", {})
+            "environment": build_info.get("environment", {}),
         }
+
     def _process_operating_system(self, attr):
         os_info = attr.get("os", {})
-        self._cache["os"] = {
-            "name": os_info.get("name", "Unknown"),
-            "version": os_info.get("version", "Unknown")
-        }
+        self._cache["os"] = {"name": os_info.get("name", "Unknown"), "version": os_info.get("version", "Unknown")}
 
     def _process_command_line_options(self, attr):
         options = attr.get("options", {})
@@ -98,7 +98,9 @@ class InfoItem(BaseItem):
             if fcv:
                 f.write(f" (FCV: `{fcv}`)")
             if process:
-                f.write(f" PID `{process.get('pid', 'Unknown')}` running on `{process.get('host', 'Unknown')}:{process.get('port', 'Unknown')}`\n")
+                f.write(
+                    f" PID `{process.get('pid', 'Unknown')}` running on `{process.get('host', 'Unknown')}:{process.get('port', 'Unknown')}`\n"
+                )
             f.write("\n")
         cert_info = self._cache.get("cert_info", None)
         if cert_info:
@@ -123,16 +125,20 @@ class InfoItem(BaseItem):
         rs_config = replica_set.get("config", None)
         if replica_set:
             f.write("### Replica Set Config\n\n")
-            f.write(f"Replica Set Name: `{rs_config.get('_id', 'Unknown')}`, member state: `{replica_set.get('memberState', 'Unknown')}`\n\n")
+            f.write(
+                f"Replica Set Name: `{rs_config.get('_id', 'Unknown')}`, member state: `{replica_set.get('memberState', 'Unknown')}`\n\n"
+            )
             f.write("|Member|Host|Arbiter|Priority|Votes|Hidden|Delay|\n")
             f.write("|------|----|-------|--------|-----|------|-----|\n")
             for member in rs_config.get("members", []):
-                f.write(f"|{member.get('_id', 'Unknown')}|{member.get('host', 'Unknown')}|{member.get('arbiterOnly', False)}|{member.get('priority', 0)}|{member.get('votes', 0)}|{member.get('hidden', False)}|{member.get('secondaryDelaySecs', 0)}|\n")
+                f.write(
+                    f"|{member.get('_id', 'Unknown')}|{member.get('host', 'Unknown')}|{member.get('arbiterOnly', False)}|{member.get('priority', 0)}|{member.get('votes', 0)}|{member.get('hidden', False)}|{member.get('secondaryDelaySecs', 0)}|\n"
+                )
             f.write("\n")
         command_line_options = self._cache.get("command_line_options", None)
         if command_line_options:
             f.write("### Command Line Options\n\n")
-            f.write("<div id=\"cmd_options\">\n")
+            f.write('<div id="cmd_options">\n')
             f.write("```json\n")
             f.write(to_json(command_line_options, indent=4))
             f.write("\n```\n\n")

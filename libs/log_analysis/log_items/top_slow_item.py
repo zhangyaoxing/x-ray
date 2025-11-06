@@ -4,10 +4,12 @@ from libs.log_analysis.query_analyzer import analyze_query_pattern
 from libs.log_analysis.shared import json_hash, to_json
 from libs.utils import escape_markdown, format_json_md
 
+
 class TopSlowItem(BaseItem):
     """
     Identify the top N slowest operations from the log entries.
     """
+
     def __init__(self, output_folder: str, config):
         super(TopSlowItem, self).__init__(output_folder, config)
         self._top_n = config.get("top", 10)
@@ -42,28 +44,30 @@ class TopSlowItem(BaseItem):
         if slow_query is None:
             slow_query = {}
             self._cache[query_hash] = slow_query
-        slow_query.update({
-            "query_hash": query_hash,
-            "ns": ns,
-            "query_pattern": query_pattern,
-            "duration": slow_query.get("duration", 0) + duration,
-            "n_returned": slow_query.get("n_returned", 0) + n_returned,
-            "keys_examined": slow_query.get("keys_examined", 0) + keys_examined,
-            "docs_examined": slow_query.get("docs_examined", 0) + docs_examined,
-            "plan_summary": plan_summary if "plan_summary" not in slow_query else slow_query["plan_summary"],
-            "has_sort": has_sort or slow_query.get("has_sort", False),
-            "count": slow_query.get("count", 0) + 1,
-            "sample": log_line if "sample" not in slow_query else slow_query["sample"],
-        })
+        slow_query.update(
+            {
+                "query_hash": query_hash,
+                "ns": ns,
+                "query_pattern": query_pattern,
+                "duration": slow_query.get("duration", 0) + duration,
+                "n_returned": slow_query.get("n_returned", 0) + n_returned,
+                "keys_examined": slow_query.get("keys_examined", 0) + keys_examined,
+                "docs_examined": slow_query.get("docs_examined", 0) + docs_examined,
+                "plan_summary": plan_summary if "plan_summary" not in slow_query else slow_query["plan_summary"],
+                "has_sort": has_sort or slow_query.get("has_sort", False),
+                "count": slow_query.get("count", 0) + 1,
+                "sample": log_line if "sample" not in slow_query else slow_query["sample"],
+            }
+        )
 
     def finalize_analysis(self):
-        self._cache = list(sorted(self._cache.values(), key=lambda item: item["count"], reverse=True)[:self._top_n])
+        self._cache = list(sorted(self._cache.values(), key=lambda item: item["count"], reverse=True)[: self._top_n])
         # self._cache = list(sorted(self._cache.values(), key=lambda item: item["duration"], reverse=True)[:self._top_n])
         super().finalize_analysis()
 
     def review_results_markdown(self, f):
         super().review_results_markdown(f)
-        f.write("<div id=\"top_slow_positioner\"></div>\n\n")
+        f.write('<div id="top_slow_positioner"></div>\n\n')
         f.write(f"|Query Hash|Op|Pattern|Details|Plan Summary|\n")
         f.write(f"|---|---|---|---|---|\n")
         # Total Duration (ms)|Count|Avg Duration (ms)|Scanned / Returned|ScannedObj / Returned|Has Sort
@@ -97,11 +101,11 @@ class TopSlowItem(BaseItem):
                 plan_summary = line_json.get("plan_summary", "N/A")
                 plan_summary = escape_markdown(plan_summary if plan_summary != "" else "N/A")
                 cols = [
-                    f"[{query_hash}](#{i})", 
-                    f"`{op}` on `{ns}`", 
-                    f"<pre>{format_json_md(pattern)}</pre>", 
-                    f"<pre>{format_json_md(details)}</pre>", 
-                    f"{plan_summary}"
+                    f"[{query_hash}](#{i})",
+                    f"`{op}` on `{ns}`",
+                    f"<pre>{format_json_md(pattern)}</pre>",
+                    f"<pre>{format_json_md(details)}</pre>",
+                    f"{plan_summary}",
                 ]
                 f.write(f"|{'|'.join(cols)}|\n")
                 i += 1

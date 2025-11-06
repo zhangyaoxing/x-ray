@@ -2,6 +2,7 @@ from libs.log_analysis.log_items.base_item import BaseItem
 from datetime import datetime
 import math
 
+
 class ConnectionRateItem(BaseItem):
     def __init__(self, output_folder: str, config):
         super(ConnectionRateItem, self).__init__(output_folder, config)
@@ -24,26 +25,17 @@ class ConnectionRateItem(BaseItem):
         if self._cache.get("time", None) != time_min:
             if self._cache != {}:
                 self._write_output()
-            self._cache = {
-                "time": time_min,
-                "created": 0,
-                "ended": 0,
-                "total": 0,
-                "byIp": {}
-            }
+            self._cache = {"time": time_min, "created": 0, "ended": 0, "total": 0, "byIp": {}}
         attr = log_line.get("attr", {})
         conn_count = attr.get("connectionCount", 1)
         ip = attr["remote"].split(":")[0] if "remote" in attr else "unknown"
         self._cache[counter] += 1
         self._cache["total"] = conn_count
         if ip not in self._cache["byIp"]:
-            self._cache["byIp"][ip] = {
-                "created": 0,
-                "ended": 0
-            }
+            self._cache["byIp"][ip] = {"created": 0, "ended": 0}
         self._cache["byIp"][ip][counter] += 1
 
     def review_results_markdown(self, f):
         super(ConnectionRateItem, self).review_results_markdown(f)
-        f.write(f"<canvas id=\"canvas_{self.__class__.__name__}\" width=\"400\" height=\"200\"></canvas>\n")
-        f.write(f"<canvas id=\"canvas_{self.__class__.__name__}_byip\" width=\"400\" height=\"200\"></canvas>\n")
+        f.write(f'<canvas id="canvas_{self.__class__.__name__}" width="400" height="200"></canvas>\n')
+        f.write(f'<canvas id="canvas_{self.__class__.__name__}_byip" width="400" height="200"></canvas>\n')

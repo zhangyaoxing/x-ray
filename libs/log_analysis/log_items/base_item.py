@@ -7,6 +7,7 @@ from libs.utils import get_script_path
 from libs.version import Version
 from libs.utils import to_ejson
 
+
 def get_version(log_line):
     """
     Extract and parse the version information from a log line.
@@ -18,6 +19,7 @@ def get_version(log_line):
     build_info = attr.get("buildInfo", {})
     version = build_info.get("version", "Unknown")
     return Version.parse(version)
+
 
 class BaseItem(object):
     def __init__(self, output_folder: str, config):
@@ -32,16 +34,16 @@ class BaseItem(object):
 
     def analyze(self, log_line):
         log_id = log_line.get("id", "")
-        if log_id == 23403: # Build Info
+        if log_id == 23403:  # Build Info
             self._server_version = get_version(log_line)
 
     def review_results(self):
         raise NotImplementedError("Subclasses must implement the review_results method.")
-    
+
     @property
     def name(self):
         return self._name
-    
+
     @name.setter
     def name(self, value):
         self._name = value
@@ -65,17 +67,19 @@ class BaseItem(object):
         file_path = os.path.join("templates", "log", "snippets", file_name)
         file_path = get_script_path(file_path)
         self._logger.debug(f"Using JS snippet file: {file_path}")
-        
+
         f.write(f"## {self.name}\n\n")
         f.write(f"{self.description}\n\n")
         if self._show_scaler:
-            f.write("<div style=\"display: none;\">\n")
-            f.write(f"*Total data points: `{self._row_count}`, displaying every <input type=\"range\" id=\"slider_{self.__class__.__name__}\" min=\"1\" max=\"{scale * 2}\" value=\"{scale}\">")
-            f.write(f"<code id=\"sliderValue_{self.__class__.__name__}\">{scale}</code> point(s).*\n\n")
+            f.write('<div style="display: none;">\n')
+            f.write(
+                f'*Total data points: `{self._row_count}`, displaying every <input type="range" id="slider_{self.__class__.__name__}" min="1" max="{scale * 2}" value="{scale}">'
+            )
+            f.write(f'<code id="sliderValue_{self.__class__.__name__}">{scale}</code> point(s).*\n\n')
             f.write("</div>\n\n")
         if self._show_reset:
-            f.write(f"<input type=\"button\" id=\"reset_{self.__class__.__name__}\" value=\"Reset\">\n\n")
-        f.write("<script type=\"text/javascript\">\n")
+            f.write(f'<input type="button" id="reset_{self.__class__.__name__}" value="Reset">\n\n')
+        f.write('<script type="text/javascript">\n')
         f.write("document.addEventListener('DOMContentLoaded', function() {\n")
         if self._show_scaler:
             f.write(f"let slider = document.getElementById('slider_{self.__class__.__name__}');\n")
@@ -117,7 +121,9 @@ class BaseItem(object):
                     f.write(to_ejson(item, indent=None))
                     f.write("\n")
                     self._row_count += 1
-                self._logger.debug(f"Wrote {len(self._cache)} records to {self._output_file} for {self.__class__.__name__}")
+                self._logger.debug(
+                    f"Wrote {len(self._cache)} records to {self._output_file} for {self.__class__.__name__}"
+                )
             else:
                 f.write(to_ejson(self._cache, indent=None))
                 f.write("\n")

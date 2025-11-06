@@ -7,8 +7,10 @@ from pymongo.uri_parser import parse_uri
 """
 This module defines a checklist item for collecting and reviewing collection statistics in MongoDB.
 """
+
+
 class IndexInfoItem(BaseItem):
-    def __init__(self, output_folder, config = None):
+    def __init__(self, output_folder, config=None):
         super().__init__(output_folder, config)
         self._name = "Index Information"
         self._description = "Collects & review index statistics.\n\n"
@@ -17,8 +19,7 @@ class IndexInfoItem(BaseItem):
         self._description += "- Whether there are redundant indexes in the collection.\n"
 
     def _num_indexes_check(self, ns, index_stats, max_num_indexes, host):
-        """ Check for the number of indexes in the collection.
-        """
+        """Check for the number of indexes in the collection."""
         # Get the unique index names
         unique_indexes = set()
         for index in index_stats:
@@ -26,14 +27,16 @@ class IndexInfoItem(BaseItem):
         num_indexes = len(unique_indexes)
         test_result = []
         if num_indexes > max_num_indexes:
-            test_result.append({
-                "host": host,
-                "severity": SEVERITY.MEDIUM,
-                "title": "Too Many Indexes",
-                "description": f"Collection `{ns}` has more than `{max_num_indexes}` indexes (`{num_indexes}` indexes detected), which can cause potential write performance issues."
-            })
+            test_result.append(
+                {
+                    "host": host,
+                    "severity": SEVERITY.MEDIUM,
+                    "title": "Too Many Indexes",
+                    "description": f"Collection `{ns}` has more than `{max_num_indexes}` indexes (`{num_indexes}` indexes detected), which can cause potential write performance issues.",
+                }
+            )
         return test_result
-    
+
     def _unused_indexes_check(self, ns, index_stats, unused_index_days, host):
         """
         Check for unused indexes in the collection.
@@ -44,12 +47,14 @@ class IndexInfoItem(BaseItem):
                 last_used = index.get("accesses", {}).get("since", None)
                 if last_used:
                     if (datetime.now() - last_used).days > unused_index_days:
-                        test_result.append({
-                            "host": host,
-                            "severity": SEVERITY.LOW,
-                            "title": "Unused Index",
-                            "description": f"Index `{index.get('name')}` from collection `{ns}` has not been used for more than `{unused_index_days}` days."
-                        })
+                        test_result.append(
+                            {
+                                "host": host,
+                                "severity": SEVERITY.LOW,
+                                "title": "Unused Index",
+                                "description": f"Index `{index.get('name')}` from collection `{ns}` has not been used for more than `{unused_index_days}` days.",
+                            }
+                        )
         return test_result
 
     def _redundant_indexes_check(self, ns, indexes, host):
@@ -57,6 +62,7 @@ class IndexInfoItem(BaseItem):
         Check for redundant indexes in the collection.
         """
         test_result = []
+
         def is_redundant(index1, index2):
             # These options must be identical for indexes to be considered redundant
             OPTIONS = ["unique", "sparse", "partialFilterExpression", "collation", "hidden"]
@@ -79,12 +85,14 @@ class IndexInfoItem(BaseItem):
         for index in indexes:
             for target in index_targets:
                 if is_redundant(index, target):
-                    test_result.append({
-                        "host": host,
-                        "severity": SEVERITY.MEDIUM,
-                        "title": "Redundant Index",
-                        "description": f"Index `{index.get('name')}` in collection `{ns}` is redundant with index `{target.get('name')}`."
-                    })
+                    test_result.append(
+                        {
+                            "host": host,
+                            "severity": SEVERITY.MEDIUM,
+                            "title": "Redundant Index",
+                            "description": f"Index `{index.get('name')}` in collection `{ns}` is redundant with index `{target.get('name')}`.",
+                        }
+                    )
                     break
         return test_result
 
@@ -92,6 +100,7 @@ class IndexInfoItem(BaseItem):
         client = kwargs.get("client")
         parsed_uri = kwargs.get("parsed_uri")
         nodes = discover_nodes(client, parsed_uri)
+
         def cluster_check(host, ns, index_stats):
             # Check number of indexes
             max_num_indexes = self._config.get("num_indexes", 10)
@@ -100,15 +109,19 @@ class IndexInfoItem(BaseItem):
             indexes = [index["spec"] for i, index in enumerate(index_stats)]
             result2 = self._redundant_indexes_check(ns, indexes, host)
             return result1 + result2
+
         def node_check(host, ns, index_stats):
             unused_index_days = self._config.get("unused_index_days", 7)
             return self._unused_indexes_check(ns, index_stats, unused_index_days, host)
+
         def enum_namespaces(node, func, **kwargs):
             level = kwargs.get("level")
             client = node["client"]
             latency = node.get("pingLatencySec", 0)
             if latency > MAX_MONGOS_PING_LATENCY:
-                self._logger.warning(yellow(f"Skip {node['host']} because it has been irresponsive for {latency / 60:.2f} minutes."))
+                self._logger.warning(
+                    yellow(f"Skip {node['host']} because it has been irresponsive for {latency / 60:.2f} minutes.")
+                )
                 return None, None
             dbs = client.admin.command("listDatabases").get("databases", [])
             test_result, raw_result = [], []
@@ -130,30 +143,29 @@ class IndexInfoItem(BaseItem):
                     if coll_name.startswith("system."):
                         self._logger.debug(f"Skipping system collection: {db_name}.{coll_name}")
                         continue
-                    self._logger.debug(f"Gathering index stats of collection `{db_name}.{coll_name}` on {level} level...")
+                    self._logger.debug(
+                        f"Gathering index stats of collection `{db_name}.{coll_name}` on {level} level..."
+                    )
                     ns = f"{db_name}.{coll_name}"
-                    
+
                     # Check for number of indexes
-                    index_stats = list(db[coll_name].aggregate([
-                        {"$indexStats": {}}
-                    ]))
+                    index_stats = list(db[coll_name].aggregate([{"$indexStats": {}}]))
                     result = func(host, ns, index_stats)
                     test_result.extend(result)
-                    raw_result.append({
-                        "ns": ns,
-                        "captureTime": datetime.now(timezone.utc),
-                        "indexStats": index_stats
-                    })
+                    raw_result.append({"ns": ns, "captureTime": datetime.now(timezone.utc), "indexStats": index_stats})
             self.append_test_results(test_result)
             return test_result, raw_result
-        result = enum_all_nodes(nodes, 
-                                func_rs_cluster=lambda name, node, **kwargs: enum_namespaces(node, cluster_check, **kwargs),
-                                func_sh_cluster=lambda name, node, **kwargs: enum_namespaces(node, cluster_check, **kwargs),
-                                func_rs_member=lambda name, node, **kwargs: enum_namespaces(node, node_check, **kwargs),
-                                func_shard_member=lambda name, node, **kwargs: enum_namespaces(node, node_check, **kwargs))
+
+        result = enum_all_nodes(
+            nodes,
+            func_rs_cluster=lambda name, node, **kwargs: enum_namespaces(node, cluster_check, **kwargs),
+            func_sh_cluster=lambda name, node, **kwargs: enum_namespaces(node, cluster_check, **kwargs),
+            func_rs_member=lambda name, node, **kwargs: enum_namespaces(node, node_check, **kwargs),
+            func_shard_member=lambda name, node, **kwargs: enum_namespaces(node, node_check, **kwargs),
+        )
 
         self.captured_sample = result
-        
+
     @property
     def review_result(self):
         result = self.captured_sample
@@ -166,10 +178,11 @@ class IndexInfoItem(BaseItem):
                 {"name": "Namespace", "type": "string"},
                 {"name": "Name", "type": "string"},
                 {"name": "Key", "type": "string", "align": "left"},
-                {"name": "Access per Hour", "type": "string"}
+                {"name": "Access per Hour", "type": "string"},
             ],
-            "rows": []
+            "rows": [],
         }
+
         def func_cluster(set_name, node, **kwargs):
             raw_result = node.get("rawResult", [])
             if raw_result is None:
@@ -180,7 +193,7 @@ class IndexInfoItem(BaseItem):
                 capture_time = item["captureTime"]
                 for stats in item["indexStats"]:
                     component = stats.get("shard", set_name)
-                    key_md = (format_json_md(stats["key"], indent=None))
+                    key_md = format_json_md(stats["key"], indent=None)
                     access = stats["accesses"]
                     ops = access.get("ops", 0)
                     since = access.get("since", None)
@@ -189,19 +202,18 @@ class IndexInfoItem(BaseItem):
                     options_md = f"<pre>{format_json_md(options)}</pre>" if len(options) > 0 else ""
                     access_per_hour = ops / (capture_time - since).total_seconds() / 3600
                     table["rows"].append(
-                        [escape_markdown(component), 
-                         escape_markdown(ns), 
-                         escape_markdown(stats["name"]),
-                         f"`{key_md}`{options_md}",
-                         access_per_hour]
+                        [
+                            escape_markdown(component),
+                            escape_markdown(ns),
+                            escape_markdown(stats["name"]),
+                            f"`{key_md}`{options_md}",
+                            access_per_hour,
+                        ]
                     )
 
         enum_result_items(result, func_sh_cluster=func_cluster, func_rs_cluster=func_cluster)
-        return {
-            "name": self.name,
-            "description": self.description,
-            "data": [table]
-        }
+        return {"name": self.name, "description": self.description, "data": [table]}
+
 
 def get_index_options(spec):
     options = {}

@@ -19,13 +19,16 @@ MEMBER_STATE = {
     7: "ARBITER",
     8: "DOWN",
     9: "ROLLBACK",
-    10: "REMOVED"
+    10: "REMOVED",
 }
+
+
 class SEVERITY(Enum):
     HIGH = 1
     MEDIUM = 2
     LOW = 3
     INFO = 4
+
 
 MAX_MONGOS_PING_LATENCY = 60  # seconds
 RESERVED_CONN_OPTIONS = [
@@ -39,26 +42,23 @@ RESERVED_CONN_OPTIONS = [
     "tlsAllowInvalidHostnames",
     "tlsInsecure",
     "connectTimeoutMS",
-    "socketTimeoutMS"
+    "socketTimeoutMS",
 ]
 
+
 def to_json(obj, indent=0):
-    cls_maps = [{
-        "class": SEVERITY,
-        "func": lambda o: o.name
-    }, {
-        "class": datetime,
-        "func": lambda o: o.isoformat()
-    }]
+    cls_maps = [{"class": SEVERITY, "func": lambda o: o.name}, {"class": datetime, "func": lambda o: o.isoformat()}]
     return to_ejson(obj, indent=indent, cls_maps=cls_maps)
+
 
 def str_to_md_id(str):
     id = str.lower()
-    id = id.replace(' ', '-')
-    id = re.sub(r'[^a-z0-9\-]', '', id)
-    id = re.sub(r'\-+', '-', id)
-    id = id.strip('-')
+    id = id.replace(" ", "-")
+    id = re.sub(r"[^a-z0-9\-]", "", id)
+    id = re.sub(r"\-+", "-", id)
+    id = id.strip("-")
     return id
+
 
 def connect_and_test(host, uri):
     client = MongoClient(uri)
@@ -70,15 +70,15 @@ def connect_and_test(host, uri):
     except Exception as e:
         global irresponsive_nodes
         latency = MAX_MONGOS_PING_LATENCY + 1  # Set to a high value to indicate failure
-        irresponsive_nodes.append({
-            "host": host,
-            "pingLatencySec": latency
-        })
+        irresponsive_nodes.append({"host": host, "pingLatencySec": latency})
         logger.debug(f"Failed to connect to MongoDB at {uri}: {e}")
     return latency, client
 
+
 nodes = {}
 irresponsive_nodes = []
+
+
 def discover_nodes(client, parsed_uri):
     """
     Discover nodes in the MongoDB replica set or sharded cluster.
@@ -105,7 +105,7 @@ def discover_nodes(client, parsed_uri):
             # Discover replica set nodes
             nodes["type"] = "RS"
             nodes["setName"] = is_master["setName"]
-            hosts = [f"{host[0]}:{host[1]}" for host in parsed_uri['nodelist']]
+            hosts = [f"{host[0]}:{host[1]}" for host in parsed_uri["nodelist"]]
             nodes["uri"] = f"mongodb://{credential}{','.join(hosts)}/{database}?{options_str}"
             nodes["pingLatencySec"], nodes["client"] = connect_and_test("cluster", nodes["uri"])
             members = client.admin.command("replSetGetStatus")["members"]
@@ -115,16 +115,11 @@ def discover_nodes(client, parsed_uri):
             for member in members:
                 uri = f"mongodb://{credential}{member['name']}/{database}?{options_str_direct}"
                 l, c = connect_and_test(member["name"], uri)
-                nodes["members"].append({
-                    "host": member["name"],
-                    "uri": uri,
-                    "client": c,
-                    "pingLatencySec": l
-                })
+                nodes["members"].append({"host": member["name"], "uri": uri, "client": c, "pingLatencySec": l})
         else:
             # Discover sharded cluster nodes, including config servers and shards
             nodes["type"] = "SH"
-            hosts = [f"{host[0]}:{host[1]}" for host in parsed_uri['nodelist']]
+            hosts = [f"{host[0]}:{host[1]}" for host in parsed_uri["nodelist"]]
             nodes["uri"] = f"mongodb://{credential}{','.join(hosts)}/{database}?{options_str}"
             nodes["pingLatencySec"], nodes["client"] = connect_and_test("cluster", nodes["uri"])
             shard_map = client.admin.command("getShardMap")["map"]
@@ -135,57 +130,37 @@ def discover_nodes(client, parsed_uri):
                 hosts = v.split("/")[1].split(",")
                 uri = f"mongodb://{credential}{','.join(hosts)}/{database}?{options_str}"
                 l, c = connect_and_test(rs_name, uri)
-                parsed_map[k] = {
-                    "setName": rs_name,
-                    "uri": uri,
-                    "client": c,
-                    "pingLatencySec": l,
-                    "members": []
-                }
+                parsed_map[k] = {"setName": rs_name, "uri": uri, "client": c, "pingLatencySec": l, "members": []}
                 for host in hosts:
                     uri = f"mongodb://{credential}{host}/{database}?{options_str_direct}"
                     l, c = connect_and_test(host, uri)
-                    parsed_map[k]["members"].append({
-                        "host": host,
-                        "uri": uri,
-                        "client": c,
-                        "pingLatencySec": l
-                    })
+                    parsed_map[k]["members"].append({"host": host, "uri": uri, "client": c, "pingLatencySec": l})
             # mongos nodes
             all_mongos = list(client.config.get_collection("mongos").find())
             uri = f"mongodb://{credential}{','.join(host['_id'] for host in all_mongos)}/{database}?{options_str}"
-            parsed_map["mongos"] = {
-                "setName": "mongos",
-                "uri": uri,
-                "members": []
-            }
+            parsed_map["mongos"] = {"setName": "mongos", "uri": uri, "members": []}
             for host in all_mongos:
                 ping = host.get("ping", datetime.now()).replace(tzinfo=timezone.utc)
                 uri = f"mongodb://{credential}{host['_id']}/{database}?{options_str_direct}"
                 l = round((datetime.now(timezone.utc) - ping).total_seconds())
                 if l < MAX_MONGOS_PING_LATENCY:
-                    l, c = connect_and_test(host["_id"], uri) 
+                    l, c = connect_and_test(host["_id"], uri)
                 else:
                     c = None
-                    irresponsive_nodes.append({
-                        "host": host["_id"],
-                        "pingLatencySec": l
-                    })
-                parsed_map["mongos"]["members"].append({
-                    "host": host["_id"],
-                    "uri": uri,
-                    "client": c,
-                    "pingLatencySec": l,
-                    "lastPing": ping
-                })
+                    irresponsive_nodes.append({"host": host["_id"], "pingLatencySec": l})
+                parsed_map["mongos"]["members"].append(
+                    {"host": host["_id"], "uri": uri, "client": c, "pingLatencySec": l, "lastPing": ping}
+                )
             nodes["map"] = parsed_map
 
     except Exception as e:
         logger.error(red(f"Failed to discover nodes: {str(e)}"))
         import sys
+
         sys.exit(1)
 
     return nodes
+
 
 def enum_all_nodes(nodes, **kwargs):
     """
@@ -200,7 +175,7 @@ def enum_all_nodes(nodes, **kwargs):
     - `func_config`: Function to apply to the CSRS.
     - `func_config_member`: Function to apply to each config member.
 
-    Each function above will be passed 2 arguments: 
+    Each function above will be passed 2 arguments:
     - `set_name`: The replica set name if it's a replica set. Or "mongos" if it's a mongos node or sharded cluster.
     - `node`: The node information from `discover_nodes` output. Only the current and sub levels will be passed.
     - Named argument `level`: The level of the node in the cluster hierarchy (e.g., "sh_cluster", "rs_cluster", "rs_member").
@@ -222,9 +197,7 @@ def enum_all_nodes(nodes, **kwargs):
     func_shard_member = kwargs.get("func_shard_member", lambda s, n, **kwargs: (None, None))
     func_config = kwargs.get("func_config", lambda s, n, **kwargs: (None, None))
     func_config_member = kwargs.get("func_config_member", lambda s, n, **kwargs: (None, None))
-    result = {
-        "type": nodes["type"]
-    }
+    result = {"type": nodes["type"]}
     if nodes["type"] == "RS":
         set_name = nodes["setName"]
         result["setName"] = set_name
@@ -232,20 +205,22 @@ def enum_all_nodes(nodes, **kwargs):
         try:
             result["testResult"], result["rawResult"] = func_rs_cluster(set_name, nodes, level="rs_cluster")
         except Exception as e:
-            logger.error(red(f"Failed to get execution result from replica set {set_name}: {e.__class__.__name__} {str(e)}"))
+            logger.error(
+                red(f"Failed to get execution result from replica set {set_name}: {e.__class__.__name__} {str(e)}")
+            )
             result["testResult"], result["rawResult"] = (None, None)
         for member in nodes["members"]:
             test_result, raw_result = None, None
             try:
                 test_result, raw_result = func_rs_member(set_name, member, level="rs_member")
             except Exception as e:
-                logger.error(red(f"Failed to get execution result from replica set {set_name}, member {member['host']}: {e.__class__.__name__} {str(e)}"))
+                logger.error(
+                    red(
+                        f"Failed to get execution result from replica set {set_name}, member {member['host']}: {e.__class__.__name__} {str(e)}"
+                    )
+                )
 
-            result["members"].append({
-                "host": member["host"],
-                "rawResult": raw_result,
-                "testResult": test_result
-            })
+            result["members"].append({"host": member["host"], "rawResult": raw_result, "testResult": test_result})
     else:
         result["map"] = {}
         test_result, raw_result = None, None
@@ -260,7 +235,7 @@ def enum_all_nodes(nodes, **kwargs):
                 "setName": host_info["setName"],
                 "members": [],
                 "rawResult": None,
-                "testResult": None
+                "testResult": None,
             }
             test_result, raw_result = None, None
             try:
@@ -285,14 +260,17 @@ def enum_all_nodes(nodes, **kwargs):
                     else:
                         test_result, raw_result = func_shard_member(set_name, member, level="shard_member")
                 except Exception as e:
-                    logger.error(red(f"Failed to get execution result from {set_name}, member {member['host']}: {e.__class__.__name__} {str(e)}"))
+                    logger.error(
+                        red(
+                            f"Failed to get execution result from {set_name}, member {member['host']}: {e.__class__.__name__} {str(e)}"
+                        )
+                    )
 
-                result["map"][component_name]["members"].append({
-                    "host": member["host"],
-                    "rawResult": raw_result,
-                    "testResult": test_result
-                })
+                result["map"][component_name]["members"].append(
+                    {"host": member["host"], "rawResult": raw_result, "testResult": test_result}
+                )
     return result
+
 
 def enum_result_items(result, **kwargs):
     """

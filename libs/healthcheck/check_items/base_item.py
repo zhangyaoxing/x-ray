@@ -5,6 +5,7 @@ from bson import json_util
 from libs.healthcheck.shared import SEVERITY, to_json
 from libs.utils import env, to_ejson
 
+
 def colorize_severity(severity: SEVERITY) -> str:
     if severity == SEVERITY.HIGH:
         return "red"
@@ -15,15 +16,16 @@ def colorize_severity(severity: SEVERITY) -> str:
     elif severity == SEVERITY.INFO:
         return "gray"
 
-TABLE_ALIGNMENT = {
-    "left": ":----------",
-    "right": "----------:",
-    "center": ":----------:"
-}
+
+TABLE_ALIGNMENT = {"left": ":----------", "right": "----------:", "center": ":----------:"}
+
+
 class BaseItem:
     def __init__(self, output_folder: str, config: dict = None):
         self._name = "BaseItem"
-        self._description = "Base item for checklist framework. If you see this, it means the item is not properly defined."
+        self._description = (
+            "Base item for checklist framework. If you see this, it means the item is not properly defined."
+        )
         self._config = config or {}
         self._test_result = []
         self._logger = logging.getLogger(self.__class__.__name__)
@@ -36,7 +38,7 @@ class BaseItem:
     @property
     def name(self):
         return self._name
-    
+
     @property
     def description(self):
         return self._description
@@ -44,7 +46,7 @@ class BaseItem:
     @property
     def captured_sample(self):
         try:
-            if self.cache_file_name.endswith('.gz'):
+            if self.cache_file_name.endswith(".gz"):
                 with gzip.open(self.cache_file_name, "rt") as f:
                     return json_util.loads(f.read())
             else:
@@ -55,19 +57,15 @@ class BaseItem:
 
     @property
     def test_result(self):
-        return {
-            "name": self.name,
-            "description": self.description,
-            "items": self._test_result
-        }
-    
+        return {"name": self.name, "description": self.description, "items": self._test_result}
+
     @property
     def test_result_markdown(self):
         result = ""
         if len(self._test_result) == 0:
             result += "<b style='color: green;'>Pass.</b>\n\n"
             return result
-        
+
         result += "| \\# | Host | Severity | Category | Message |\n"
         result += "|:----------:|:----------:|:----------:|---------|---------|\n"
         for idx, item in enumerate(self._test_result):
@@ -77,11 +75,7 @@ class BaseItem:
 
     @property
     def review_result(self):
-        return {
-            "name": self.name,
-            "description": self.description,
-            "data": []
-        }
+        return {"name": self.name, "description": self.description, "data": []}
 
     @property
     def review_result_markdown(self):
@@ -98,8 +92,11 @@ class BaseItem:
             if type == "table":
                 result += f"#### ({i + 1}) {caption}\n"
                 result += f"{notes}\n"
-                header = [col.get('name', '(NOT SET)') for col in block.get("columns", [])]
-                align = [TABLE_ALIGNMENT.get(col.get("align", "center"), TABLE_ALIGNMENT["center"]) for col in block.get("columns", [])]
+                header = [col.get("name", "(NOT SET)") for col in block.get("columns", [])]
+                align = [
+                    TABLE_ALIGNMENT.get(col.get("align", "center"), TABLE_ALIGNMENT["center"])
+                    for col in block.get("columns", [])
+                ]
                 result += f"|{'|'.join(header)}|\n"
                 result += f"|{'|'.join(align)}|\n"
                 for row in block.get("rows", []):
@@ -118,8 +115,8 @@ class BaseItem:
 
     @captured_sample.setter
     def captured_sample(self, data):
-        if self.cache_file_name.endswith('.gz'):
-            with gzip.open(self.cache_file_name, 'wt') as f:
+        if self.cache_file_name.endswith(".gz"):
+            with gzip.open(self.cache_file_name, "wt") as f:
                 f.write(to_ejson(data))
         else:
             with open(self.cache_file_name, "w") as f:
@@ -130,19 +127,10 @@ class BaseItem:
         if env == "development":
             return f"{self._output_folder}{self.__class__.__name__}_raw.json"
         return f"{self._output_folder}{self.__class__.__name__}_raw.json.gz"
-    
+
     def append_test_result(self, host: str, severity: SEVERITY, title: str, message: str):
-        self._test_result.append({
-            "host": host,
-            "severity": severity,
-            "title": title,
-            "message": message
-        })
+        self._test_result.append({"host": host, "severity": severity, "title": title, "message": message})
+
     def append_test_results(self, items: list):
         for item in items:
-            self.append_test_result(
-                item["host"],
-                item["severity"],
-                item["title"],
-                item["description"]
-            )
+            self.append_test_result(item["host"], item["severity"], item["title"], item["description"])

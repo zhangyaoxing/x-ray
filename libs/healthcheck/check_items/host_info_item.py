@@ -21,15 +21,22 @@ class HostInfoItem(BaseItem):
         def func_single(name, node, **kwargs):
             client = node["client"]
             if "pingLatencySec" in node and node["pingLatencySec"] > MAX_MONGOS_PING_LATENCY:
-                self._logger.warning(yellow(f"Skip {node['host']} because it has been irresponsive for {node['pingLatencySec'] / 60:.2f} minutes."))
+                self._logger.warning(
+                    yellow(
+                        f"Skip {node['host']} because it has been irresponsive for {node['pingLatencySec'] / 60:.2f} minutes."
+                    )
+                )
                 return None, None
             host_info = client.admin.command("hostInfo")
             return None, host_info
-        result = enum_all_nodes(nodes,
-                                    func_rs_member=func_single,
-                                    func_mongos_member=func_single,
-                                    func_shard_member=func_single,
-                                    func_config_member=func_single)
+
+        result = enum_all_nodes(
+            nodes,
+            func_rs_member=func_single,
+            func_mongos_member=func_single,
+            func_shard_member=func_single,
+            func_config_member=func_single,
+        )
 
         self.captured_sample = result
 
@@ -54,7 +61,7 @@ class HostInfoItem(BaseItem):
                     {"name": "OS", "type": "string"},
                     {"name": "NUMA", "type": "boolean"},
                 ],
-                "rows": []
+                "rows": [],
             }
             data.append(table)
             for m in members:
@@ -68,22 +75,22 @@ class HostInfoItem(BaseItem):
                 if "extra" in extra:
                     # Compatibility for MongoDB 6.0
                     extra = extra["extra"]
-                table["rows"].append([
-                    m["host"],
-                    f"{extra.get('cpuString', '(Unknown CPU)')} ({system['cpuArch']}) {extra.get('cpuFrequencyMHz', 'n/a')} MHz",
-                    f"{system['numCores']}c",
-                    format_size(system["memSizeMB"] * 1024**2),
-                    f"{os['name']} {os['version']}",
-                    system["numaEnabled"]
-                ])
+                table["rows"].append(
+                    [
+                        m["host"],
+                        f"{extra.get('cpuString', '(Unknown CPU)')} ({system['cpuArch']}) {extra.get('cpuFrequencyMHz', 'n/a')} MHz",
+                        f"{system['numCores']}c",
+                        format_size(system["memSizeMB"] * 1024**2),
+                        f"{os['name']} {os['version']}",
+                        system["numaEnabled"],
+                    ]
+                )
 
-        enum_result_items(result,
-                          func_rs_cluster=func_component,
-                          func_all_mongos=func_component,
-                          func_shard=func_component,
-                          func_config=func_component)
-        return {
-            "name": self.name,
-            "description": self.description,
-            "data": data
-        }
+        enum_result_items(
+            result,
+            func_rs_cluster=func_component,
+            func_all_mongos=func_component,
+            func_shard=func_component,
+            func_config=func_component,
+        )
+        return {"name": self.name, "description": self.description, "data": data}

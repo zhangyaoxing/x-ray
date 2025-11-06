@@ -11,6 +11,7 @@ logger = logging.getLogger(__name__)
 
 LOG_CLASSES = load_classes("libs.healthcheck.check_items")
 
+
 class Framework:
     def __init__(self, file_path: str, config: dict):
         self._file_path = file_path
@@ -41,7 +42,9 @@ class Framework:
         # Dynamically load the log checkset based on the name
         logsets = self._config.get("logsets", {})
         if not logset_name in logsets:
-            self._logger.warning(yellow(f"Log checkset '{logset_name}' not found in configuration. Using default logset."))
+            self._logger.warning(
+                yellow(f"Log checkset '{logset_name}' not found in configuration. Using default logset.")
+            )
             logset_name = "default"
         ls = logsets[logset_name]
         self._logger.info(f"Running log checkset: {bold(green(logset_name))}")
@@ -90,7 +93,7 @@ class Framework:
             except Exception as e:
                 self._logger.warning(yellow(f"Log analysis item '{item.name}' finalize failed: {e}"))
                 continue
-        
+
     def output_results(self, output_folder: str = "output/", format: str = "html"):
         batch_folder = self._get_output_folder(output_folder)
         output_file = f"{batch_folder}report.md"
@@ -118,7 +121,9 @@ class Framework:
             self._logger.info(f"Converting markdown to HTML: {green(html_file)}")
             with open(html_file, "w") as f:
                 with open(output_file, "r") as md_file:
-                    html_content = markdown.markdown(md_file.read(), extensions=["tables", "fenced_code", "toc", "md_in_html"])
+                    html_content = markdown.markdown(
+                        md_file.read(), extensions=["tables", "fenced_code", "toc", "md_in_html"]
+                    )
                 # Load the template file
                 with open(template_file, "r") as tf:
                     template_content = tf.read()
