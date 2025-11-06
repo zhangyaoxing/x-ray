@@ -1,25 +1,6 @@
 {
     "makefile.configureOnOpen": false,
     "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
-    "python.linting.enabled": true,
-    "python.linting.lintOnSave": true,
-    "python.linting.pylintEnabled": true,
-    "python.linting.pylintPath": "${workspaceFolder}/.venv/bin/pylint",
-    "python.linting.pylintArgs": [
-        "--rcfile=${workspaceFolder}/.pylintrc"
-    ],
-    // Flake8 配置（可选，作为补充检查）
-    "python.linting.flake8Enabled": true,
-    "python.linting.flake8Path": "${workspaceFolder}/.venv/bin/flake8",
-    "python.linting.flake8Args": [
-        "--max-line-length=120",
-        "--select=E9,F63,F7,F82"
-    ],
-    "python.formatting.provider": "black",
-    "python.formatting.blackPath": "${workspaceFolder}/.venv/bin/black",
-    "python.formatting.blackArgs": [
-        "--line-length=120"
-    ],
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
         "source.organizeImports": "always"
@@ -53,7 +34,5 @@
         "editor.codeActionsOnSave": {
             "source.organizeImports": "always"
         }
-    },
-    // 触发完整项目检查的快捷方式
-    "tasks.autoDetect": "on"
+    }
 }
