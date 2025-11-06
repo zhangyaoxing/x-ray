@@ -1,6 +1,9 @@
 # x-ray
 
-[![Makefile CI](https://github.com/zhangyaoxing/x-ray/actions/workflows/makefile.yml/badge.svg)](https://github.com/zhangyaoxing/x-ray/actions/workflows/makefile.yml)
+[![Makefile](https://github.com/zhangyaoxing/x-ray/actions/workflows/makefile.yml/badge.svg)](https://github.com/zhangyaoxing/x-ray/actions/workflows/makefile.yml)
+[![Pylint](https://github.com/zhangyaoxing/x-ray/actions/workflows/pylint.yml/badge.svg)](https://github.com/zhangyaoxing/x-ray/actions/workflows/pylint.yml)
+[![CodeQL](https://github.com/zhangyaoxing/x-ray/actions/workflows/codeql.yml/badge.svg)](https://github.com/zhangyaoxing/x-ray/actions/workflows/codeql.yml)
+[![Release](https://github.com/zhangyaoxing/x-ray/actions/workflows/release.yml/badge.svg)](https://github.com/zhangyaoxing/x-ray/actions/workflows/release.yml)
 
 This project aims to create tools for MongoDB analysis and diagnosis. So far 2 modules are built:
 - Health check module.

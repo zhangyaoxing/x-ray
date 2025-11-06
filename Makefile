@@ -1,4 +1,4 @@
-.PHONY: all clean deps build test install dist init lint format check-lint
+.PHONY: all clean deps build test install dist init lint format check-lint flake8
 
 # Project name
 PROJECT_NAME = x-ray
@@ -71,6 +71,12 @@ check-lint:
 	$(PYTHON) -m pylint libs/ x-ray --rcfile=.pylintrc --errors-only
 	@echo "\033[32m✓ No errors found!\033[0m"
 
+# Run flake8 for syntax errors
+flake8:
+	@echo "Running flake8 (syntax errors only)..."
+	$(PYTHON) -m flake8 libs/ x-ray --select=E9,F63,F7,F82 --show-source --statistics
+	@echo "\033[32m✓ No syntax errors!\033[0m"
+
 # Format code with black
 format:
 	@echo "Formatting code with black..."
@@ -78,15 +84,15 @@ format:
 	@echo "\033[32m✓ Code formatted!\033[0m"
 
 # Check formatting without making changes
-format-check:
+check-format:
 	@echo "Checking code format..."
 	$(PYTHON) -m black libs/ x-ray tests/ --line-length=120 --check
 	@echo "\033[32m✓ Code format is correct!\033[0m"
 
 # Run all quality checks
-check: format-check lint test
+check: check-format check-lint flake8 test
 	@echo "\033[32m✓ All checks passed!\033[0m"
-	
+
 # Clean build artifacts
 clean:
 	@echo "Cleaning build artifacts..."
@@ -106,12 +112,13 @@ help:
 	@echo "  make build        - Build executable (default: lightweight version without AI)"
 	@echo "  make build-lite   - Build lightweight executable without AI support (~15MB)"
 	@echo "  make build-ai     - *Experimental* Build full executable with AI libraries (~2GB, models downloaded separately)"
-	@echo "  make check        - Run all tests"
+	@echo "  make test         - Run all tests"
 	@echo "  make lint         - Run pylint on code"
 	@echo "  make check-lint   - Run pylint (errors only)"
+	@echo "  make flake8       - Run flake8 (syntax errors only)"
 	@echo "  make format       - Format code with black"
 	@echo "  make format-check - Check code formatting without changes"
-	@echo "  make qa           - Run all quality checks (format + lint + test)"
+	@echo "  make check        - Run all quality checks (format + lint + flake8 + test)"
 	@echo "  make clean        - Clean build artifacts"
 	@echo "  make all          - Install dependencies and build executable"
 	@echo "  make help         - Display this help information"
@@ -123,12 +130,13 @@ help:
 	@echo "Quality checks:"
 	@echo "  make lint         - Full pylint analysis with warnings"
 	@echo "  make check-lint   - Quick check (errors only)"
+	@echo "  make flake8       - Flake8 syntax error check"
 	@echo "  make format       - Auto-format code"
-	@echo "  make qa           - Run all checks (recommended before commit)"
+	@echo "  make check        - Run all checks (recommended before commit)"
 	@echo ""
 	@echo "Examples:"
 	@echo "  make deps       - First-time setup in a new environment"
 	@echo "  make build      - Build without AI (recommended for distribution)"
 	@echo "  make build-ai   - Build with AI support (for local AI analysis)"
-	@echo "  make qa         - Run all quality checks before committing"
+	@echo "  make check      - Run all quality checks before committing"
 	@echo "  make clean      - Clean build artifacts"
