@@ -17,8 +17,14 @@ jobs:
     - name: Install dependencies
       run: make deps
 
-    - name: Run check
-      run: make check
+    - name: Check code format
+      run: make format-check
 
-    - name: Run build
+    - name: Lint with pylint
+      run: make check-lint
+
+    - name: Run tests
+      run: make test
+
+    - name: Build executable
       run: make build
