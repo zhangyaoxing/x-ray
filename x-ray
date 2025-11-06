@@ -26,12 +26,24 @@ For more information on specific commands, use:
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
 
-    parser.add_argument("-q", "--quiet", help='Quiet mode. Defaults to "false".', action="store_true", default=False)
     parser.add_argument(
-        "-c", "--config", help='Path to configuration file. Defaults to "config.json".', type=str, default="config.json"
+        "-q",
+        "--quiet",
+        help='Quiet mode. Defaults to "false".',
+        action="store_true",
+        default=False,
+    )
+    parser.add_argument(
+        "-c",
+        "--config",
+        help='Path to configuration file. Defaults to "config.json".',
+        type=str,
+        default="config.json",
     )
 
-    subparsers = parser.add_subparsers(dest="command", help="Command to execute", required=True)
+    subparsers = parser.add_subparsers(
+        dest="command", help="Command to execute", required=True
+    )
 
     # Health check module
     hc_description = """
@@ -55,13 +67,24 @@ For more information on specific commands, use:
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     hc_parser.add_argument(
-        "uri", nargs="?", help="MongoDB database URI. If not provided, you will be prompted to enter it.", type=str
+        "uri",
+        nargs="?",
+        help="MongoDB database URI. If not provided, you will be prompted to enter it.",
+        type=str,
     )
     hc_parser.add_argument(
-        "-s", "--checkset", help='Checkset to run. Defaults to "default".', type=str, default="default"
+        "-s",
+        "--checkset",
+        help='Checkset to run. Defaults to "default".',
+        type=str,
+        default="default",
     )
     hc_parser.add_argument(
-        "-o", "--output", help='Output folder path. Defaults to "output/".', type=str, default="output/"
+        "-o",
+        "--output",
+        help='Output folder path. Defaults to "output/".',
+        type=str,
+        default="output/",
     )
     hc_parser.add_argument(
         "-f",
@@ -101,10 +124,18 @@ For more information on specific commands, use:
     )
     log_parser.add_argument("log_file", help="Path to the MongoDB log file to analyze")
     log_parser.add_argument(
-        "-s", "--checkset", help='Checkset to run. Defaults to "default".', type=str, default="default"
+        "-s",
+        "--checkset",
+        help='Checkset to run. Defaults to "default".',
+        type=str,
+        default="default",
     )
     log_parser.add_argument(
-        "-o", "--output", help='Output folder path. Defaults to "output/".', type=str, default="output/"
+        "-o",
+        "--output",
+        help='Output folder path. Defaults to "output/".',
+        type=str,
+        default="output/",
     )
     log_parser.add_argument(
         "-f",
@@ -121,7 +152,9 @@ For more information on specific commands, use:
         type=float,
         default=1.0,
     )
-    log_parser.add_argument("--top", help="Top N slow queries. Defaults to 10.", type=int, default=10)
+    log_parser.add_argument(
+        "--top", help="Top N slow queries. Defaults to 10.", type=int, default=10
+    )
 
     return parser
 
@@ -149,14 +182,18 @@ def health_check_command(args):
         config = load_config(args.config)["healthcheck"]
     except FileNotFoundError:
         logger.error("Config file not found: %s", args.config)
-        logger.info("Please provide a valid path to config.json using the -c/--config argument")
+        logger.info(
+            "Please provide a valid path to config.json using the -c/--config argument"
+        )
         return 1
 
     checkset = args.checkset
     output_folder = args.output if args.output.endswith("/") else f"{args.output}/"
     framework = HealthCheckFramework(config)
-    framework.run_checks(checkset, client=client, output_folder=output_folder, parsed_uri=parsed_uri)
-    framework.output_results(output_folder=output_folder, format=args.format)
+    framework.run_checks(
+        checkset, client=client, output_folder=output_folder, parsed_uri=parsed_uri
+    )
+    framework.output_results(output_folder=output_folder, fmt=args.format)
     return 0
 
 
@@ -169,14 +206,16 @@ def log_analysis_command(args):
         config["item_config"]["TopSlowItem"]["top"] = args.top
     except FileNotFoundError:
         logger.error("Config file not found: %s", args.config)
-        logger.info("Please provide a valid path to config.json using the -c/--config argument")
+        logger.info(
+            "Please provide a valid path to config.json using the -c/--config argument"
+        )
         return 1
 
     checkset = args.checkset
     output_folder = args.output if args.output.endswith("/") else f"{args.output}/"
     framework = LogAnalysisFramework(args.log_file, config)
     framework.run_logs_analysis(checkset, output_folder=output_folder)
-    framework.output_results(output_folder=output_folder, format=args.format)
+    framework.output_results(output_folder=output_folder, fmt=args.format)
     return 0
 
 
@@ -191,11 +230,10 @@ def main():
     # Dispatch to different handler functions based on subcommand
     if args.command in ["healthcheck", "hc"]:
         return health_check_command(args)
-    elif args.command == "log":
+    if args.command == "log":
         return log_analysis_command(args)
-    else:
-        logger.error("Unknown command: %s", args.command)
-        return 1
+    logger.error("Unknown command: %s", args.command)
+    return 1
 
 
 if __name__ == "__main__":
