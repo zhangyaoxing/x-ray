@@ -1,5 +1,10 @@
 from libs.healthcheck.check_items.base_item import BaseItem
-from libs.healthcheck.shared import SEVERITY, discover_nodes, enum_all_nodes, enum_result_items
+from libs.healthcheck.shared import (
+    SEVERITY,
+    discover_nodes,
+    enum_all_nodes,
+    enum_result_items,
+)
 from libs.utils import format_size, escape_markdown, format_json_md
 
 
@@ -8,7 +13,9 @@ class ShardKeyItem(BaseItem):
         super().__init__(output_folder, config)
         self._name = "Shard Key Information"
         self._description = "Collects and reviews shard key configuration for collections in a sharded cluster.\n\n"
-        self._description += "- Whether the shard key is set to `{_id: 1}` or `{_id: -1}`.\n"
+        self._description += (
+            "- Whether the shard key is set to `{_id: 1}` or `{_id: -1}`.\n"
+        )
         self._description += "- Whether collections are imbalanced."
 
     def test(self, *args, **kwargs):
@@ -25,7 +32,11 @@ class ShardKeyItem(BaseItem):
         def func_sh_cluster(name, node, **kwargs):
             client = node["client"]
             imbalance_percentage = self._config["sharding_imbalance_percentage"]
-            collections = list(client.config.collections.find({"_id": {"$ne": "config.system.sessions"}}))
+            collections = list(
+                client.config.collections.find(
+                    {"_id": {"$ne": "config.system.sessions"}}
+                )
+            )
             shards = [doc["_id"] for doc in client.config.shards.find()]
             test_result = []
             raw_result = {"shardedCollections": collections, "stats": {}}
@@ -34,7 +45,7 @@ class ShardKeyItem(BaseItem):
                 ns = c["_id"]
                 key = c["key"]
                 v = key.get("_id", None)
-                if (v == 1 or v == -1) and len(key.keys()) == 1:
+                if v in [-1, 1] and len(key.keys()) == 1:
                     test_result.append(
                         {
                             "host": "cluster",
@@ -59,7 +70,9 @@ class ShardKeyItem(BaseItem):
                 }
                 raw_result["stats"][ns] = shard_stats
                 # Check if collection is imbalanced.
-                sizes = [shard_stats.get(s_name, {}).get("size", 0) for s_name in shards]
+                sizes = [
+                    shard_stats.get(s_name, {}).get("size", 0) for s_name in shards
+                ]
                 max_size = max(sizes)
                 min_size = min(sizes)
                 if max_size > min_size * (1 + imbalance_percentage):
@@ -85,7 +98,7 @@ class ShardKeyItem(BaseItem):
             return {"name": self.name, "description": self.description, "data": []}
         table = {
             "type": "table",
-            "caption": f"Shard Keys",
+            "caption": "Shard Keys",
             "columns": [
                 {"name": "Namespace", "type": "string"},
                 {"name": "Shard Key", "type": "string"},
@@ -111,19 +124,31 @@ class ShardKeyItem(BaseItem):
                 stats = all_stats.get(ns, {})
                 data_size = sum(s["size"] for s in stats.values())
                 data_size_detail = "<br/>".join(
-                    [f"{escape_markdown(s_name)}: {format_size(s['size'])}" for s_name, s in stats.items()]
+                    [
+                        f"{escape_markdown(s_name)}: {format_size(s['size'])}"
+                        for s_name, s in stats.items()
+                    ]
                 )
                 storage_size = sum(s["storageSize"] for s in stats.values())
                 storage_size_detail = "<br/>".join(
-                    [f"{escape_markdown(s_name)}: {format_size(s['storageSize'])}" for s_name, s in stats.items()]
+                    [
+                        f"{escape_markdown(s_name)}: {format_size(s['storageSize'])}"
+                        for s_name, s in stats.items()
+                    ]
                 )
                 index_size = sum(s["totalIndexSize"] for s in stats.values())
                 index_size_detail = "<br/>".join(
-                    [f"{escape_markdown(s_name)}: {format_size(s['totalIndexSize'])}" for s_name, s in stats.items()]
+                    [
+                        f"{escape_markdown(s_name)}: {format_size(s['totalIndexSize'])}"
+                        for s_name, s in stats.items()
+                    ]
                 )
                 docs_count = sum(s["count"] for s in stats.values())
                 docs_count_detail = "<br/>".join(
-                    [f"{escape_markdown(s_name)}: {s['count']}" for s_name, s in stats.items()]
+                    [
+                        f"{escape_markdown(s_name)}: {s['count']}"
+                        for s_name, s in stats.items()
+                    ]
                 )
                 table["rows"].append(
                     [

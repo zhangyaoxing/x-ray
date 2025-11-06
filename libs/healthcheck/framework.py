@@ -1,11 +1,16 @@
+"""
+Framework for running health check items and generating reports.
+"""
+
 from datetime import datetime, timezone
 import re
-from libs.healthcheck.shared import str_to_md_id, irresponsive_nodes
-from libs.utils import *
 import logging
-import importlib
-import pkgutil
+from pathlib import Path
+
 import markdown
+
+from libs.healthcheck.shared import str_to_md_id, irresponsive_nodes
+from libs.utils import load_classes, get_script_path, yellow, bold, green, env
 
 CHECKLIST_CLASSES = load_classes("libs.healthcheck.check_items")
 
@@ -16,7 +21,7 @@ class Framework:
         self._logger = logging.getLogger(__name__)
         self._items = []
         now = str(datetime.now(tz=timezone.utc))
-        self._timestamp = re.sub(r"[:\- ]", "", now.split(".")[0])
+        self._timestamp = re.sub(r"[:\- ]", "", now.split(".", maxsplit=1)[0])
 
     def _get_output_folder(self, output_folder: str):
         if env == "development":
@@ -35,11 +40,13 @@ class Framework:
         checksets = self._config.get("checksets", {})
         if not checkset_name in checksets:
             self._logger.warning(
-                yellow(f"Checkset '{checkset_name}' not found in configuration. Using default checkset.")
+                yellow(
+                    f"Checkset '{checkset_name}' not found in configuration. Using default checkset."
+                )
             )
             checkset_name = "default"
         cs = checksets[checkset_name]
-        self._logger.info(f"Running checkset: {bold(green(checkset_name))}")
+        self._logger.info("Running checkset: %s", bold(green(checkset_name)))
 
         # The information gathered can be huge sometimes, we always save the information to the file immediately after using.
         # The test result, however, will be kept in memory until the end of the run.
@@ -47,28 +54,32 @@ class Framework:
         for item_name in cs.get("items", []):
             item_cls = CHECKLIST_CLASSES.get(item_name)
             if not item_cls:
-                self._logger.warning(yellow(f"Check item '{item_name}' not found. Skipping."))
+                self._logger.warning(
+                    yellow(f"Check item '{item_name}' not found. Skipping.")
+                )
                 continue
             # The config for the item can be specified in the `item_config` section, under the item class name.
             item_config = self._config.get("item_config", {}).get(item_name, {})
             item = item_cls(batch_folder, item_config)
-            self._logger.info(f"Running check item: {bold(green(item.name))}")
+            self._logger.info("Running check item: %s", bold(green(item.name)))
             item.test(**kwargs)
             self._items.append(item)
 
-    def output_results(self, output_folder: str = "output/", format: str = "html"):
+    def output_results(self, output_folder: str = "output/", fmt: str = "html"):
         # output the results to a markdown file
         batch_folder = self._get_output_folder(output_folder)
         output_file = f"{batch_folder}report.md"
-        template_file = get_script_path(f"templates/{self._config.get('template', 'healthcheck/full.html')}")
-        self._logger.info(f"Saving results to: {green(output_file)}")
+        template_file = get_script_path(
+            f"templates/{self._config.get('template', 'healthcheck/full.html')}"
+        )
+        self._logger.info("Saving results to: %s", green(output_file))
 
-        with open(output_file, "w") as f:
+        with open(output_file, "w", encoding="utf-8") as f:
             f.write("# Deployment Health Check\n\n")
             # Display irresponsive nodes
             f.write("## 0 Overview\n\n")
             f.write(
-                f"|<span style='color: red;'>HIGH</span>|<span style='color: orange;'>MEDIUM</span>|<span style='color: green;'>LOW</span>|<span style='color: gray;'>INFO</span>|\n"
+                "|<span style='color: red;'>HIGH</span>|<span style='color: orange;'>MEDIUM</span>|<span style='color: green;'>LOW</span>|<span style='color: gray;'>INFO</span>|\n"
             )
             f.write("|---|---|---|---|\n")
             all_test_result = []
@@ -81,7 +92,9 @@ class Framework:
             info_count = all_severity.count("INFO")
             f.write(f"|{high_count}|{medium_count}|{low_count}|{info_count}|\n\n")
             if len(irresponsive_nodes) > 0:
-                f.write("The following nodes have been detected as irresponsive during the checks:\n\n")
+                f.write(
+                    "The following nodes have been detected as irresponsive during the checks:\n\n"
+                )
                 for node in irresponsive_nodes:
                     f.write(f"- `{node['host']}`\n")
                 f.write(
@@ -106,16 +119,18 @@ class Framework:
                 f.write(f"[&larr; Review Test Results](#{title_id})\n\n")
                 f.write(item.review_result_markdown)
 
-        if format == "html":
+        if fmt == "html":
             html_file = f"{batch_folder}report.html"
-            self._logger.info(f"Converting results to HTML format and saving to: {green(html_file)}")
-            with open(html_file, "w") as f:
-                with open(output_file, "r") as md_file:
+            self._logger.info(
+                "Converting results to HTML format and saving to: %s", green(html_file)
+            )
+            with open(html_file, "w", encoding="utf-8") as f:
+                with open(output_file, "r", encoding="utf-8") as md_file:
                     md_text = md_file.read()
                 html = markdown.markdown(md_text, extensions=["tables", "toc"])
                 html = self._compact_html(html)
 
-                with open(template_file, "r") as template:
+                with open(template_file, "r", encoding="utf-8") as template:
                     template_content = template.read()
                     html = template_content.replace("{{ content }}", html)
                 f.write(html)

@@ -1,11 +1,12 @@
 from datetime import datetime, timezone
 import random
 import re
-from libs.healthcheck.shared import to_json
-from libs.utils import *
+from pathlib import Path
 import logging
 import markdown
 from bson import json_util
+from libs.healthcheck.shared import to_json
+from libs.utils import load_classes, bold, green, yellow, cyan, get_script_path, env
 
 logger = logging.getLogger(__name__)
 LOG_CLASSES = load_classes("libs.log_analysis.log_items")
@@ -18,7 +19,7 @@ class Framework:
         self._logger = logging.getLogger(__name__)
         self._items = []
         now = str(datetime.now(tz=timezone.utc))
-        self._timestamp = re.sub(r"[:\- ]", "", now.split(".")[0])
+        self._timestamp = re.sub(r"[:\- ]", "", now.split(".", maxsplit=1)[0])
         self._logger.debug(to_json(self._config))
         self._log_start = None
         self._log_end = None
@@ -42,7 +43,9 @@ class Framework:
         logsets = self._config.get("logsets", {})
         if not logset_name in logsets:
             self._logger.warning(
-                yellow(f"Log checkset '{logset_name}' not found in configuration. Using default logset.")
+                yellow(
+                    f"Log checkset '{logset_name}' not found in configuration. Using default logset."
+                )
             )
             logset_name = "default"
         ls = logsets[logset_name]
@@ -52,7 +55,9 @@ class Framework:
         for item_name in ls.get("items", []):
             item_cls = LOG_CLASSES.get(item_name)
             if not item_cls:
-                self._logger.warning(yellow(f"Log item '{item_name}' not found. Skipping."))
+                self._logger.warning(
+                    yellow(f"Log item '{item_name}' not found. Skipping.")
+                )
                 continue
             # The config for the item can be specified in the `item_config` section, under the item class name.
             item_config = self._config.get("item_config", {}).get(item_name, {})
@@ -80,30 +85,40 @@ class Framework:
                         try:
                             item.analyze(log_line)
                         except Exception as e:
-                            self._logger.warning(yellow(f"Log analysis item '{item.name}' failed: {e}"))
+                            self._logger.warning(
+                                yellow(f"Log analysis item '{item.name}' failed: {e}")
+                            )
                             continue
                 except Exception as e:
-                    self._logger.warning(yellow(f"Failed to parse log line as JSON: {line.strip()}"))
+                    self._logger.warning(
+                        yellow(f"Failed to parse log line as JSON: {line.strip()}")
+                    )
                     continue
         self._log_end = log_line.get("t", None) if log_line else None
         for item in self._items:
             try:
                 item.finalize_analysis()
             except Exception as e:
-                self._logger.warning(yellow(f"Log analysis item '{item.name}' finalize failed: {e}"))
+                self._logger.warning(
+                    yellow(f"Log analysis item '{item.name}' finalize failed: {e}")
+                )
                 continue
 
     def output_results(self, output_folder: str = "output/", format: str = "html"):
         batch_folder = self._get_output_folder(output_folder)
         output_file = f"{batch_folder}report.md"
-        template_file = get_script_path(f"templates/{self._config.get('template', 'log/full.html')}")
+        template_file = get_script_path(
+            f"templates/{self._config.get('template', 'log/full.html')}"
+        )
         self._logger.info(f"Saving results to: {green(output_file)}")
 
         with open(output_file, "w") as f:
             f.write(f"# Log Analysis Report\n")
             f.write(f"Generated at: `{str(datetime.now(tz=timezone.utc))} UTC`\n\n")
             f.write(f"Log path: `{self._file_path}`\n\n")
-            f.write(f"Log analysis period: `{self._log_start.isoformat()}` to `{self._log_end.isoformat()}`\n\n")
+            f.write(
+                f"Log analysis period: `{self._log_start.isoformat()}` to `{self._log_end.isoformat()}`\n\n"
+            )
             f.write("Histogram chart instructions:\n\n")
             f.write("- **zoom in/out:** _mouse wheel or pinch_\n")
             f.write("- **pan:** _shift+drag_\n")
@@ -112,7 +127,11 @@ class Framework:
                 try:
                     item.review_results_markdown(f)
                 except Exception as e:
-                    self._logger.warning(yellow(f"Failed to generate markdown for log item '{item.name}': {e}"))
+                    self._logger.warning(
+                        yellow(
+                            f"Failed to generate markdown for log item '{item.name}': {e}"
+                        )
+                    )
                     continue
 
         if format == "html":
@@ -121,7 +140,8 @@ class Framework:
             with open(html_file, "w") as f:
                 with open(output_file, "r") as md_file:
                     html_content = markdown.markdown(
-                        md_file.read(), extensions=["tables", "fenced_code", "toc", "md_in_html"]
+                        md_file.read(),
+                        extensions=["tables", "fenced_code", "toc", "md_in_html"],
                     )
                 # Load the template file
                 with open(template_file, "r") as tf:

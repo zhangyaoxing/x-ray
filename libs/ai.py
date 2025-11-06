@@ -16,11 +16,13 @@ def detect_device():
 
         if torch.cuda.is_available():
             return "cuda"
-        elif getattr(torch.backends, "mps", None) and torch.backends.mps.is_available():
+        if getattr(torch.backends, "mps", None) and torch.backends.mps.is_available():
             return "mps"
         return "cpu"
     except ImportError:
-        logger.error("torch is not installed. Please install it with: pip install torch")
+        logger.error(
+            "torch is not installed. Please install it with: pip install torch"
+        )
         raise
 
 
@@ -37,7 +39,9 @@ def load_model(model_name):
     logger.info("Using device: %s", green(device))
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     model = AutoModelForCausalLM.from_pretrained(
-        model_name, device_map="auto", dtype=torch.float16 if device != "cpu" else torch.float32
+        model_name,
+        device_map="auto",
+        dtype=torch.float16 if device != "cpu" else torch.float32,
     )
     model.eval()
     gen_config = GenerationConfig(
@@ -53,7 +57,9 @@ def analyze_log_line_local(log_line, tokenizer, model, gen_config):
     prompt = f"Analyze this MongoDB log message and give me the shortest answer: {str(log_line['msg'])}".strip()
     inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
     outputs = model.generate(**inputs, generation_config=gen_config)
-    text = tokenizer.decode(outputs[0][inputs["input_ids"].shape[1] :], skip_special_tokens=True).strip()
+    text = tokenizer.decode(
+        outputs[0][inputs["input_ids"].shape[1] :], skip_special_tokens=True
+    ).strip()
 
     return text
 

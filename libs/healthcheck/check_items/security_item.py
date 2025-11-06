@@ -1,7 +1,16 @@
-from pymongo import MongoClient
+"""
+This module defines a checklist item for collecting and reviewing security-related information in MongoDB.
+"""
+
 from libs.healthcheck.check_items.base_item import BaseItem
-from libs.healthcheck.shared import *
-from libs.utils import *
+from libs.healthcheck.shared import (
+    MAX_MONGOS_PING_LATENCY,
+    discover_nodes,
+    enum_all_nodes,
+    enum_result_items,
+    SEVERITY,
+)
+from libs.utils import yellow, escape_markdown
 
 
 class SecurityItem(BaseItem):
@@ -26,7 +35,10 @@ class SecurityItem(BaseItem):
         def func_node(name, node, **kwargs):
             client = node["client"]
             host = node["host"]
-            if "pingLatencySec" in node and node["pingLatencySec"] > MAX_MONGOS_PING_LATENCY:
+            if (
+                "pingLatencySec" in node
+                and node["pingLatencySec"] > MAX_MONGOS_PING_LATENCY
+            ):
                 self._logger.warning(
                     yellow(
                         f"Skip {host} because it has been irresponsive for {node['pingLatencySec'] / 60:.2f} minutes."
@@ -46,7 +58,11 @@ class SecurityItem(BaseItem):
             bind_ip = net.get("bindIp", "127.0.0.1")
             port = net.get("port", None)
             tls_enabled = net.get("tls", {}).get("mode", None)
-            audit = "enabled" if audit_log.get("destination", None) is not None else "disabled"
+            audit = (
+                "enabled"
+                if audit_log.get("destination", None) is not None
+                else "disabled"
+            )
             if authorization != "enabled":
                 test_result.append(
                     {
@@ -56,7 +72,7 @@ class SecurityItem(BaseItem):
                         "description": "Authorization is disabled, which may lead to unauthorized access.",
                     }
                 )
-            if redact_logs != True:
+            if not redact_logs:
                 test_result.append(
                     {
                         "host": host,
@@ -130,7 +146,7 @@ class SecurityItem(BaseItem):
         raw_result = self.captured_sample
         table = {
             "type": "table",
-            "caption": f"Security Information",
+            "caption": "Security Information",
             "columns": [
                 {"name": "Component", "type": "string"},
                 {"name": "Host", "type": "string"},
@@ -149,7 +165,19 @@ class SecurityItem(BaseItem):
             raw_result = node["rawResult"]
             host = node["host"]
             if raw_result is None:
-                table["rows"].append([escape_markdown(name), host, "n/a", "n/a", "n/a", "n/a", "n/a", "n/a", "n/a"])
+                table["rows"].append(
+                    [
+                        escape_markdown(name),
+                        host,
+                        "n/a",
+                        "n/a",
+                        "n/a",
+                        "n/a",
+                        "n/a",
+                        "n/a",
+                        "n/a",
+                    ]
+                )
                 return
 
             parsed = raw_result.get("parsed", {})
@@ -163,7 +191,11 @@ class SecurityItem(BaseItem):
             eat = security.get("enableEncryption", "false")
             bind_ip = net.get("bindIp", "127.0.0.1")
             cluster_auth = security.get("clusterAuthMode", "disabled")
-            audit = "enabled" if audit_log.get("destination", None) is not None else "disabled"
+            audit = (
+                "enabled"
+                if audit_log.get("destination", None) is not None
+                else "disabled"
+            )
             table["rows"].append(
                 [
                     escape_markdown(name),
