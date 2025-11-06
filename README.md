@@ -40,7 +40,7 @@ You can also build the tool with AI modules for log analysis. For more details r
 ```bash
 x-ray [-h] [-q] [-c CONFIG] {healthcheck,hc,log}
 ```
-|     Argument     |                                          Description                                           |        Default         |
+| Argument         | Description                                                                                    |        Default         |
 | ---------------- | ---------------------------------------------------------------------------------------------- | :--------------------: |
 | `-q`, `--quiet`  | Quiet mode.                                                                                    |        `false`         |
 | `-h`, `--help`   | Show the help message and exit.                                                                |          n/a           |
@@ -52,7 +52,7 @@ Besides, you can use environment variables to control some behaviors:
   - Formatted the output JSON for for easier reading.
   - The output will not create a new folder for each run but overwrite the same files.
 - `LOG_LEVEL`: Can be `DEBUG`, `ERROR` or `INFO` (default).
-- 
+
 ### 3.1 Health Check Component
 #### 3.1.1 Examples
 ```bash
@@ -65,7 +65,7 @@ Besides, you can use environment variables to control some behaviors:
 ```bash
 x-ray healthcheck [-h] [-s CHECKSET] [-o OUTPUT] [-f {markdown,html}] [uri]
 ```
-|      Argument      |                 Description                 |  Default  |
+| Argument           | Description                                 |  Default  |
 | ------------------ | ------------------------------------------- | :-------: |
 | `-s`, `--checkset` | Checkset to run.                            | `default` |
 | `-o`, `--output`   | Output folder path.                         | `output/` |
@@ -96,7 +96,7 @@ Refer to the wiki for more details.
 ```bash
 x-ray log [-h] [-s CHECKSET] [-o OUTPUT] [-f {markdown,html}] [log_file]
 ```
-|      Argument      |                    Description                    |  Default  |
+| Argument           | Description                                       |  Default  |
 | ------------------ | ------------------------------------------------- | :-------: |
 | `-s`, `--checkset` | Checkset to run.                                  | `default` |
 | `-o`, `--output`   | Output folder path.                               | `output/` |
