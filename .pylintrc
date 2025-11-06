@@ -18,6 +18,7 @@ disable=
     R0914,  # too-many-locals
     R0915,  # too-many-statements
     W0212,  # protected-access
+    W0511,  # fixme
     W0611,  # unused-import
     W0613,  # unused-argument
     W0718,  # broad-exception-caught
