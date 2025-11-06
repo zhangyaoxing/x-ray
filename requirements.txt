@@ -58,5 +58,5 @@ zipp==3.23.0
 
 # Development tools
 pylint==3.3.3
-black==25.1.0
+black==25.9.0
 flake8==7.3.0
