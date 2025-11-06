@@ -58,9 +58,7 @@ def _load_config():
                 if os.path.isfile(config_path):
                     with open(config_path, "r", encoding="utf-8") as f:
                         config = json.load(f)
-                    logger.info(
-                        "Loaded config from user-provided path: %s", config_path
-                    )
+                    logger.info("Loaded config from user-provided path: %s", config_path)
                     return config
 
                 # Then try to load from the script path
@@ -68,9 +66,7 @@ def _load_config():
                 if os.path.isfile(script_config_path):
                     with open(script_config_path, "r", encoding="utf-8") as f:
                         config = json.load(f)
-                    logger.info(
-                        "Loaded config from script path: %s", script_config_path
-                    )
+                    logger.info("Loaded config from script path: %s", script_config_path)
                     return config
 
                 # Finally, try current working directory
@@ -78,9 +74,7 @@ def _load_config():
                 if os.path.isfile(cwd_config_path):
                     with open(cwd_config_path, "r", encoding="utf-8") as f:
                         config = json.load(f)
-                    logger.info(
-                        "Loaded config from current directory: %s", cwd_config_path
-                    )
+                    logger.info("Loaded config from current directory: %s", cwd_config_path)
                     return config
 
                 # If all fails, raise an error
@@ -181,9 +175,7 @@ def format_json_md(json_data, **kwargs):
         kwargs["indent"] = None
         json_str = to_ejson(json_data, **kwargs)
     else:
-        json_str = (
-            to_ejson(json_data, **kwargs).replace(" ", "&nbsp;").replace("\n", "<br>")
-        )
+        json_str = to_ejson(json_data, **kwargs).replace(" ", "&nbsp;").replace("\n", "<br>")
     return json_str
 
 
@@ -207,9 +199,7 @@ def to_ejson(obj, **kwargs):
     # Must use json.dumps because bson.json_util.dumps has its own serializer behavior,
     # and won't always call our custom_serializer.
     # It only calls when the object is not serializable by default.
-    return json.dumps(
-        obj, indent=indent, separators=separators, default=custom_serializer
-    )
+    return json.dumps(obj, indent=indent, separators=separators, default=custom_serializer)
 
 
 def json_hash(data, digest_size=8):

@@ -41,9 +41,7 @@ For more information on specific commands, use:
         default="config.json",
     )
 
-    subparsers = parser.add_subparsers(
-        dest="command", help="Command to execute", required=True
-    )
+    subparsers = parser.add_subparsers(dest="command", help="Command to execute", required=True)
 
     # Health check module
     hc_description = """
@@ -152,9 +150,7 @@ For more information on specific commands, use:
         type=float,
         default=1.0,
     )
-    log_parser.add_argument(
-        "--top", help="Top N slow queries. Defaults to 10.", type=int, default=10
-    )
+    log_parser.add_argument("--top", help="Top N slow queries. Defaults to 10.", type=int, default=10)
 
     return parser
 
@@ -182,17 +178,13 @@ def health_check_command(args):
         config = load_config(args.config)["healthcheck"]
     except FileNotFoundError:
         logger.error("Config file not found: %s", args.config)
-        logger.info(
-            "Please provide a valid path to config.json using the -c/--config argument"
-        )
+        logger.info("Please provide a valid path to config.json using the -c/--config argument")
         return 1
 
     checkset = args.checkset
     output_folder = args.output if args.output.endswith("/") else f"{args.output}/"
     framework = HealthCheckFramework(config)
-    framework.run_checks(
-        checkset, client=client, output_folder=output_folder, parsed_uri=parsed_uri
-    )
+    framework.run_checks(checkset, client=client, output_folder=output_folder, parsed_uri=parsed_uri)
     framework.output_results(output_folder=output_folder, fmt=args.format)
     return 0
 
@@ -206,9 +198,7 @@ def log_analysis_command(args):
         config["item_config"]["TopSlowItem"]["top"] = args.top
     except FileNotFoundError:
         logger.error("Config file not found: %s", args.config)
-        logger.info(
-            "Please provide a valid path to config.json using the -c/--config argument"
-        )
+        logger.info("Please provide a valid path to config.json using the -c/--config argument")
         return 1
 
     checkset = args.checkset

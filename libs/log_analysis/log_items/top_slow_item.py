@@ -15,9 +15,7 @@ class TopSlowItem(BaseItem):
         super().__init__(output_folder, config)
         self._top_n = config.get("top", 10)
         self.name = "Top Slow Operations"
-        self.description = (
-            f"Identify the top `{self._top_n}` slowest operations from the log entries."
-        )
+        self.description = f"Identify the top `{self._top_n}` slowest operations from the log entries."
         self._show_scaler = False
         self._cache = {}
 
@@ -28,11 +26,7 @@ class TopSlowItem(BaseItem):
         attr = log_line.get("attr", {})
         ns = attr.get("ns", "")
         # Skip system namespaces
-        if (
-            ns.startswith("admin.")
-            or ns.startswith("local.")
-            or ns.startswith("config.")
-        ):
+        if ns.startswith("admin.") or ns.startswith("local.") or ns.startswith("config."):
             return
         duration = attr.get("durationMillis", 0)
         has_sort = attr.get("hasSortStage", False)
@@ -60,25 +54,15 @@ class TopSlowItem(BaseItem):
                 "n_returned": slow_query.get("n_returned", 0) + n_returned,
                 "keys_examined": slow_query.get("keys_examined", 0) + keys_examined,
                 "docs_examined": slow_query.get("docs_examined", 0) + docs_examined,
-                "plan_summary": (
-                    plan_summary
-                    if "plan_summary" not in slow_query
-                    else slow_query["plan_summary"]
-                ),
+                "plan_summary": (plan_summary if "plan_summary" not in slow_query else slow_query["plan_summary"]),
                 "has_sort": has_sort or slow_query.get("has_sort", False),
                 "count": slow_query.get("count", 0) + 1,
-                "sample": (
-                    log_line if "sample" not in slow_query else slow_query["sample"]
-                ),
+                "sample": (log_line if "sample" not in slow_query else slow_query["sample"]),
             }
         )
 
     def finalize_analysis(self):
-        self._cache = list(
-            sorted(self._cache.values(), key=lambda item: item["count"], reverse=True)[
-                : self._top_n
-            ]
-        )
+        self._cache = list(sorted(self._cache.values(), key=lambda item: item["count"], reverse=True)[: self._top_n])
         # self._cache = list(sorted(self._cache.values(), key=lambda item: item["duration"], reverse=True)[:self._top_n])
         super().finalize_analysis()
 
@@ -105,16 +89,8 @@ class TopSlowItem(BaseItem):
                 keys_examined = line_json.get("keys_examined", 0)
                 docs_examined = line_json.get("docs_examined", 0)
                 has_sort = "Yes" if line_json.get("has_sort", False) else "No"
-                scanned_per_returned = (
-                    round(keys_examined / n_returned, 2)
-                    if n_returned > 0
-                    else keys_examined
-                )
-                scannedobj_per_returned = (
-                    round(docs_examined / n_returned, 2)
-                    if n_returned > 0
-                    else docs_examined
-                )
+                scanned_per_returned = round(keys_examined / n_returned, 2) if n_returned > 0 else keys_examined
+                scannedobj_per_returned = round(docs_examined / n_returned, 2) if n_returned > 0 else docs_examined
                 details = {
                     "Total Duration (ms)": duration,
                     "Count": count,
@@ -124,9 +100,7 @@ class TopSlowItem(BaseItem):
                     "Has Sort": has_sort,
                 }
                 plan_summary = line_json.get("plan_summary", "N/A")
-                plan_summary = escape_markdown(
-                    plan_summary if plan_summary != "" else "N/A"
-                )
+                plan_summary = escape_markdown(plan_summary if plan_summary != "" else "N/A")
                 cols = [
                     f"[{query_hash}](#{i})",
                     f"`{op}` on `{ns}`",

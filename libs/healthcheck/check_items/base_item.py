@@ -26,13 +26,13 @@ TABLE_ALIGNMENT = {
 class BaseItem:
     def __init__(self, output_folder: str, config: dict = None):
         self._name = "BaseItem"
-        self._description = "Base item for checklist framework. If you see this, it means the item is not properly defined."
+        self._description = (
+            "Base item for checklist framework. If you see this, it means the item is not properly defined."
+        )
         self._config = config or {}
         self._test_result = []
         self._logger = logging.getLogger(self.__class__.__name__)
-        self._output_folder = (
-            output_folder if output_folder.endswith("/") else f"{output_folder}/"
-        )
+        self._output_folder = output_folder if output_folder.endswith("/") else f"{output_folder}/"
 
     @abstractmethod
     def test(self, *args, **kwargs):
@@ -99,13 +99,9 @@ class BaseItem:
             if chart_type == "table":
                 result += f"#### ({i + 1}) {caption}\n"
                 result += f"{notes}\n"
-                header = [
-                    col.get("name", "(NOT SET)") for col in block.get("columns", [])
-                ]
+                header = [col.get("name", "(NOT SET)") for col in block.get("columns", [])]
                 align = [
-                    TABLE_ALIGNMENT.get(
-                        col.get("align", "center"), TABLE_ALIGNMENT["center"]
-                    )
+                    TABLE_ALIGNMENT.get(col.get("align", "center"), TABLE_ALIGNMENT["center"])
                     for col in block.get("columns", [])
                 ]
                 result += f"|{'|'.join(header)}|\n"
@@ -119,9 +115,7 @@ class BaseItem:
                 result += f"<div class='{chart_type}'><canvas class='{chart_type}' id='{cid}'></canvas></div>"
                 result += "<script type='text/javascript'>\n"
                 result += f"  const canvas{cid} = document.getElementById('{cid}');\n"
-                result += (
-                    f"  const chart{cid} = new Chart(canvas{cid}, {to_json(block)});\n"
-                )
+                result += f"  const chart{cid} = new Chart(canvas{cid}, {to_json(block)});\n"
                 result += f"  charts.push(chart{cid});\n"
                 result += "</script>\n"
         return result
@@ -141,15 +135,9 @@ class BaseItem:
             return f"{self._output_folder}{self.__class__.__name__}_raw.json"
         return f"{self._output_folder}{self.__class__.__name__}_raw.json.gz"
 
-    def append_test_result(
-        self, host: str, severity: SEVERITY, title: str, message: str
-    ):
-        self._test_result.append(
-            {"host": host, "severity": severity, "title": title, "message": message}
-        )
+    def append_test_result(self, host: str, severity: SEVERITY, title: str, message: str):
+        self._test_result.append({"host": host, "severity": severity, "title": title, "message": message})
 
     def append_test_results(self, items: list):
         for item in items:
-            self.append_test_result(
-                item["host"], item["severity"], item["title"], item["description"]
-            )
+            self.append_test_result(item["host"], item["severity"], item["title"], item["description"])

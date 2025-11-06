@@ -16,9 +16,7 @@ class ClusterItem(BaseItem):
         super().__init__(output_folder, config)
         self._name = "Cluster Information"
         self._description = "Collects and reviews cluster configuration and status.\n\n"
-        self._description += (
-            "- The following items apply to replica set, shards and CSRS:\n"
-        )
+        self._description += "- The following items apply to replica set, shards and CSRS:\n"
         self._description += "    - Replication status check.\n"
         self._description += "    - Replication config check.\n"
         self._description += "    - Oplog window check (Both `oplogMinRetentionHours` and oplog size are considered).\n"
@@ -33,9 +31,7 @@ class ClusterItem(BaseItem):
         latency = node.get("pingLatencySec", 0)
         if latency > MAX_MONGOS_PING_LATENCY:
             self._logger.warning(
-                yellow(
-                    f"Skip {node['host']} because it has been irresponsive for {latency / 60:.2f} minutes."
-                )
+                yellow(f"Skip {node['host']} because it has been irresponsive for {latency / 60:.2f} minutes.")
             )
             return None, None
         test_result = []
@@ -113,23 +109,15 @@ class ClusterItem(BaseItem):
         latency = node.get("pingLatencySec", 0)
         if latency > MAX_MONGOS_PING_LATENCY:
             self._logger.warning(
-                yellow(
-                    f"Skip {node['host']} because it has been irresponsive for {latency / 60:.2f} minutes."
-                )
+                yellow(f"Skip {node['host']} because it has been irresponsive for {latency / 60:.2f} minutes.")
             )
             return None, None
         # Gather oplog information
         stats = client.local.command("collStats", "oplog.rs")
         server_status = client.admin.command("serverStatus")
-        configured_retention_hours = server_status.get("oplogTruncation", {}).get(
-            "oplogMinRetentionHours", 0
-        )
-        latest_oplog = list(client.local.oplog.rs.find().sort("$natural", -1).limit(1))[
-            0
-        ]["ts"]
-        earliest_oplog = list(
-            client.local.oplog.rs.find().sort("$natural", 1).limit(1)
-        )[0]["ts"]
+        configured_retention_hours = server_status.get("oplogTruncation", {}).get("oplogMinRetentionHours", 0)
+        latest_oplog = list(client.local.oplog.rs.find().sort("$natural", -1).limit(1))[0]["ts"]
+        earliest_oplog = list(client.local.oplog.rs.find().sort("$natural", 1).limit(1))[0]["ts"]
         delta = latest_oplog.time - earliest_oplog.time
         current_retention_hours = delta / 3600  # Convert seconds to hours
         oplog_window_threshold = self._config.get("oplog_window_hours", 48)
@@ -233,9 +221,7 @@ class ClusterItem(BaseItem):
                 mongos_details["rows"].append(["n/a", "n/a", "n/a"])
                 return
             component_names = result["map"].keys()
-            shards = sum(
-                1 for name in component_names if name not in ["mongos", "config"]
-            )
+            shards = sum(1 for name in component_names if name not in ["mongos", "config"])
             mongos = len(result["map"]["mongos"]["members"])
             active_mongos = 0
             for host, info in raw_result.items():
@@ -276,25 +262,18 @@ class ClusterItem(BaseItem):
                 else:
                     oplog_info[m["host"]] = {
                         "min_retention_hours": round(
-                            r_result.get("oplogInfo", {}).get(
-                                "oplogMinRetentionHours", 0
-                            ),
+                            r_result.get("oplogInfo", {}).get("oplogMinRetentionHours", 0),
                             2,
                         ),
                         "current_retention_hours": round(
-                            r_result.get("oplogInfo", {}).get(
-                                "currentRetentionHours", 0
-                            ),
+                            r_result.get("oplogInfo", {}).get("currentRetentionHours", 0),
                             2,
                         ),
                     }
 
             repl_status = result["rawResult"]["replsetStatus"]
             latest_optime = max(m["optime"]["ts"] for m in repl_status["members"])
-            member_delay = {
-                m["name"]: (latest_optime.time - m["optime"]["ts"].time)
-                for m in repl_status["members"]
-            }
+            member_delay = {m["name"]: (latest_optime.time - m["optime"]["ts"].time) for m in repl_status["members"]}
             table_details = {
                 "type": "table",
                 "caption": f"Component Details - `{set_name}`",
@@ -315,9 +294,7 @@ class ClusterItem(BaseItem):
             for m in members:
                 member_host = m["host"]
                 min_retention_hours = oplog_info[member_host]["min_retention_hours"]
-                current_retention_hours = oplog_info[member_host][
-                    "current_retention_hours"
-                ]
+                current_retention_hours = oplog_info[member_host]["current_retention_hours"]
                 if min_retention_hours in [0, "n/a"]:
                     retention_hours = current_retention_hours
                 else:
@@ -332,11 +309,7 @@ class ClusterItem(BaseItem):
                         m["priority"],
                         m["votes"],
                         m.get("secondaryDelaySecs", m.get("slaveDelay", 0)),
-                        (
-                            member_delay[member_host]
-                            if member_host in member_delay
-                            else "n/a"
-                        ),
+                        (member_delay[member_host] if member_host in member_delay else "n/a"),
                         retention_hours,
                     ]
                 )
@@ -358,9 +331,7 @@ def check_replset_status(replset_status, config):
     """
     result = []
     # Find primary in members
-    primary_member = next(
-        iter(m for m in replset_status["members"] if m["state"] == 1), None
-    )
+    primary_member = next(iter(m for m in replset_status["members"] if m["state"] == 1), None)
 
     if not primary_member:
         result.append(
@@ -424,11 +395,7 @@ def check_replset_config(replset_config, config):
     result = []
     set_name = replset_config["config"]["_id"]
     # Check number of voting members
-    voting_members = sum(
-        1
-        for member in replset_config["config"]["members"]
-        if member.get("votes", 0) > 0
-    )
+    voting_members = sum(1 for member in replset_config["config"]["members"] if member.get("votes", 0) > 0)
     if voting_members < 3:
         result.append(
             {

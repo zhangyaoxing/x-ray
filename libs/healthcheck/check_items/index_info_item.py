@@ -19,13 +19,9 @@ class IndexInfoItem(BaseItem):
         super().__init__(output_folder, config)
         self._name = "Index Information"
         self._description = "Collects & review index statistics.\n\n"
-        self._description += (
-            "- Whether the number of indexes in the collection is too many.\n"
-        )
+        self._description += "- Whether the number of indexes in the collection is too many.\n"
         self._description += "- Whether there are unused indexes in the collection.\n"
-        self._description += (
-            "- Whether there are redundant indexes in the collection.\n"
-        )
+        self._description += "- Whether there are redundant indexes in the collection.\n"
 
     def _num_indexes_check(self, ns, index_stats, max_num_indexes, host):
         """Check for the number of indexes in the collection."""
@@ -94,10 +90,7 @@ class IndexInfoItem(BaseItem):
         reverse_indexes = []
         for index in indexes:
             reverse_index = {k: v for k, v in index.items() if k != "key"}
-            reverse_index["key"] = {
-                k: (v * -1 if isinstance(v, (int, float)) else v)
-                for k, v in index["key"].items()
-            }
+            reverse_index["key"] = {k: (v * -1 if isinstance(v, (int, float)) else v) for k, v in index["key"].items()}
             reverse_indexes.append(reverse_index)
         index_targets = indexes + reverse_indexes
         for index in indexes:
@@ -138,9 +131,7 @@ class IndexInfoItem(BaseItem):
             latency = node.get("pingLatencySec", 0)
             if latency > MAX_MONGOS_PING_LATENCY:
                 self._logger.warning(
-                    yellow(
-                        f"Skip {node['host']} because it has been irresponsive for {latency / 60:.2f} minutes."
-                    )
+                    yellow(f"Skip {node['host']} because it has been irresponsive for {latency / 60:.2f} minutes.")
                 )
                 return None, None
             dbs = client.admin.command("listDatabases").get("databases", [])
@@ -165,9 +156,7 @@ class IndexInfoItem(BaseItem):
                         )
                         continue
                     if coll_name.startswith("system."):
-                        self._logger.debug(
-                            "Skipping system collection: %s.%s", db_name, coll_name
-                        )
+                        self._logger.debug("Skipping system collection: %s.%s", db_name, coll_name)
                         continue
                     self._logger.debug(
                         "Gathering index stats of collection `%s.%s` on %s level...",
@@ -193,18 +182,10 @@ class IndexInfoItem(BaseItem):
 
         result = enum_all_nodes(
             nodes,
-            func_rs_cluster=lambda name, node, **kwargs: enum_namespaces(
-                node, cluster_check, **kwargs
-            ),
-            func_sh_cluster=lambda name, node, **kwargs: enum_namespaces(
-                node, cluster_check, **kwargs
-            ),
-            func_rs_member=lambda name, node, **kwargs: enum_namespaces(
-                node, node_check, **kwargs
-            ),
-            func_shard_member=lambda name, node, **kwargs: enum_namespaces(
-                node, node_check, **kwargs
-            ),
+            func_rs_cluster=lambda name, node, **kwargs: enum_namespaces(node, cluster_check, **kwargs),
+            func_sh_cluster=lambda name, node, **kwargs: enum_namespaces(node, cluster_check, **kwargs),
+            func_rs_member=lambda name, node, **kwargs: enum_namespaces(node, node_check, **kwargs),
+            func_shard_member=lambda name, node, **kwargs: enum_namespaces(node, node_check, **kwargs),
         )
 
         self.captured_sample = result
@@ -242,14 +223,8 @@ class IndexInfoItem(BaseItem):
                     since = access.get("since", None)
                     spec = stats.get("spec", {})
                     options = get_index_options(spec)
-                    options_md = (
-                        f"<pre>{format_json_md(options)}</pre>"
-                        if len(options) > 0
-                        else ""
-                    )
-                    access_per_hour = (
-                        ops / (capture_time - since).total_seconds() / 3600
-                    )
+                    options_md = f"<pre>{format_json_md(options)}</pre>" if len(options) > 0 else ""
+                    access_per_hour = ops / (capture_time - since).total_seconds() / 3600
                     table["rows"].append(
                         [
                             escape_markdown(component),
@@ -260,9 +235,7 @@ class IndexInfoItem(BaseItem):
                         ]
                     )
 
-        enum_result_items(
-            result, func_sh_cluster=func_cluster, func_rs_cluster=func_cluster
-        )
+        enum_result_items(result, func_sh_cluster=func_cluster, func_rs_cluster=func_cluster)
         return {"name": self.name, "description": self.description, "data": [table]}
 
 

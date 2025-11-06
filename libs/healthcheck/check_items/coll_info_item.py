@@ -33,9 +33,7 @@ class CollInfoItem(BaseItem):
             host = node["host"] if "host" in node else "cluster"
             if latency > MAX_MONGOS_PING_LATENCY:
                 self._logger.warning(
-                    yellow(
-                        f"Skip {host} because it has been irresponsive for {latency / 60:.2f} minutes."
-                    )
+                    yellow(f"Skip {host} because it has been irresponsive for {latency / 60:.2f} minutes.")
                 )
                 return None, None
             dbs = client.admin.command("listDatabases").get("databases", [])
@@ -61,21 +59,13 @@ class CollInfoItem(BaseItem):
                         )
                         continue
                     if coll_name.startswith("system."):
-                        self._logger.debug(
-                            "Skipping system collection: %s.%s", db_name, coll_name
-                        )
+                        self._logger.debug("Skipping system collection: %s.%s", db_name, coll_name)
                         continue
-                    self._logger.debug(
-                        "Gathering stats for collection: `%s.%s`", db_name, coll_name
-                    )
+                    self._logger.debug("Gathering stats for collection: `%s.%s`", db_name, coll_name)
 
                     args = {"storageStats": {}}
                     args["latencyStats"] = {"histograms": True}
-                    stats = (
-                        db.get_collection(coll_name)
-                        .aggregate([{"$collStats": args}])
-                        .next()
-                    )
+                    stats = db.get_collection(coll_name).aggregate([{"$collStats": args}]).next()
                     t_result, r_result = func(host, stats, **kwargs)
                     test_result.extend(t_result)
                     raw_result.append(r_result)
@@ -136,9 +126,7 @@ class CollInfoItem(BaseItem):
             # Check for fragmentation
             storage_stats = stats.get("storageStats", {})
             storage_size = storage_stats["storageSize"]
-            coll_reusable = storage_stats["wiredTiger"]["block-manager"][
-                "file bytes available for reuse"
-            ]
+            coll_reusable = storage_stats["wiredTiger"]["block-manager"]["file bytes available for reuse"]
             coll_frag = round(coll_reusable / storage_size if storage_size else 0, 4)
             if coll_frag > fragmentation_ratio:
                 test_result.append(
@@ -252,18 +240,10 @@ class CollInfoItem(BaseItem):
         nodes = discover_nodes(client, parsed_uri)
         result = enum_all_nodes(
             nodes,
-            func_sh_cluster=lambda name, node, **kwargs: enum_collections(
-                name, node, func_overview, **kwargs
-            ),
-            func_rs_cluster=lambda name, node, **kwargs: enum_collections(
-                name, node, func_overview, **kwargs
-            ),
-            func_rs_member=lambda name, node, **kwargs: enum_collections(
-                name, node, func_node, **kwargs
-            ),
-            func_shard_member=lambda name, node, **kwargs: enum_collections(
-                name, node, func_node, **kwargs
-            ),
+            func_sh_cluster=lambda name, node, **kwargs: enum_collections(name, node, func_overview, **kwargs),
+            func_rs_cluster=lambda name, node, **kwargs: enum_collections(name, node, func_overview, **kwargs),
+            func_rs_member=lambda name, node, **kwargs: enum_collections(name, node, func_node, **kwargs),
+            func_shard_member=lambda name, node, **kwargs: enum_collections(name, node, func_node, **kwargs),
         )
         self.captured_sample = result
 
@@ -318,9 +298,7 @@ class CollInfoItem(BaseItem):
                 storage_size = storage_stats.get("storageSize", 0)
                 avg_obj_size = storage_stats.get("avgObjSize", 0)
                 total_index_size = storage_stats.get("totalIndexSize", 0)
-                index_data_ratio = (
-                    round(total_index_size / storage_size, 4) if size > 0 else 0
-                )
+                index_data_ratio = round(total_index_size / storage_size, 4) if size > 0 else 0
                 stats_table["rows"].append(
                     [
                         escape_markdown(ns),
@@ -365,9 +343,7 @@ class CollInfoItem(BaseItem):
                     },
                     "y": {"title": {"display": True, "text": "Namespaces"}},
                 },
-                "plugins": {
-                    "title": {"display": True, "text": "Storage Fragmentation"}
-                },
+                "plugins": {"title": {"display": True, "text": "Storage Fragmentation"}},
             },
         }
         index_frag_bar = {
@@ -376,9 +352,7 @@ class CollInfoItem(BaseItem):
             "options": {
                 "indexAxis": "y",
                 "scales": {
-                    "x": {
-                        "title": {"display": True, "text": "Index Fragmentation Ratio"}
-                    },
+                    "x": {"title": {"display": True, "text": "Index Fragmentation Ratio"}},
                     "y": {"title": {"display": True, "text": "Namespaces"}},
                 },
                 "plugins": {"title": {"display": True, "text": "Index Fragmentation"}},
@@ -424,11 +398,7 @@ class CollInfoItem(BaseItem):
                     index_name = escape_markdown(index.get("indexName", ""))
                     fragmentation = index.get("fragmentation", 0)
                     index_details.append(f"{index_name}: {fragmentation:.2%}")
-                index_frag = (
-                    round(total_reusable_size / total_index_size, 4)
-                    if total_index_size > 0
-                    else 0
-                )
+                index_frag = round(total_reusable_size / total_index_size, 4) if total_index_size > 0 else 0
                 frag_table["rows"].append(
                     [
                         escape_markdown(set_name),
@@ -449,18 +419,10 @@ class CollInfoItem(BaseItem):
                     }
                 )
                 # Latency visualization
-                avg_reads_latency = stats.get("latencyStats", {}).get(
-                    "reads_latency", 0
-                )
-                avg_writes_latency = stats.get("latencyStats", {}).get(
-                    "writes_latency", 0
-                )
-                avg_commands_latency = stats.get("latencyStats", {}).get(
-                    "commands_latency", 0
-                )
-                avg_transactions_latency = stats.get("latencyStats", {}).get(
-                    "transactions_latency", 0
-                )
+                avg_reads_latency = stats.get("latencyStats", {}).get("reads_latency", 0)
+                avg_writes_latency = stats.get("latencyStats", {}).get("writes_latency", 0)
+                avg_commands_latency = stats.get("latencyStats", {}).get("commands_latency", 0)
+                avg_transactions_latency = stats.get("latencyStats", {}).get("transactions_latency", 0)
                 latency_table["rows"].append(
                     [
                         escape_markdown(set_name),
@@ -490,20 +452,12 @@ class CollInfoItem(BaseItem):
             ns_data = []
             idx_data = []
             for ns in labels:
-                search = [
-                    item
-                    for item in frag_data
-                    if item["label"] == label and item["ns"] == ns
-                ]
+                search = [item for item in frag_data if item["label"] == label and item["ns"] == ns]
                 v = search[0]["collFrag"] if len(search) > 0 else 0
                 ns_data.append(v)
                 v = search[0]["indexFrag"] if len(search) > 0 else 0
                 idx_data.append(v)
-            coll_frag_bar["data"]["datasets"].append(
-                {"label": label, "data": ns_data, "stack": label}
-            )
-            index_frag_bar["data"]["datasets"].append(
-                {"label": label, "data": idx_data}
-            )
+            coll_frag_bar["data"]["datasets"].append({"label": label, "data": ns_data, "stack": label})
+            index_frag_bar["data"]["datasets"].append({"label": label, "data": idx_data})
 
         return {"title": self.name, "description": self.description, "data": data}

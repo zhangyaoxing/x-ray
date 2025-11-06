@@ -35,10 +35,7 @@ class SecurityItem(BaseItem):
         def func_node(name, node, **kwargs):
             client = node["client"]
             host = node["host"]
-            if (
-                "pingLatencySec" in node
-                and node["pingLatencySec"] > MAX_MONGOS_PING_LATENCY
-            ):
+            if "pingLatencySec" in node and node["pingLatencySec"] > MAX_MONGOS_PING_LATENCY:
                 self._logger.warning(
                     yellow(
                         f"Skip {host} because it has been irresponsive for {node['pingLatencySec'] / 60:.2f} minutes."
@@ -58,11 +55,7 @@ class SecurityItem(BaseItem):
             bind_ip = net.get("bindIp", "127.0.0.1")
             port = net.get("port", None)
             tls_enabled = net.get("tls", {}).get("mode", None)
-            audit = (
-                "enabled"
-                if audit_log.get("destination", None) is not None
-                else "disabled"
-            )
+            audit = "enabled" if audit_log.get("destination", None) is not None else "disabled"
             if authorization != "enabled":
                 test_result.append(
                     {
@@ -191,11 +184,7 @@ class SecurityItem(BaseItem):
             eat = security.get("enableEncryption", "false")
             bind_ip = net.get("bindIp", "127.0.0.1")
             cluster_auth = security.get("clusterAuthMode", "disabled")
-            audit = (
-                "enabled"
-                if audit_log.get("destination", None) is not None
-                else "disabled"
-            )
+            audit = "enabled" if audit_log.get("destination", None) is not None else "disabled"
             table["rows"].append(
                 [
                     escape_markdown(name),

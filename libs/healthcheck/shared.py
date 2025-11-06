@@ -73,10 +73,7 @@ def connect_and_test(host, uri):
     try:
         ping = client.admin.command("ping")
         cluster_time = ping["$clusterTime"]["clusterTime"]
-        latency = (
-            datetime.now(timezone.utc)
-            - datetime.fromtimestamp(cluster_time.time, timezone.utc)
-        ).total_seconds()
+        latency = (datetime.now(timezone.utc) - datetime.fromtimestamp(cluster_time.time, timezone.utc)).total_seconds()
         logger.debug("Successfully connected to MongoDB at %s", uri)
     except Exception as e:
         latency = MAX_MONGOS_PING_LATENCY + 1  # Set to a high value to indicate failure
@@ -94,11 +91,7 @@ def discover_nodes(client, parsed_uri):
         return active_nodes
     try:
         is_master = client.admin.command("isMaster")
-        database = (
-            parsed_uri["database"]
-            if parsed_uri.get("database", None) is not None
-            else "admin"
-        )
+        database = parsed_uri["database"] if parsed_uri.get("database", None) is not None else "admin"
         # Reserve the options in the list
         options = []
         for k, v in parsed_uri["options"].items():
@@ -115,12 +108,8 @@ def discover_nodes(client, parsed_uri):
             active_nodes["type"] = "RS"
             active_nodes["setName"] = is_master["setName"]
             hosts = [f"{host[0]}:{host[1]}" for host in parsed_uri["nodelist"]]
-            active_nodes["uri"] = (
-                f"mongodb://{credential}{','.join(hosts)}/{database}?{options_str}"
-            )
-            active_nodes["pingLatencySec"], active_nodes["client"] = connect_and_test(
-                "cluster", active_nodes["uri"]
-            )
+            active_nodes["uri"] = f"mongodb://{credential}{','.join(hosts)}/{database}?{options_str}"
+            active_nodes["pingLatencySec"], active_nodes["client"] = connect_and_test("cluster", active_nodes["uri"])
             members = client.admin.command("replSetGetStatus")["members"]
 
             # Prepare the nodes information
@@ -140,21 +129,15 @@ def discover_nodes(client, parsed_uri):
             # Discover sharded cluster nodes, including config servers and shards
             active_nodes["type"] = "SH"
             hosts = [f"{host[0]}:{host[1]}" for host in parsed_uri["nodelist"]]
-            active_nodes["uri"] = (
-                f"mongodb://{credential}{','.join(hosts)}/{database}?{options_str}"
-            )
-            active_nodes["pingLatencySec"], active_nodes["client"] = connect_and_test(
-                "cluster", active_nodes["uri"]
-            )
+            active_nodes["uri"] = f"mongodb://{credential}{','.join(hosts)}/{database}?{options_str}"
+            active_nodes["pingLatencySec"], active_nodes["client"] = connect_and_test("cluster", active_nodes["uri"])
             shard_map = client.admin.command("getShardMap")["map"]
             parsed_map = {}
             # config and shard nodes
             for k, v in shard_map.items():
                 rs_name = v.split("/")[0]
                 hosts = v.split("/")[1].split(",")
-                uri = (
-                    f"mongodb://{credential}{','.join(hosts)}/{database}?{options_str}"
-                )
+                uri = f"mongodb://{credential}{','.join(hosts)}/{database}?{options_str}"
                 l, c = connect_and_test(rs_name, uri)
                 parsed_map[k] = {
                     "setName": rs_name,
@@ -164,13 +147,9 @@ def discover_nodes(client, parsed_uri):
                     "members": [],
                 }
                 for host in hosts:
-                    uri = (
-                        f"mongodb://{credential}{host}/{database}?{options_str_direct}"
-                    )
+                    uri = f"mongodb://{credential}{host}/{database}?{options_str_direct}"
                     l, c = connect_and_test(host, uri)
-                    parsed_map[k]["members"].append(
-                        {"host": host, "uri": uri, "client": c, "pingLatencySec": l}
-                    )
+                    parsed_map[k]["members"].append({"host": host, "uri": uri, "client": c, "pingLatencySec": l})
             # mongos nodes
             all_mongos = list(client.config.get_collection("mongos").find())
             uri = f"mongodb://{credential}{','.join(host['_id'] for host in all_mongos)}/{database}?{options_str}"
@@ -183,9 +162,7 @@ def discover_nodes(client, parsed_uri):
                     l, c = connect_and_test(host["_id"], uri)
                 else:
                     c = None
-                    irresponsive_nodes.append(
-                        {"host": host["_id"], "pingLatencySec": l}
-                    )
+                    irresponsive_nodes.append({"host": host["_id"], "pingLatencySec": l})
                 parsed_map["mongos"]["members"].append(
                     {
                         "host": host["_id"],
@@ -234,39 +211,27 @@ def enum_all_nodes(nodes, **kwargs):  # pylint: disable=too-many-branches
     func_rs_member = kwargs.get("func_rs_member", lambda s, n, **kwargs: (None, None))
     func_sh_cluster = kwargs.get("func_sh_cluster", lambda s, n, **kwargs: (None, None))
     func_all_mongos = kwargs.get("func_all_mongos", lambda s, n, **kwargs: (None, None))
-    func_mongos_member = kwargs.get(
-        "func_mongos_member", lambda s, n, **kwargs: (None, None)
-    )
+    func_mongos_member = kwargs.get("func_mongos_member", lambda s, n, **kwargs: (None, None))
     func_shard = kwargs.get("func_shard", lambda s, n, **kwargs: (None, None))
-    func_shard_member = kwargs.get(
-        "func_shard_member", lambda s, n, **kwargs: (None, None)
-    )
+    func_shard_member = kwargs.get("func_shard_member", lambda s, n, **kwargs: (None, None))
     func_config = kwargs.get("func_config", lambda s, n, **kwargs: (None, None))
-    func_config_member = kwargs.get(
-        "func_config_member", lambda s, n, **kwargs: (None, None)
-    )
+    func_config_member = kwargs.get("func_config_member", lambda s, n, **kwargs: (None, None))
     result = {"type": nodes["type"]}
     if nodes["type"] == "RS":
         set_name = nodes["setName"]
         result["setName"] = set_name
         result["members"] = []
         try:
-            result["testResult"], result["rawResult"] = func_rs_cluster(
-                set_name, nodes, level="rs_cluster"
-            )
+            result["testResult"], result["rawResult"] = func_rs_cluster(set_name, nodes, level="rs_cluster")
         except Exception as e:
             logger.error(
-                red(
-                    f"Failed to get execution result from replica set {set_name}: {e.__class__.__name__} {str(e)}"
-                )
+                red(f"Failed to get execution result from replica set {set_name}: {e.__class__.__name__} {str(e)}")
             )
             result["testResult"], result["rawResult"] = (None, None)
         for member in nodes["members"]:
             test_result, raw_result = None, None
             try:
-                test_result, raw_result = func_rs_member(
-                    set_name, member, level="rs_member"
-                )
+                test_result, raw_result = func_rs_member(set_name, member, level="rs_member")
             except Exception as e:
                 logger.error(
                     red(
@@ -285,16 +250,10 @@ def enum_all_nodes(nodes, **kwargs):  # pylint: disable=too-many-branches
         result["map"] = {}
         test_result, raw_result = None, None
         try:
-            test_result, raw_result = func_sh_cluster(
-                "mongos", nodes, level="sh_cluster"
-            )
+            test_result, raw_result = func_sh_cluster("mongos", nodes, level="sh_cluster")
             result["testResult"], result["rawResult"] = test_result, raw_result
         except Exception as e:
-            logger.error(
-                red(
-                    f"Failed to get execution result from sharded cluster: {e.__class__.__name__} {str(e)}"
-                )
-            )
+            logger.error(red(f"Failed to get execution result from sharded cluster: {e.__class__.__name__} {str(e)}"))
         for component_name, host_info in nodes["map"].items():
             set_name = host_info["setName"]
             result["map"][component_name] = {
@@ -306,41 +265,25 @@ def enum_all_nodes(nodes, **kwargs):  # pylint: disable=too-many-branches
             test_result, raw_result = None, None
             try:
                 if component_name == "mongos":
-                    test_result, raw_result = func_all_mongos(
-                        set_name, host_info, level="all_mongos"
-                    )
+                    test_result, raw_result = func_all_mongos(set_name, host_info, level="all_mongos")
                 elif component_name == "config":
-                    test_result, raw_result = func_config(
-                        set_name, host_info, level="config"
-                    )
+                    test_result, raw_result = func_config(set_name, host_info, level="config")
                 else:
-                    test_result, raw_result = func_shard(
-                        set_name, host_info, level="shard"
-                    )
+                    test_result, raw_result = func_shard(set_name, host_info, level="shard")
                 result["map"][component_name]["testResult"] = test_result
                 result["map"][component_name]["rawResult"] = raw_result
             except Exception as e:
-                logger.error(
-                    red(
-                        f"Failed to get execution result from {set_name}: {e.__class__.__name__} {str(e)}"
-                    )
-                )
+                logger.error(red(f"Failed to get execution result from {set_name}: {e.__class__.__name__} {str(e)}"))
 
             for member in host_info["members"]:
                 test_result, raw_result = None, None
                 try:
                     if component_name == "mongos":
-                        test_result, raw_result = func_mongos_member(
-                            set_name, member, level="mongos_member"
-                        )
+                        test_result, raw_result = func_mongos_member(set_name, member, level="mongos_member")
                     elif component_name == "config":
-                        test_result, raw_result = func_config_member(
-                            set_name, member, level="config_member"
-                        )
+                        test_result, raw_result = func_config_member(set_name, member, level="config_member")
                     else:
-                        test_result, raw_result = func_shard_member(
-                            set_name, member, level="shard_member"
-                        )
+                        test_result, raw_result = func_shard_member(set_name, member, level="shard_member")
                 except Exception as e:
                     logger.error(
                         red(

@@ -47,10 +47,7 @@ class Version:
     def compatible_with(self, version) -> bool:
         """Check if the given version is compatible with this version."""
         # If the major and minor version are the same, consider compatible
-        if (
-            self.version_array[0] == version.version_array[0]
-            and self.version_array[1] == version.version_array[1]
-        ):
+        if self.version_array[0] == version.version_array[0] and self.version_array[1] == version.version_array[1]:
             return True
         return False
 

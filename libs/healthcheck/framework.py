@@ -42,9 +42,7 @@ class Framework:
         checksets = self._config.get("checksets", {})
         if not checkset_name in checksets:
             self._logger.warning(
-                yellow(
-                    f"Checkset '{checkset_name}' not found in configuration. Using default checkset."
-                )
+                yellow(f"Checkset '{checkset_name}' not found in configuration. Using default checkset.")
             )
             checkset_name = "default"
         cs = checksets[checkset_name]
@@ -56,9 +54,7 @@ class Framework:
         for item_name in cs.get("items", []):
             item_cls = CHECKLIST_CLASSES.get(item_name)
             if not item_cls:
-                self._logger.warning(
-                    yellow(f"Check item '{item_name}' not found. Skipping.")
-                )
+                self._logger.warning(yellow(f"Check item '{item_name}' not found. Skipping."))
                 continue
             # The config for the item can be specified in the `item_config` section, under the item class name.
             item_config = self._config.get("item_config", {}).get(item_name, {})
@@ -71,9 +67,7 @@ class Framework:
         # output the results to a markdown file
         batch_folder = self._get_output_folder(output_folder)
         output_file = f"{batch_folder}report.md"
-        template_file = get_script_path(
-            f"templates/{self._config.get('template', 'healthcheck/full.html')}"
-        )
+        template_file = get_script_path(f"templates/{self._config.get('template', 'healthcheck/full.html')}")
         self._logger.info("Saving results to: %s", green(output_file))
 
         with open(output_file, "w", encoding="utf-8") as f:
@@ -94,9 +88,7 @@ class Framework:
             info_count = all_severity.count("INFO")
             f.write(f"|{high_count}|{medium_count}|{low_count}|{info_count}|\n\n")
             if len(irresponsive_nodes) > 0:
-                f.write(
-                    "The following nodes have been detected as irresponsive during the checks:\n\n"
-                )
+                f.write("The following nodes have been detected as irresponsive during the checks:\n\n")
                 for node in irresponsive_nodes:
                     f.write(f"- `{node['host']}`\n")
                 f.write(
@@ -123,9 +115,7 @@ class Framework:
 
         if fmt == "html":
             html_file = f"{batch_folder}report.html"
-            self._logger.info(
-                "Converting results to HTML format and saving to: %s", green(html_file)
-            )
+            self._logger.info("Converting results to HTML format and saving to: %s", green(html_file))
             with open(html_file, "w", encoding="utf-8") as f:
                 with open(output_file, "r", encoding="utf-8") as md_file:
                     md_text = md_file.read()

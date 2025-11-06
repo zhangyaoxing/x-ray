@@ -20,9 +20,7 @@ def detect_device():
             return "mps"
         return "cpu"
     except ImportError:
-        logger.error(
-            "torch is not installed. Please install it with: pip install torch"
-        )
+        logger.error("torch is not installed. Please install it with: pip install torch")
         raise
 
 
@@ -57,9 +55,7 @@ def analyze_log_line_local(log_line, tokenizer, model, gen_config):
     prompt = f"Analyze this MongoDB log message and give me the shortest answer: {str(log_line['msg'])}".strip()
     inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
     outputs = model.generate(**inputs, generation_config=gen_config)
-    text = tokenizer.decode(
-        outputs[0][inputs["input_ids"].shape[1] :], skip_special_tokens=True
-    ).strip()
+    text = tokenizer.decode(outputs[0][inputs["input_ids"].shape[1] :], skip_special_tokens=True).strip()
 
     return text
 
