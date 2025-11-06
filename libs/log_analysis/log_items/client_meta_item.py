@@ -4,7 +4,6 @@ from re import search, split
 import json
 from bson import json_util
 from libs.log_analysis.log_items.base_item import BaseItem
-from libs.log_analysis.shared import json_hash
 from libs.utils import (
     get_script_path,
     logger,
@@ -12,6 +11,7 @@ from libs.utils import (
     tooltip_html,
     escape_markdown,
     truncate_content,
+    json_hash,
 )
 from libs.version import Version
 
@@ -190,3 +190,5 @@ def parse_version_from_log(
     if target_driver_name == driver_name:
         version = search(r"\d+(\.\d+)*", driver_version.strip())
         return Version.parse(version.group(0) if version else None)
+
+    return None

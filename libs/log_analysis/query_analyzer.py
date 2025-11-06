@@ -1,4 +1,8 @@
-from libs.log_analysis.shared import json_hash
+"""
+Analyze MongoDB query patterns from log entries.
+"""
+
+from libs.utils import json_hash
 
 
 DATA_TYPES = [

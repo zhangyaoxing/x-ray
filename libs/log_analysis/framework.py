@@ -13,6 +13,8 @@ LOG_CLASSES = load_classes("libs.log_analysis.log_items")
 
 
 class Framework:
+    _logset_name = ""
+
     def __init__(self, file_path: str, config: dict):
         self._file_path = file_path
         self._config = config
@@ -49,7 +51,7 @@ class Framework:
             )
             logset_name = "default"
         ls = logsets[logset_name]
-        self._logger.info(f"Running log checkset: {bold(green(logset_name))}")
+        self._logger.info("Running log checkset: %s", bold(cyan(logset_name)))
 
         self._items = []
         for item_name in ls.get("items", []):
@@ -63,7 +65,7 @@ class Framework:
             item_config = self._config.get("item_config", {}).get(item_name, {})
             item = item_cls(batch_folder, item_config)
             self._items.append(item)
-            self._logger.info(f"Log analyze item loaded: {bold(cyan(item_name))}")
+            self._logger.info("Log analyze item loaded: %s", bold(cyan(item_name)))
         log_file = self._file_path
         rate = self._config.get("sample_rate", 1.0)
         # Read the log file line by line and pass each line to the log items for analysis
@@ -73,7 +75,7 @@ class Framework:
             for line in f:
                 counter += 1
                 if counter % 10000 == 0:
-                    self._logger.info(f"{green(counter)} lines ingested...")
+                    self._logger.info("%s lines ingested...", green(counter))
                 # Sampling based on the rate. For dealing with large log files.
                 if random.random() > rate:
                     continue
@@ -89,7 +91,7 @@ class Framework:
                                 yellow(f"Log analysis item '{item.name}' failed: {e}")
                             )
                             continue
-                except Exception as e:
+                except Exception:
                     self._logger.warning(
                         yellow(f"Failed to parse log line as JSON: {line.strip()}")
                     )
@@ -104,16 +106,16 @@ class Framework:
                 )
                 continue
 
-    def output_results(self, output_folder: str = "output/", format: str = "html"):
+    def output_results(self, output_folder: str = "output/", fmt: str = "html"):
         batch_folder = self._get_output_folder(output_folder)
         output_file = f"{batch_folder}report.md"
         template_file = get_script_path(
             f"templates/{self._config.get('template', 'log/full.html')}"
         )
-        self._logger.info(f"Saving results to: {green(output_file)}")
+        self._logger.info("Saving results to: %s", green(output_file))
 
-        with open(output_file, "w") as f:
-            f.write(f"# Log Analysis Report\n")
+        with open(output_file, "w", encoding="utf-8") as f:
+            f.write("# Log Analysis Report\n")
             f.write(f"Generated at: `{str(datetime.now(tz=timezone.utc))} UTC`\n\n")
             f.write(f"Log path: `{self._file_path}`\n\n")
             f.write(
@@ -134,17 +136,17 @@ class Framework:
                     )
                     continue
 
-        if format == "html":
+        if fmt == "html":
             html_file = f"{batch_folder}report.html"
-            self._logger.info(f"Converting markdown to HTML: {green(html_file)}")
-            with open(html_file, "w") as f:
-                with open(output_file, "r") as md_file:
+            self._logger.info("Converting markdown to HTML: %s", green(html_file))
+            with open(html_file, "w", encoding="utf-8") as f:
+                with open(output_file, "r", encoding="utf-8") as md_file:
                     html_content = markdown.markdown(
                         md_file.read(),
                         extensions=["tables", "fenced_code", "toc", "md_in_html"],
                     )
                 # Load the template file
-                with open(template_file, "r") as tf:
+                with open(template_file, "r", encoding="utf-8") as tf:
                     template_content = tf.read()
                     # Replace the placeholder with the generated HTML content
                 final_html = template_content.replace("{{ content }}", html_content)
