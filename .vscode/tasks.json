@@ -1,0 +1,89 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Pylint: Check All Files",
+            "type": "shell",
+            "command": "${workspaceFolder}/.venv/bin/pylint",
+            "args": [
+                "libs/",
+                "x-ray",
+                "--rcfile=${workspaceFolder}/.pylintrc"
+            ],
+            "problemMatcher": {
+                "owner": "python",
+                "fileLocation": [
+                    "relative",
+                    "${workspaceFolder}"
+                ],
+                "pattern": {
+                    "regexp": "^(.+):(\\d+):(\\d+):\\s+(\\w+):\\s+(.+)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "severity": 4,
+                    "message": 5
+                }
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            },
+            "group": {
+                "kind": "test",
+                "isDefault": false
+            }
+        },
+        {
+            "label": "Pylint: Check All Files (Errors Only)",
+            "type": "shell",
+            "command": "${workspaceFolder}/.venv/bin/pylint",
+            "args": [
+                "libs/",
+                "x-ray",
+                "--rcfile=${workspaceFolder}/.pylintrc",
+                "--errors-only"
+            ],
+            "problemMatcher": {
+                "owner": "python",
+                "fileLocation": [
+                    "relative",
+                    "${workspaceFolder}"
+                ],
+                "pattern": {
+                    "regexp": "^(.+):(\\d+):(\\d+):\\s+(\\w+):\\s+(.+)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "severity": 4,
+                    "message": 5
+                }
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            },
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Run All Quality Checks",
+            "type": "shell",
+            "command": "make",
+            "args": [
+                "check"
+            ],
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ]
+}
