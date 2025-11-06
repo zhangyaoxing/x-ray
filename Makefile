@@ -53,6 +53,12 @@ build-ai:
 	@echo "\033[32m✓ Full build complete: dist/x-ray-ai\033[0m"
 	@echo "\033[33m⚠ Note: This does NOT include model weights. Models will be downloaded on first use.\033[0m"
 
+# Run tests 
+check:
+	@echo "Running tests..."
+	$(PYTHON) -m pytest tests/ -v
+	@echo "\033[32m✓ All tests passed!\033[0m"
+
 # Clean build artifacts
 clean:
 	@echo "Cleaning build artifacts..."
