@@ -1,14 +1,17 @@
+"""Client Metadata Log Item checks for client metadata in the log."""
+from re import search, split
+import json
+from bson import json_util
 from libs.log_analysis.log_items.base_item import BaseItem
 from libs.log_analysis.shared import json_hash
-from bson import json_util
-from libs.utils import *
+from libs.utils import get_script_path, logger, yellow, tooltip_html, escape_markdown, truncate_content
 from libs.version import Version
-from re import search, split
 
 COMPATIBILITY_MATRIX_JSON = "compatibility_matrix.json"
 
 
 class ClientMetaItem(BaseItem):
+    _driver_matrix = None
     def __init__(self, output_folder: str, config):
         super(ClientMetaItem, self).__init__(output_folder, config)
         self._cache = {}
@@ -46,7 +49,7 @@ class ClientMetaItem(BaseItem):
         super().finalize_analysis()
         # Based on the server version, find out minimum compatible driver versions.
         matrix_path = get_script_path(COMPATIBILITY_MATRIX_JSON)
-        with open(matrix_path, "r") as f:
+        with open(matrix_path, "r", encoding="utf-8") as f:
             compatibility_matrix = json.load(f)
         server_compatible_version = self._server_version.to_compatibility_str() if self._server_version else "Unknown"
         driver_matrix = compatibility_matrix.get(server_compatible_version, {})
@@ -54,10 +57,10 @@ class ClientMetaItem(BaseItem):
 
     def review_results_markdown(self, f):
         super().review_results_markdown(f)
-        f.write(f"|Application|Driver|OS|Platform|Client IPs|\n")
-        f.write(f"|---|---|---|---|---|\n")
+        f.write("|Application|Driver|OS|Platform|Client IPs|\n")
+        f.write("|---|---|---|---|---|\n")
         rows = []
-        with open(self._output_file, "r") as data:
+        with open(self._output_file, "r", encoding="utf-8") as data:
             for line in data:
                 line_json = json_util.loads(line)
                 doc = line_json.get("doc", {})
@@ -99,7 +102,7 @@ class ClientMetaItem(BaseItem):
             )
         else:
             f.write(
-                f'\n**<span style="color: red;">Unable to determine server version to mark incompatible drivers. Log may be truncated by user.</span>**\n'
+                '\n**<span style="color: red;">Unable to determine server version to mark incompatible drivers. Log may be truncated by user.</span>**\n'
             )
         f.write(f"<div class=\"pie\"><canvas id='canvas_{self.__class__.__name__}'></canvas></div>\n")
         f.write(f"<div class=\"pie\"><canvas id='canvas_{self.__class__.__name__}_ip'></canvas></div>\n")
@@ -128,7 +131,7 @@ def is_driver_compatible(log_driver_name: str, log_driver_version: str, server_v
         driver_ver = parse_version_from_log(log_driver_name, log_driver_version, driver_name)
         return not driver_ver or driver_ver >= min_version
     except Exception as e:
-        logger.warning(f"Failed to parse driver version: {log_driver_version}, error: {e}")
+        logger.warning("Failed to parse driver version: %s, error: %s", log_driver_version, e)
         return True
 
 

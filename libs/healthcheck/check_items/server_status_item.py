@@ -1,7 +1,7 @@
 from time import sleep
 from libs.healthcheck.check_items.base_item import BaseItem
-from libs.healthcheck.shared import *
-from libs.utils import format_size, escape_markdown
+from libs.healthcheck.shared import SEVERITY, MAX_MONGOS_PING_LATENCY, discover_nodes, enum_all_nodes, enum_result_items
+from libs.utils import format_size, escape_markdown, green, yellow
 
 SERVER_STATUS_INTERVAL = 5
 
@@ -114,7 +114,8 @@ class ServerStatusItem(BaseItem):
             return test_result, raw_result
 
         nodes = discover_nodes(client, parsed_uri)
-        func_all_first = lambda set_name, node, **kwargs: enumerator(set_name, node, func_req=func_first_req)
+        def func_all_first(set_name, node, **kwargs):
+            return enumerator(set_name, node, func_req=func_first_req, **kwargs)
         result1 = enum_all_nodes(
             nodes,
             func_mongos_member=func_all_first,
@@ -123,9 +124,10 @@ class ServerStatusItem(BaseItem):
             func_config_member=func_all_first,
         )
         # Sleep for 5s to capture next status.
-        self._logger.info(f"Sleep {green(f'{SERVER_STATUS_INTERVAL} seconds')} to capture next server status.")
+        self._logger.info("Sleep %s to capture next server status.", green(f"{SERVER_STATUS_INTERVAL} seconds"))
         sleep(SERVER_STATUS_INTERVAL)
-        func_all_2nd = lambda set_name, node, **kwargs: enumerator(set_name, node, func_req=func_2nd_req)
+        def func_all_2nd(set_name, node, **kwargs):
+            return enumerator(set_name, node, func_req=func_2nd_req, **kwargs)
         result2 = enum_all_nodes(
             nodes,
             func_mongos_member=func_all_2nd,
@@ -268,12 +270,13 @@ class ServerStatusItem(BaseItem):
     @property
     def review_result(self):
         result = self.captured_sample
-        result1, result2 = result
+        _, result2 = result
         data = []
         conn_table = {
             "type": "table",
-            "caption": f"Connections",
-            "notes": "- `Rejected` is only available for MongoDB 6.3 and later.\n - `Threaded` is only available for MongoDB 5.0 and later.\n",
+            "caption": "Connections",
+            "notes": "- `Rejected` is only available for MongoDB 6.3 and later.\n" +
+                      "- `Threaded` is only available for MongoDB 5.0 and later.\n",
             "columns": [
                 {"name": "Component", "type": "string"},
                 {"name": "Host", "type": "string"},
@@ -307,7 +310,7 @@ class ServerStatusItem(BaseItem):
         }
         opcounters_table = {
             "type": "table",
-            "caption": f"Operation Counters",
+            "caption": "Operation Counters",
             "columns": [
                 {"name": "Component", "type": "string"},
                 {"name": "Host", "type": "string"},
@@ -409,7 +412,7 @@ class ServerStatusItem(BaseItem):
         )
         qt_table = {
             "type": "table",
-            "caption": f"Query Targeting",
+            "caption": "Query Targeting",
             "columns": [
                 {"name": "Component", "type": "string"},
                 {"name": "Host", "type": "string"},

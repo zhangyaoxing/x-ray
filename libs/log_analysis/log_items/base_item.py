@@ -1,8 +1,7 @@
 import logging
 import os
-
-from libs.log_analysis.shared import MAX_DATA_POINTS, to_json
 from bson import json_util
+from libs.log_analysis.shared import MAX_DATA_POINTS, to_json
 from libs.utils import get_script_path
 from libs.version import Version
 from libs.utils import to_ejson
@@ -22,6 +21,7 @@ def get_version(log_line):
 
 
 class BaseItem(object):
+    _cache = None
     def __init__(self, output_folder: str, config):
         self.config = config
         self._output_file = os.path.join(output_folder, f"{self.__class__.__name__}.json")
@@ -30,15 +30,14 @@ class BaseItem(object):
         self._show_scaler = True
         self._show_reset = False
         self._server_version = None
-        os.remove(self._output_file) if os.path.isfile(self._output_file) else None
+        if os.path.isfile(self._output_file):
+            os.remove(self._output_file)
 
     def analyze(self, log_line):
         log_id = log_line.get("id", "")
         if log_id == 23403:  # Build Info
             self._server_version = get_version(log_line)
 
-    def review_results(self):
-        raise NotImplementedError("Subclasses must implement the review_results method.")
 
     @property
     def name(self):
@@ -66,7 +65,7 @@ class BaseItem(object):
         file_name = f"{self.__class__.__name__}.js"
         file_path = os.path.join("templates", "log", "snippets", file_name)
         file_path = get_script_path(file_path)
-        self._logger.debug(f"Using JS snippet file: {file_path}")
+        self._logger.debug("Using JS snippet file: %s", file_path)
 
         f.write(f"## {self.name}\n\n")
         f.write(f"{self.description}\n\n")
@@ -85,8 +84,8 @@ class BaseItem(object):
             f.write(f"let slider = document.getElementById('slider_{self.__class__.__name__}');\n")
             f.write(f"let sliderValue = document.getElementById('sliderValue_{self.__class__.__name__}');\n")
             f.write("slider.oninput = function() {\n")
-            f.write(f"  let value = parseInt(slider.value);\n")
-            f.write(f"  sliderValue.textContent = value;\n")
+            f.write("  let value = parseInt(slider.value);\n")
+            f.write("  sliderValue.textContent = value;\n")
             f.write("}\n")
             f.write("slider.onchange = function() {\n")
             f.write("  onSlide(slider, sliderValue, scaleCharts);\n")
@@ -94,8 +93,8 @@ class BaseItem(object):
             f.write("let scale = parseInt(sliderValue.innerText);\n")
         if self._show_reset:
             f.write(f"let resetButton = document.getElementById('reset_{self.__class__.__name__}');\n")
-        f.write(f"let data = [\n")
-        with open(self._output_file, "r") as data:
+        f.write("let data = [\n")
+        with open(self._output_file, "r", encoding="utf-8") as data:
             for line in data:
                 # The data is in EJSON format, convert it to JSON
                 line_json = json_util.loads(line)
@@ -103,7 +102,7 @@ class BaseItem(object):
                 f.write(", \n")
         f.write("];\n")
         if os.path.isfile(file_path):
-            with open(file_path, "r") as js:
+            with open(file_path, "r", encoding="utf-8") as js:
                 for line in js:
                     f.write(line.replace("{name}", self.__class__.__name__))
         f.write("});\n")
@@ -112,9 +111,9 @@ class BaseItem(object):
     def _write_output(self):
         # Open file steam and write the cache to file
         # Even if the cache is None, we still write to indicate no data
-        with open(self._output_file, "a") as f:
+        with open(self._output_file, "a", encoding="utf-8") as f:
             if self._cache is None:
-                self._logger.debug(f"Cache is empty, nothing to write for {self.__class__.__name__}")
+                self._logger.debug("Cache is empty, nothing to write for %s", self.__class__.__name__)
                 return
             if isinstance(self._cache, list):
                 for item in self._cache:
@@ -122,10 +121,10 @@ class BaseItem(object):
                     f.write("\n")
                     self._row_count += 1
                 self._logger.debug(
-                    f"Wrote {len(self._cache)} records to {self._output_file} for {self.__class__.__name__}"
+                    "Wrote %d records to %s for %s", len(self._cache), self._output_file, self.__class__.__name__
                 )
             else:
                 f.write(to_ejson(self._cache, indent=None))
                 f.write("\n")
                 self._row_count += 1
-                self._logger.debug(f"Wrote 1 record to {self._output_file} for {self.__class__.__name__}")
+                self._logger.debug("Wrote 1 record to %s for %s", self._output_file, self.__class__.__name__)
