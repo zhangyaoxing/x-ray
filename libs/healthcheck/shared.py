@@ -1,12 +1,12 @@
+"""Shared utilities for health check modules."""
 from enum import Enum
 import re
-from bson import json_util
 import logging
 import urllib.parse
-from libs.utils import *
-from pymongo.uri_parser import parse_uri
-from pymongo import MongoClient
+import sys
 from datetime import datetime, timezone
+from pymongo import MongoClient
+from libs.utils import to_ejson, red
 
 logger = logging.getLogger(__name__)
 MEMBER_STATE = {
@@ -51,13 +51,17 @@ def to_json(obj, indent=0):
     return to_ejson(obj, indent=indent, cls_maps=cls_maps)
 
 
-def str_to_md_id(str):
-    id = str.lower()
-    id = id.replace(" ", "-")
-    id = re.sub(r"[^a-z0-9\-]", "", id)
-    id = re.sub(r"\-+", "-", id)
-    id = id.strip("-")
-    return id
+def str_to_md_id(string: str) -> str:
+    md_id = string.lower()
+    md_id = md_id.replace(" ", "-")
+    md_id = re.sub(r"[^a-z0-9\-]", "", md_id)
+    md_id = re.sub(r"\-+", "-", md_id)
+    md_id = md_id.strip("-")
+    return md_id
+
+
+active_nodes = {}
+irresponsive_nodes = []
 
 
 def connect_and_test(host, uri):
@@ -66,17 +70,12 @@ def connect_and_test(host, uri):
         ping = client.admin.command("ping")
         cluster_time = ping["$clusterTime"]["clusterTime"]
         latency = (datetime.now(timezone.utc) - datetime.fromtimestamp(cluster_time.time, timezone.utc)).total_seconds()
-        logger.debug(f"Successfully connected to MongoDB at {uri}")
+        logger.debug("Successfully connected to MongoDB at %s", uri)
     except Exception as e:
-        global irresponsive_nodes
         latency = MAX_MONGOS_PING_LATENCY + 1  # Set to a high value to indicate failure
         irresponsive_nodes.append({"host": host, "pingLatencySec": latency})
-        logger.debug(f"Failed to connect to MongoDB at {uri}: {e}")
+        logger.debug("Failed to connect to MongoDB at %s: %s", uri, e)
     return latency, client
-
-
-nodes = {}
-irresponsive_nodes = []
 
 
 def discover_nodes(client, parsed_uri):
@@ -84,9 +83,8 @@ def discover_nodes(client, parsed_uri):
     Discover nodes in the MongoDB replica set or sharded cluster.
     For examples of discovered nodes, check out the `example_data_structure/discovered_rs.json,discovered_sh.json`.
     """
-    global nodes
-    if len(nodes) > 0:
-        return nodes
+    if len(active_nodes) > 0:
+        return active_nodes
     try:
         is_master = client.admin.command("isMaster")
         database = parsed_uri["database"] if parsed_uri.get("database", None) is not None else "admin"
@@ -103,25 +101,25 @@ def discover_nodes(client, parsed_uri):
             credential = ""
         if is_master.get("setName"):
             # Discover replica set nodes
-            nodes["type"] = "RS"
-            nodes["setName"] = is_master["setName"]
+            active_nodes["type"] = "RS"
+            active_nodes["setName"] = is_master["setName"]
             hosts = [f"{host[0]}:{host[1]}" for host in parsed_uri["nodelist"]]
-            nodes["uri"] = f"mongodb://{credential}{','.join(hosts)}/{database}?{options_str}"
-            nodes["pingLatencySec"], nodes["client"] = connect_and_test("cluster", nodes["uri"])
+            active_nodes["uri"] = f"mongodb://{credential}{','.join(hosts)}/{database}?{options_str}"
+            active_nodes["pingLatencySec"], active_nodes["client"] = connect_and_test("cluster", active_nodes["uri"])
             members = client.admin.command("replSetGetStatus")["members"]
 
             # Prepare the nodes information
-            nodes["members"] = []
+            active_nodes["members"] = []
             for member in members:
                 uri = f"mongodb://{credential}{member['name']}/{database}?{options_str_direct}"
                 l, c = connect_and_test(member["name"], uri)
-                nodes["members"].append({"host": member["name"], "uri": uri, "client": c, "pingLatencySec": l})
+                active_nodes["members"].append({"host": member["name"], "uri": uri, "client": c, "pingLatencySec": l})
         else:
             # Discover sharded cluster nodes, including config servers and shards
-            nodes["type"] = "SH"
+            active_nodes["type"] = "SH"
             hosts = [f"{host[0]}:{host[1]}" for host in parsed_uri["nodelist"]]
-            nodes["uri"] = f"mongodb://{credential}{','.join(hosts)}/{database}?{options_str}"
-            nodes["pingLatencySec"], nodes["client"] = connect_and_test("cluster", nodes["uri"])
+            active_nodes["uri"] = f"mongodb://{credential}{','.join(hosts)}/{database}?{options_str}"
+            active_nodes["pingLatencySec"], active_nodes["client"] = connect_and_test("cluster", active_nodes["uri"])
             shard_map = client.admin.command("getShardMap")["map"]
             parsed_map = {}
             # config and shard nodes
@@ -151,15 +149,13 @@ def discover_nodes(client, parsed_uri):
                 parsed_map["mongos"]["members"].append(
                     {"host": host["_id"], "uri": uri, "client": c, "pingLatencySec": l, "lastPing": ping}
                 )
-            nodes["map"] = parsed_map
+            active_nodes["map"] = parsed_map
 
     except Exception as e:
         logger.error(red(f"Failed to discover nodes: {str(e)}"))
-        import sys
-
         sys.exit(1)
 
-    return nodes
+    return active_nodes
 
 
 def enum_all_nodes(nodes, **kwargs):
