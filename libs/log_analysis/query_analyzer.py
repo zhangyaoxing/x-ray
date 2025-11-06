@@ -1,7 +1,15 @@
 from libs.log_analysis.shared import json_hash
 
 
-DATA_TYPES = ["$binary", "$date", "$numberLong", "$numberInt", "$numberDecimal", "$oid", "$timestamp"]
+DATA_TYPES = [
+    "$binary",
+    "$date",
+    "$numberLong",
+    "$numberInt",
+    "$numberDecimal",
+    "$oid",
+    "$timestamp",
+]
 QUERY_OPERATORS = [
     "$all",
     "$size",
@@ -76,7 +84,15 @@ SIMPLE_OPERATORS = [
     "$text",
     "$comment",
 ]
-COMPLEX_OPERATORS = ["$elemMatch", "$and", "$or", "$not", "$nor", "$expr", "$jsonSchema"]
+COMPLEX_OPERATORS = [
+    "$elemMatch",
+    "$and",
+    "$or",
+    "$not",
+    "$nor",
+    "$expr",
+    "$jsonSchema",
+]
 
 
 def analyze_query_pattern(log_line):
@@ -87,9 +103,9 @@ def analyze_query_pattern(log_line):
     if msg != "Slow query":
         return None
     attr = log_line.get("attr", {})
-    type = attr.get("type", "")
+    op_type = attr.get("type", "")
     command = attr.get("command", {})
-    if type == "update":
+    if op_type == "update":
         # The real update command
         query_type = "update"
         query = command.get("q", {})
@@ -123,7 +139,7 @@ def analyze_query_pattern(log_line):
         query = command.get("deletes", [])
         # if isinstance(query, list) and len(query) > 0:
         #     query = query[0].get("q", {})
-    elif type == "remove":
+    elif op_type == "remove":
         query_type = "remove"
         query = command.get("q", {})
     elif "findAndModify" in command:
@@ -138,16 +154,19 @@ def analyze_query_pattern(log_line):
             q_pattern = query_to_pattern(q.get("q", {}))
             q_hash = json_hash(q_pattern, 4)
             patterns[q_hash] = q_pattern
-        return {"type": query_type, "pattern": list(patterns.values()), "hash": list(patterns.keys())}
-    else:
-        # For single query
-        q_pattern = query_to_pattern(query)
         return {
             "type": query_type,
-            "pattern": q_pattern,
-            "sort": sort,
-            "hash": json_hash({"query": q_pattern, "sort": sort}, 4),
+            "pattern": list(patterns.values()),
+            "hash": list(patterns.keys()),
         }
+    # For single query
+    q_pattern = query_to_pattern(query)
+    return {
+        "type": query_type,
+        "pattern": q_pattern,
+        "sort": sort,
+        "hash": json_hash({"query": q_pattern, "sort": sort}, 4),
+    }
 
 
 def query_to_pattern(query):

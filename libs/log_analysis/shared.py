@@ -1,5 +1,5 @@
 from datetime import datetime
-from libs.utils import *
+from libs.utils import to_ejson
 
 
 def to_json(obj, indent=None):

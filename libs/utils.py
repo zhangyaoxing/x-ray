@@ -43,8 +43,7 @@ def get_script_path(filename=None):
 
     if filename is None:
         return base_path
-    else:
-        return str(Path(base_path) / filename)
+    return str(Path(base_path) / filename)
 
 
 def _load_config():
@@ -59,7 +58,9 @@ def _load_config():
                 if os.path.isfile(config_path):
                     with open(config_path, "r", encoding="utf-8") as f:
                         config = json.load(f)
-                    logger.info("Loaded config from user-provided path: %s", config_path)
+                    logger.info(
+                        "Loaded config from user-provided path: %s", config_path
+                    )
                     return config
 
                 # Then try to load from the script path
@@ -67,7 +68,9 @@ def _load_config():
                 if os.path.isfile(script_config_path):
                     with open(script_config_path, "r", encoding="utf-8") as f:
                         config = json.load(f)
-                    logger.info("Loaded config from script path: %s", script_config_path)
+                    logger.info(
+                        "Loaded config from script path: %s", script_config_path
+                    )
                     return config
 
                 # Finally, try current working directory
@@ -75,7 +78,9 @@ def _load_config():
                 if os.path.isfile(cwd_config_path):
                     with open(cwd_config_path, "r", encoding="utf-8") as f:
                         config = json.load(f)
-                    logger.info("Loaded config from current directory: %s", cwd_config_path)
+                    logger.info(
+                        "Loaded config from current directory: %s", cwd_config_path
+                    )
                     return config
 
                 # If all fails, raise an error
@@ -96,7 +101,12 @@ MAX_CONTENT_WORDS = 3
 MORE_CONTENT = "..."
 
 
-def truncate_content(content: str, delimiter="[ \t]", max_words=MAX_CONTENT_WORDS, more_content=MORE_CONTENT) -> str:
+def truncate_content(
+    content: str,
+    delimiter="[ \t]",
+    max_words=MAX_CONTENT_WORDS,
+    more_content=MORE_CONTENT,
+) -> str:
     content = content.strip()
     truncated = re.split(delimiter, content)
     if len(truncated) <= max_words:
@@ -144,7 +154,14 @@ def escape_markdown(text):
     """
     Escape markdown special characters.
     """
-    ESCAPE_MAP = {"_": "\\_", "*": "\\*", "`": "\\`", "|": "\\|", "<": "&lt;", ">": "&gt;"}
+    ESCAPE_MAP = {
+        "_": "\\_",
+        "*": "\\*",
+        "`": "\\`",
+        "|": "\\|",
+        "<": "&lt;",
+        ">": "&gt;",
+    }
     if not isinstance(text, str):
         text = str(text)
     # Escape underscores, asterisks, backticks, and other special characters
@@ -164,14 +181,19 @@ def format_json_md(json_data, **kwargs):
         kwargs["indent"] = None
         json_str = to_ejson(json_data, **kwargs)
     else:
-        json_str = to_ejson(json_data, **kwargs).replace(" ", "&nbsp;").replace("\n", "<br>")
+        json_str = (
+            to_ejson(json_data, **kwargs).replace(" ", "&nbsp;").replace("\n", "<br>")
+        )
     return json_str
 
 
 def to_ejson(obj, **kwargs):
     indent = kwargs.pop("indent", 2)
     separators = kwargs.pop("separators", None)
-    cls_maps = [{"class": Enum, "func": lambda o: o.name}, {"class": Version, "func": str}]
+    cls_maps = [
+        {"class": Enum, "func": lambda o: o.name},
+        {"class": Version, "func": str},
+    ]
     cls_maps.extend(kwargs.pop("cls_maps", []))
 
     def custom_serializer(o):
@@ -185,7 +207,9 @@ def to_ejson(obj, **kwargs):
     # Must use json.dumps because bson.json_util.dumps has its own serializer behavior,
     # and won't always call our custom_serializer.
     # It only calls when the object is not serializable by default.
-    return json.dumps(obj, indent=indent, separators=separators, default=custom_serializer)
+    return json.dumps(
+        obj, indent=indent, separators=separators, default=custom_serializer
+    )
 
 
 def json_hash(data, digest_size=8):

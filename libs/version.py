@@ -47,14 +47,30 @@ class Version:
     def compatible_with(self, version) -> bool:
         """Check if the given version is compatible with this version."""
         # If the major and minor version are the same, consider compatible
-        if self.version_array[0] == version.version_array[0] and self.version_array[1] == version.version_array[1]:
+        if (
+            self.version_array[0] == version.version_array[0]
+            and self.version_array[1] == version.version_array[1]
+        ):
             return True
         return False
 
     def to_compatibility_str(self) -> str:
         return f"{self.version_array[0]}.{self.version_array[1]}"
 
+    @staticmethod
     def parse(version_str):
+        """Parse a version string into a Version object.
+
+        Args:
+            version_str: Version string in format "x.y.z" or "x.y.z.w"
+
+        Returns:
+            Version: A Version object
+
+        Example:
+            >>> Version.parse("4.4.0")
+            Version([4, 4, 0, 0])
+        """
         parts = version_str.split(".")
         version_array = []
         for part in parts:

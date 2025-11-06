@@ -1,6 +1,5 @@
 from libs.log_analysis.log_items.base_item import BaseItem
-from libs.log_analysis.shared import *
-from libs.utils import *
+from libs.log_analysis.shared import to_json
 
 
 class InfoItem(BaseItem):
@@ -26,7 +25,7 @@ class InfoItem(BaseItem):
         log_id = log_line.get("id", "")
         index = self._ids.index(log_id) if log_id in self._ids else -1
         attr = log_line.get("attr", {})
-        if index == 0 or index == 7:
+        if index in [0, 7]:
             # Process Details
             self._process_details(attr)
         elif index == 1:
@@ -71,7 +70,10 @@ class InfoItem(BaseItem):
 
     def _process_operating_system(self, attr):
         os_info = attr.get("os", {})
-        self._cache["os"] = {"name": os_info.get("name", "Unknown"), "version": os_info.get("version", "Unknown")}
+        self._cache["os"] = {
+            "name": os_info.get("name", "Unknown"),
+            "version": os_info.get("version", "Unknown"),
+        }
 
     def _process_command_line_options(self, attr):
         options = attr.get("options", {})
@@ -83,7 +85,7 @@ class InfoItem(BaseItem):
 
     def review_results_markdown(self, f):
         super().review_results_markdown(f)
-        if self._cache == {}:
+        if not self._cache:
             f.write("No basic info found in the logs.\n")
             return
         process = self._cache.get("process", None)
@@ -110,17 +112,17 @@ class InfoItem(BaseItem):
             issuer = cert_info.get("issuer", "Unknown")
             valid_from = cert_info.get("notValidBefore", "Unknown")
             valid_to = cert_info.get("notValidAfter", "Unknown")
-            type = cert_info.get("type", "Unknown")
+            cert_type = cert_info.get("type", "Unknown")
             f.write(f"- Key File: `{key_file}`\n")
-            f.write(f"- Type: `{type}`\n")
+            f.write(f"- Type: `{cert_type}`\n")
             f.write(f"- Subject: `{subject}`\n")
             f.write(f"- Issuer: `{issuer}`\n")
             f.write(f"- Valid: `{valid_from}` ~ `{valid_to}`\n\n")
-        os = self._cache.get("os", None)
-        if os:
+        guest_os = self._cache.get("os", None)
+        if guest_os:
             f.write("### Operating System\n\n")
-            f.write(f"- {os.get('name', 'Unknown')}\n")
-            f.write(f"- {os.get('version', 'Unknown')}\n\n")
+            f.write(f"- {guest_os.get('name', 'Unknown')}\n")
+            f.write(f"- {guest_os.get('version', 'Unknown')}\n\n")
         replica_set = self._cache.get("replica_set", {})
         rs_config = replica_set.get("config", None)
         if replica_set:

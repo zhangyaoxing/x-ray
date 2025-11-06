@@ -1,15 +1,13 @@
-import json
-import os
-from libs.log_analysis.log_items.base_item import BaseItem
-from datetime import datetime, timezone
-from libs.log_analysis.shared import to_json
-from bson import json_util
+"""Analyze slow query rates from log lines."""
+
+from datetime import datetime
 import math
+from libs.log_analysis.log_items.base_item import BaseItem
 
 
 class SlowRateItem(BaseItem):
     def __init__(self, output_folder: str, config):
-        super(SlowRateItem, self).__init__(output_folder, config)
+        super().__init__(output_folder, config)
         self._cache = None
         self.name = "Slow Rate"
         self.description = "Analyse the rate of slow queries."
@@ -41,9 +39,13 @@ class SlowRateItem(BaseItem):
         self._cache["byNs"][ns]["total_slow_ms"] += slow_ms
 
     def review_results_markdown(self, f):
-        super(SlowRateItem, self).review_results_markdown(f)
-        f.write(f'<canvas id="canvas_{self.__class__.__name__}" width="400" height="200"></canvas>\n')
-        f.write(f'<div class="pie"><canvas id="canvas_{self.__class__.__name__}_byns" height="200"></canvas></div>\n')
+        super().review_results_markdown(f)
+        f.write(
+            f'<canvas id="canvas_{self.__class__.__name__}" width="400" height="200"></canvas>\n'
+        )
+        f.write(
+            f'<div class="pie"><canvas id="canvas_{self.__class__.__name__}_byns" height="200"></canvas></div>\n'
+        )
         f.write(
             f'<div class="pie"><canvas id="canvas_{self.__class__.__name__}_byns_ms" height="200"></canvas></div>\n'
         )

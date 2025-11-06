@@ -5,7 +5,14 @@ import json
 from bson import json_util
 from libs.log_analysis.log_items.base_item import BaseItem
 from libs.log_analysis.shared import json_hash
-from libs.utils import get_script_path, logger, yellow, tooltip_html, escape_markdown, truncate_content
+from libs.utils import (
+    get_script_path,
+    logger,
+    yellow,
+    tooltip_html,
+    escape_markdown,
+    truncate_content,
+)
 from libs.version import Version
 
 COMPATIBILITY_MATRIX_JSON = "compatibility_matrix.json"
@@ -15,7 +22,7 @@ class ClientMetaItem(BaseItem):
     _driver_matrix = None
 
     def __init__(self, output_folder: str, config):
-        super(ClientMetaItem, self).__init__(output_folder, config)
+        super().__init__(output_folder, config)
         self._cache = {}
         self.name = "Client Metadata"
         self.description = "Visualize client metadata."
@@ -53,7 +60,11 @@ class ClientMetaItem(BaseItem):
         matrix_path = get_script_path(COMPATIBILITY_MATRIX_JSON)
         with open(matrix_path, "r", encoding="utf-8") as f:
             compatibility_matrix = json.load(f)
-        server_compatible_version = self._server_version.to_compatibility_str() if self._server_version else "Unknown"
+        server_compatible_version = (
+            self._server_version.to_compatibility_str()
+            if self._server_version
+            else "Unknown"
+        )
         driver_matrix = compatibility_matrix.get(server_compatible_version, {})
         self._driver_matrix = {k: Version(v) for k, v in driver_matrix.items()}
 
@@ -78,7 +89,10 @@ class ClientMetaItem(BaseItem):
                 driver_version = driver.get("version", "Unknown")
                 full_driver = escape_markdown(f"{driver_name} {driver_version}")
                 is_compatible = is_driver_compatible(
-                    driver_name, driver_version, self._server_version, self._driver_matrix
+                    driver_name,
+                    driver_version,
+                    self._server_version,
+                    self._driver_matrix,
                 )
                 if not is_compatible:
                     full_driver = f'<span style="color:red;">{full_driver}</span>'
@@ -92,7 +106,9 @@ class ClientMetaItem(BaseItem):
                 )
                 platform = escape_markdown(doc.get("platform", "Unknown"))
                 ips = [f"{ip['ip']} ({ip['count']} times)" for ip in line_json["ips"]]
-                ips_html = tooltip_html(", ".join(ips), f"{ips[0]} {'...' if len(ips) > 1 else ''}")
+                ips_html = tooltip_html(
+                    ", ".join(ips), f"{ips[0]} {'...' if len(ips) > 1 else ''}"
+                )
                 rows.append([app_html, full_driver, os_str, platform, ips_html])
         # Sort by Application name, then driver name
         sorted_rows = sorted(rows, key=lambda x: (x[0].lower(), x[1].lower()))
@@ -106,16 +122,24 @@ class ClientMetaItem(BaseItem):
             f.write(
                 '\n**<span style="color: red;">Unable to determine server version to mark incompatible drivers. Log may be truncated by user.</span>**\n'
             )
-        f.write(f"<div class=\"pie\"><canvas id='canvas_{self.__class__.__name__}'></canvas></div>\n")
-        f.write(f"<div class=\"pie\"><canvas id='canvas_{self.__class__.__name__}_ip'></canvas></div>\n")
+        f.write(
+            f"<div class=\"pie\"><canvas id='canvas_{self.__class__.__name__}'></canvas></div>\n"
+        )
+        f.write(
+            f"<div class=\"pie\"><canvas id='canvas_{self.__class__.__name__}_ip'></canvas></div>\n"
+        )
 
 
-def is_driver_compatible(log_driver_name: str, log_driver_version: str, server_version: Version, matrix) -> bool:
+def is_driver_compatible(
+    log_driver_name: str, log_driver_version: str, server_version: Version, matrix
+) -> bool:
     if not server_version or log_driver_version == "Unknown":
         # If can't determine server version, assume compatible.
         # But log a warning and display a message on the report.
         logger.warning(
-            yellow(f"Cannot determine compatibility for driver version: {log_driver_name} {log_driver_version}")
+            yellow(
+                f"Cannot determine compatibility for driver version: {log_driver_name} {log_driver_version}"
+            )
         )
         return True
     try:
@@ -130,14 +154,20 @@ def is_driver_compatible(log_driver_name: str, log_driver_version: str, server_v
                 driver_name = k
                 min_version = v
 
-        driver_ver = parse_version_from_log(log_driver_name, log_driver_version, driver_name)
+        driver_ver = parse_version_from_log(
+            log_driver_name, log_driver_version, driver_name
+        )
         return not driver_ver or driver_ver >= min_version
     except Exception as e:
-        logger.warning("Failed to parse driver version: %s, error: %s", log_driver_version, e)
+        logger.warning(
+            "Failed to parse driver version: %s, error: %s", log_driver_version, e
+        )
         return True
 
 
-def parse_version_from_log(driver_name: str, driver_version: str, target_driver_name: str) -> Version:
+def parse_version_from_log(
+    driver_name: str, driver_version: str, target_driver_name: str
+) -> Version:
     """Parse driver version from log line"""
     # Driver version from the log can have different forms. Some examples are:
     #  - {"name":"mongo-csharp-driver","version":"2.21.0.0"}

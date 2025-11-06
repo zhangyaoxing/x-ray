@@ -16,6 +16,8 @@ CHECKLIST_CLASSES = load_classes("libs.healthcheck.check_items")
 
 
 class Framework:
+    _checkset_name: str = None
+
     def __init__(self, config: dict):
         self._config = config
         self._logger = logging.getLogger(__name__)
