@@ -1,4 +1,7 @@
 # x-ray
+
+[![Makefile CI](https://github.com/zhangyaoxing/x-ray/actions/workflows/makefile.yml/badge.svg)](https://github.com/zhangyaoxing/x-ray/actions/workflows/makefile.yml)
+
 This project aims to create tools for MongoDB analysis and diagnosis. So far 2 modules are built:
 - Health check module.
 - Log analysis module (Under construction).
