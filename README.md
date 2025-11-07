@@ -5,7 +5,7 @@
 [![CodeQL](https://github.com/zhangyaoxing/x-ray/actions/workflows/codeql.yml/badge.svg)](https://github.com/zhangyaoxing/x-ray/actions/workflows/codeql.yml)
 [![Release](https://github.com/zhangyaoxing/x-ray/actions/workflows/release.yml/badge.svg)](https://github.com/zhangyaoxing/x-ray/actions/workflows/release.yml)
 
-This project aims to create tools for MongoDB analysis and diagnosis. So far 2 modules are built:
+This project aims to create tools for MongoDB analysis and diagnosis. So far 3 modules are built:
 - Health check module.
 - Log analysis module (Under construction).
 
