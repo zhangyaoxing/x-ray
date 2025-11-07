@@ -1,82 +1,96 @@
 {
     "type": "SH",
-    "uri": "mongodb://localhost:30017,localhost:30028/?authSource=admin&connectTimeoutMS=5000",
-    "client": "<MongoClient object that connects to the above URI>",
+    "uri": "mongodb://localhost:30017/admin?tls=false",
+    "pingLatencySec": 5.922189,
+    "client": "<MongoClient>",
     "map": {
         "shard01": {
             "setName": "shard01",
-            "uri": "mongodb://localhost:30018,localhost:30019,localhost:30020/?authSource=admin&connectTimeoutMS=5000",
-            "client": "<MongoClient object that connects to the above URI>",
+            "uri": "mongodb://localhost:30018,localhost:30019,localhost:30020/admin?tls=false",
+            "client": "<MongoClient>",
+            "pingLatencySec": 0.94953,
             "members": [
                 {
                     "host": "localhost:30018",
-                    "uri": "mongodb://localhost:30018/?authSource=admin&directConnection=true&connectTimeoutMS=5000",
-                    "client": "<MongoClient object that connects to the above URI>"
+                    "uri": "mongodb://localhost:30018/admin?tls=false&directConnection=true",
+                    "client": "<MongoClient>",
+                    "pingLatencySec": 0.970956
                 },
                 {
                     "host": "localhost:30019",
-                    "uri": "mongodb://localhost:30019/?authSource=admin&directConnection=true&connectTimeoutMS=5000",
-                    "client": "<MongoClient object that connects to the above URI>"
+                    "uri": "mongodb://localhost:30019/admin?tls=false&directConnection=true",
+                    "client": "<MongoClient>",
+                    "pingLatencySec": 0.992073
                 },
                 {
                     "host": "localhost:30020",
-                    "uri": "mongodb://localhost:30020/?authSource=admin&directConnection=true&connectTimeoutMS=5000",
-                    "client": "<MongoClient object that connects to the above URI>"
+                    "uri": "mongodb://localhost:30020/admin?tls=false&directConnection=true",
+                    "client": "<MongoClient>",
+                    "pingLatencySec": 0.992073
                 }
             ]
         },
         "shard02": {
             "setName": "shard02",
-            "uri": "mongodb://localhost:30021,localhost:30022,localhost:30023/?authSource=admin&connectTimeoutMS=5000",
-            "client": "<MongoClient object that connects to the above URI>",
+            "uri": "mongodb://localhost:30021,localhost:30022,localhost:30023/admin?tls=false",
+            "client": "<MongoClient>",
+            "pingLatencySec": 2.030207,
             "members": [
                 {
                     "host": "localhost:30021",
-                    "uri": "mongodb://localhost:30021/?authSource=admin&directConnection=true&connectTimeoutMS=5000",
-                    "client": "<MongoClient object that connects to the above URI>"
+                    "uri": "mongodb://localhost:30021/admin?tls=false&directConnection=true",
+                    "client": "<MongoClient>",
+                    "pingLatencySec": 2.043117
                 },
                 {
                     "host": "localhost:30022",
-                    "uri": "mongodb://localhost:30022/?authSource=admin&directConnection=true&connectTimeoutMS=5000",
-                    "client": "<MongoClient object that connects to the above URI>"
+                    "uri": "mongodb://localhost:30022/admin?tls=false&directConnection=true",
+                    "client": "<MongoClient>",
+                    "pingLatencySec": 2.055651
                 },
                 {
                     "host": "localhost:30023",
-                    "uri": "mongodb://localhost:30023/?authSource=admin&directConnection=true&connectTimeoutMS=5000",
-                    "client": "<MongoClient object that connects to the above URI>"
+                    "uri": "mongodb://localhost:30023/admin?tls=false&directConnection=true",
+                    "client": "<MongoClient>",
+                    "pingLatencySec": 2.070487
                 }
             ]
         },
         "config": {
             "setName": "configRepl",
-            "uri": "mongodb://localhost:30024/?authSource=admin&connectTimeoutMS=5000",
-            "client": "<MongoClient object that connects to the above URI>",
+            "uri": "mongodb://localhost:30024/admin?tls=false",
+            "client": "<MongoClient>",
+            "pingLatencySec": 1.088079,
             "members": [
                 {
                     "host": "localhost:30024",
-                    "uri": "mongodb://localhost:30024/?authSource=admin&directConnection=true&connectTimeoutMS=5000",
-                    "client": "<MongoClient object that connects to the above URI>"
+                    "uri": "mongodb://localhost:30024/admin?tls=false&directConnection=true",
+                    "client": "<MongoClient>",
+                    "pingLatencySec": 1.10382
                 }
             ]
         },
         "mongos": {
             "setName": "mongos",
-            "uri": "mongodb://localhost:30017,localhost:30028/?authSource=admin&connectTimeoutMS=5000",
-            "client": "<MongoClient object that connects to the above URI>",
+            "uri": "mongodb://M-QTFH0WFXLG:30017,M-QTFH0WFXLG:30028/admin?tls=false",
             "members": [
                 {
                     "host": "M-QTFH0WFXLG:30017",
-                    "uri": "mongodb://M-QTFH0WFXLG:30017/?authSource=admin&connectTimeoutMS=5000",
-                    "client": "<MongoClient object that connects to the above URI>",
-                    "pingLatencySec": 3.480887,
-                    "lastPing": {"$date": "2025-08-18T18:47:09.593Z"}
+                    "uri": "mongodb://M-QTFH0WFXLG:30017/admin?tls=false&directConnection=true",
+                    "client": "<MongoClient>",
+                    "pingLatencySec": 1.122247,
+                    "lastPing": {
+                        "$date": "2025-11-07T22:25:49.738Z"
+                    }
                 },
                 {
                     "host": "M-QTFH0WFXLG:30028",
-                    "uri": "mongodb://M-QTFH0WFXLG:30028/?authSource=admin&connectTimeoutMS=5000",
-                    "client": "<MongoClient object that connects to the above URI>",
-                    "pingLatencySec": 67086.035915,
-                    "lastPing": {"$date": "2025-08-18T18:47:09.593Z"}
+                    "uri": "mongodb://M-QTFH0WFXLG:30028/admin?tls=false&directConnection=true",
+                    "client": null,
+                    "pingLatencySec": 7464395,
+                    "lastPing": {
+                        "$date": "2025-08-13T12:59:19.978Z"
+                    }
                 }
             ]
         }

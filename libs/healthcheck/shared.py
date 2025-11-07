@@ -58,7 +58,7 @@ def to_json(obj, indent=0):
 def str_to_md_id(string: str) -> str:
     md_id = string.lower()
     md_id = md_id.replace(" ", "-")
-    md_id = re.sub(r"[^a-z0-9\-]", "", md_id)
+    md_id = re.sub(r"[^a-z0-9\-_]", "", md_id)
     md_id = re.sub(r"\-+", "-", md_id)
     md_id = md_id.strip("-")
     return md_id
