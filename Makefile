@@ -80,13 +80,13 @@ flake8:
 # Format code with black
 format:
 	@echo "Formatting code with black..."
-	$(PYTHON) -m black libs/ x-ray tests/ --line-length=120
+	$(PYTHON) -m black libs/ x-ray tests/
 	@echo "\033[32m✓ Code formatted!\033[0m"
 
 # Check formatting without making changes
 check-format:
 	@echo "Checking code format..."
-	$(PYTHON) -m black libs/ x-ray tests/ --line-length=120 --check
+	$(PYTHON) -m black libs/ x-ray tests/ --check
 	@echo "\033[32m✓ Code format is correct!\033[0m"
 
 # Run all quality checks
