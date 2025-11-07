@@ -1,5 +1,6 @@
 from bson import json_util
 from libs.log_analysis.log_items.connection_rate_item import ConnectionRateItem
+from tests.log.mocking import gen_mock_write_output
 
 LOGS = [
     json_util.loads(
@@ -14,18 +15,15 @@ LOGS = [
     json_util.loads(
         '{"t":{"$date":"2025-09-26T00:02:01.718+02:00"},"s":"I",  "c":"NETWORK",  "id":22943,   "ctx":"listener","msg":"Connection accepted","attr":{"remote":"127.0.0.1:57335","uuid":"8d98ce07-0fe0-4543-b69b-8aa23d175a6c","connectionId":55,"connectionCount":20}}'
     ),
-    json_util.loads(
-        '{"t":{"$date":"2025-09-26T00:03:01.718+02:00"},"s":"I",  "c":"NETWORK",  "id":22943,   "ctx":"listener","msg":"Connection accepted","attr":{"remote":"127.0.0.1:57335","uuid":"8d98ce07-0fe0-4543-b69b-8aa23d175a6c","connectionId":55,"connectionCount":20}}'
-    ),
 ]
 
 
 def test_connection_rate_item():
     item = ConnectionRateItem(output_folder="/tmp", config={})
-    output = []
-    item._write_output = lambda: output.append(item._cache.copy())
+    output, item._write_output = gen_mock_write_output(item)
     for log in LOGS:
         item.analyze(log)
+    item.finalize_analysis()
 
     assert len(output) == 2
     result = output[0]
