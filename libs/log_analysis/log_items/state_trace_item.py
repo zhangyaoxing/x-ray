@@ -130,9 +130,7 @@ class StateTraceItem(BaseItem):
                     {
                         "id": -1,
                         "host": host,
-                        "timestamp": (
-                            self._last_log.get("t", "") if self._last_log else ""
-                        ),
+                        "timestamp": (self._last_log.get("t", "") if self._last_log else ""),
                         "event": "LogEnd",
                         "details": {"msg": "End of log"},
                     }
@@ -141,6 +139,4 @@ class StateTraceItem(BaseItem):
 
     def review_results_markdown(self, f):
         super().review_results_markdown(f)
-        f.write(
-            f'<canvas id="canvas_{self.__class__.__name__}" height="300" width="400"></canvas>\n'
-        )
+        f.write(f'<canvas id="canvas_{self.__class__.__name__}" height="300" width="400"></canvas>\n')
