@@ -56,7 +56,7 @@ build-ai:
 # Run tests 
 test:
 	@echo "Running tests..."
-	$(PYTHON) -m pytest tests/ -v
+	$(PYTHON) -m pytest
 	@echo "\033[32m✓ All tests passed!\033[0m"
 
 # Run pylint
@@ -117,7 +117,7 @@ help:
 	@echo "  make check-lint   - Run pylint (errors only)"
 	@echo "  make flake8       - Run flake8 (syntax errors only)"
 	@echo "  make format       - Format code with black"
-	@echo "  make format-check - Check code formatting without changes"
+	@echo "  make check-format - Check code formatting without changes"
 	@echo "  make check        - Run all quality checks (format + lint + flake8 + test)"
 	@echo "  make clean        - Clean build artifacts"
 	@echo "  make all          - Install dependencies and build executable"
