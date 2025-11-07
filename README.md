@@ -7,7 +7,13 @@
 
 This project aims to create tools for MongoDB analysis and diagnosis. So far 2 modules are built:
 - Health check module.
-- Log analysis module (Under construction).
+- Log analysis module.
+- `getMongoData` visualization module (Under construction).
+
+## Disclaimer
+**This software is provided “as-is” without any warranties of any kind, either express or implied. The author and contributors shall not be held liable for any damages or losses arising from the use of this software, including but not limited to data loss, system failures, security issues, or any other problems resulting directly or indirectly from its use.**
+
+**By using this software, you acknowledge and agree that you assume full responsibility and risk. If you do not agree with these terms, do not use this software.**
 
 ## 1 Compatibility Matrix
 ### Health Check
