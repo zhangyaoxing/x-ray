@@ -42,9 +42,9 @@ def test_enum_all_nodes_sh():
             assert "shard02" in nodes["map"]
             assert "config" in nodes["map"]
             assert "mongos" in nodes["map"]
-            return None, None
         except Exception as e:
             pytest.fail(f"Unexpected error: {e}")
+        return None, None
 
     def func_all_mongos(set_name, nodes, **kwargs):
         try:
@@ -54,9 +54,9 @@ def test_enum_all_nodes_sh():
             assert len(nodes["members"]) == 2
             assert nodes["members"][0]["host"] == "M-QTFH0WFXLG:30017"
             assert nodes["members"][1]["host"] == "M-QTFH0WFXLG:30028"
-            return None, None
         except Exception as e:
             pytest.fail(f"Unexpected error: {e}")
+        return None, None
 
     enumed_mongos_members = []
 
@@ -67,9 +67,9 @@ def test_enum_all_nodes_sh():
             assert level == "mongos_member"
             assert nodes["host"] in ["M-QTFH0WFXLG:30017", "M-QTFH0WFXLG:30028"]
             enumed_mongos_members.append(nodes["host"])
-            return None, None
         except Exception as e:
             pytest.fail(f"Unexpected error: {e}")
+        return None, None
 
     def func_shard(set_name, nodes, **kwargs):
         try:
@@ -85,9 +85,9 @@ def test_enum_all_nodes_sh():
                 assert nodes["members"][0]["host"] == "localhost:30021"
                 assert nodes["members"][1]["host"] == "localhost:30022"
                 assert nodes["members"][2]["host"] == "localhost:30023"
-            return None, None
         except Exception as e:
             pytest.fail(f"Unexpected error: {e}")
+        return None, None
 
     enumed_shard_members = []
 
@@ -105,9 +105,9 @@ def test_enum_all_nodes_sh():
                 "localhost:30023",
             ]
             enumed_shard_members.append(nodes["host"])
-            return None, None
         except Exception as e:
             pytest.fail(f"Unexpected error: {e}")
+        return None, None
 
     def func_config(set_name, nodes, **kwargs):
         try:
@@ -116,9 +116,9 @@ def test_enum_all_nodes_sh():
             assert level == "config"
             assert len(nodes["members"]) == 1
             assert nodes["members"][0]["host"] == "localhost:30024"
-            return None, None
         except Exception as e:
             pytest.fail(f"Unexpected error: {e}")
+        return None, None
 
     enumed_config_members = []
 
@@ -207,9 +207,9 @@ def test_enum_result_items_rs():
         try:
             assert name == "replset"
             assert node["type"] == "RS"
-            return None, None
         except Exception as e:
             pytest.fail(f"Unexpected error: {e}")
+        return None, None
 
     enumed_rs_members = []
 
@@ -222,9 +222,9 @@ def test_enum_result_items_rs():
             assert node["rawResult"]["ok"] == 1
             assert node["rawResult"]["versionArray"] == [5, 0, 14, 0]
             enumed_rs_members.append(node["host"])
-            return None, None
         except Exception as e:
             pytest.fail(f"Unexpected error: {e}")
+        return None, None
 
     # Each test function must try/catch and raise pytest.fail on error to report properly
     # Because inside enum_result_items, exceptions are swallowed to allow continuing enumeration
@@ -250,9 +250,9 @@ def test_enum_result_items_sh():
             assert "shard02" in node["map"]
             assert "config" in node["map"]
             assert "mongos" in node["map"]
-            return None, None
         except Exception as e:
             pytest.fail(f"Unexpected error: {e}")
+        return None, None
 
     enumed_mongos_members = []
 
@@ -267,9 +267,9 @@ def test_enum_result_items_sh():
             elif node["host"] == "M-QTFH0WFXLG:30028":
                 assert node["rawResult"] is None
             enumed_mongos_members.append(node["host"])
-            return None, None
         except Exception as e:
             pytest.fail(f"Unexpected error: {e}")
+        return None, None
 
     def func_shard(name, node, **kwargs):
         try:
@@ -277,9 +277,9 @@ def test_enum_result_items_sh():
             assert level == "shard"
             assert name in ["shard01", "shard02"]
             assert node["rawResult"] is None
-            return None, None
         except Exception as e:
             pytest.fail(f"Unexpected error: {e}")
+        return None, None
 
     enumed_shard_members = []
 
@@ -297,9 +297,9 @@ def test_enum_result_items_sh():
                 "localhost:30023",
             ]
             enumed_shard_members.append(node["host"])
-            return None, None
         except Exception as e:
             pytest.fail(f"Unexpected error: {e}")
+        return None, None
 
     def func_config(name, node, **kwargs):
         try:
@@ -307,9 +307,9 @@ def test_enum_result_items_sh():
             assert level == "config"
             assert name == "configRepl"
             assert node["rawResult"] is None
-            return None, None
         except Exception as e:
             pytest.fail(f"Unexpected error: {e}")
+        return None, None
 
     enumed_config_members = []
 
@@ -320,9 +320,9 @@ def test_enum_result_items_sh():
             assert name == "configRepl"
             assert node["host"] == "localhost:30024"
             enumed_config_members.append(node["host"])
-            return None, None
         except Exception as e:
             pytest.fail(f"Unexpected error: {e}")
+        return None, None
 
     # Each test function must try/catch and raise pytest.fail on error to report properly
     # Because inside enum_result_items, exceptions are swallowed to allow continuing enumeration
