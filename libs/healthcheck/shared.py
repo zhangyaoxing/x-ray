@@ -161,7 +161,7 @@ def discover_nodes(client, parsed_uri):
                     )
             # mongos nodes
             all_mongos = list(client.config.get_collection("mongos").find())
-            uri = f"mongodb://{credential}{','.join(host['_id'] for host in all_mongos)}/{database}?{options_str}"
+            # uri = f"mongodb://{credential}{','.join(host['_id'] for host in all_mongos)}/{database}?{options_str}"
             parsed_map["mongos"] = {
                 "setName": "mongos",
                 # "uri": uri,
