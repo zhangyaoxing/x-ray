@@ -11,18 +11,18 @@ const ctx = document.getElementById('canvas_{name}').getContext('2d');
 chart1 = new Chart(ctx, {
     type: 'bar',
     data: {
-        labels: scaleData(bar_labels, scale),
+        labels: bar_labels,
         datasets: [
             {
                 label: 'Slow Count',
-                data: scaleData(count, scale),
+                data: count,
                 type: 'bar',
                 backgroundColor: 'rgba(54, 162, 235, 0.7)',
                 yAxisID: 'y'
             },
             {
                 label: 'Total Slow (ms)',
-                data: scaleData(total_slow_ms, scale),
+                data: total_slow_ms,
                 type: 'line',
                 borderColor: 'rgba(255, 99, 132, 1)',
                 backgroundColor: 'rgba(255, 99, 132, 0.2)',
@@ -39,7 +39,7 @@ chart1 = new Chart(ctx, {
             duration: ANIMATION_DURATION
         },
         plugins: {
-            legend: { 
+            legend: {
                 position: 'top',
                 labels: {
                     usePointStyle: true,
@@ -138,12 +138,6 @@ var chart3 = new Chart(ctx_byns_ms, {
     }
 });
 charts.push(chart3);
-function scaleCharts(scale) {
-    chart1.data.labels = scaleData(bar_labels, scale);
-    chart1.data.datasets[0].data = scaleData(count, scale);
-    chart1.data.datasets[1].data = scaleData(total_slow_ms, scale);
-    chart1.update();
-}
 resetButton.onclick = function () {
     chart1.resetZoom();
 }

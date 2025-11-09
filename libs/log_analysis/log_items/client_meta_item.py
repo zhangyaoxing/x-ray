@@ -27,7 +27,6 @@ class ClientMetaItem(BaseItem):
         self.name = "Client Metadata"
         self.description = "Visualize client metadata."
         self._cache = {}
-        self._show_scaler = False
 
     def analyze(self, log_line):
         super().analyze(log_line)

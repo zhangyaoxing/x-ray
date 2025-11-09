@@ -13,25 +13,25 @@ const ctx = document.getElementById('canvas_{name}').getContext('2d');
 var chart1 = new Chart(ctx, {
     type: 'bar',
     data: {
-        labels: scaleData(labels, scale),
+        labels: labels,
         datasets: [
             {
                 label: 'Connections Created',
-                data: scaleData(created, scale),
+                data: created,
                 type: 'bar',
                 stack: 'Stack 0',
                 backgroundColor: 'rgba(54, 162, 235, 0.7)'
             },
             {
                 label: 'Connections Ended',
-                data: scaleData(ended, scale),
+                data: ended,
                 type: 'bar',
                 stack: 'Stack 0',
                 backgroundColor: 'rgba(255, 99, 132, 0.7)'
             },
             {
                 label: 'Total Connections',
-                data: scaleData(total, scale),
+                data: total,
                 type: 'line',
                 borderColor: 'rgba(255, 206, 86, 1)',
                 backgroundColor: 'rgba(255, 206, 86, 0.2)',
@@ -52,7 +52,7 @@ var chart1 = new Chart(ctx, {
                 display: true,
                 text: 'Connection Create/Ended Rate Over Time'
             },
-            legend: { 
+            legend: {
                 position: 'top',
                 labels: {
                     usePointStyle: true,
@@ -103,10 +103,10 @@ const displayLegend = datasets_byip.length <= MAX_LEGENDS;
 var chart2 = new Chart(ctx_byip, {
     type: 'bar',
     data: {
-        labels: scaleData(labels, scale),
+        labels: labels,
         datasets: datasets_byip.map(ds => ({
             label: ds.label,
-            data: scaleData(ds.data, scale),
+            data: ds.data,
             type: 'bar',
             stack: ds.stack
         }))
@@ -117,7 +117,7 @@ var chart2 = new Chart(ctx_byip, {
                 display: true,
                 text: 'Connections Created/Ended by IP Over Time'
             },
-            legend: { 
+            legend: {
                 position: 'top',
                 display: displayLegend,
                 labels: {
@@ -142,22 +142,8 @@ var chart2 = new Chart(ctx_byip, {
     }
 });
 charts.push(chart2);
-function scaleCharts(scale) {
-    chart1.data.labels = scaleData(labels, scale);
-    chart1.data.datasets[0].data = scaleData(created, scale);
-    chart1.data.datasets[1].data = scaleData(ended, scale);
-    chart1.data.datasets[2].data = scaleData(total, scale);
-    chart1.update();
-    chart2.data.labels = scaleData(labels, scale);
-    chart2.data.datasets = datasets_byip.map(ds => ({
-        label: ds.label,
-        data: scaleData(ds.data, scale),
-        stack: ds.stack
-    }));
-    chart2.update();
-}
 
-resetButton.onclick = function() {
+resetButton.onclick = function () {
     chart1.resetZoom();
     chart2.resetZoom();
 }

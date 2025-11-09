@@ -16,7 +16,6 @@ class TopSlowItem(BaseItem):
         self._top_n = config.get("top", 10)
         self.name = "Top Slow Operations"
         self.description = f"Identify the top `{self._top_n}` slowest operations from the log entries."
-        self._show_scaler = False
         self._cache = {}
 
     def analyze(self, log_line):

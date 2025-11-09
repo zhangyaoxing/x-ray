@@ -28,7 +28,6 @@ class BaseItem:
         self._output_file = os.path.join(output_folder, f"{self.__class__.__name__}.json")
         self._logger = logging.getLogger(__name__)
         self._row_count = 0
-        self._show_scaler = True
         self._show_reset = False
         self._server_version = None
         if os.path.isfile(self._output_file):
@@ -59,8 +58,6 @@ class BaseItem:
         self._write_output()
 
     def review_results_markdown(self, f):
-        # Calculate the scale for the chart. Avoid too many data points.
-        scale = round(self._row_count / MAX_DATA_POINTS if self._row_count > MAX_DATA_POINTS else 1)
         # Write JS snippet to the file
         file_name = f"{self.__class__.__name__}.js"
         file_path = os.path.join("templates", "log", "snippets", file_name)
@@ -69,28 +66,11 @@ class BaseItem:
 
         f.write(f"## {self.name}\n\n")
         f.write(f"{self.description}\n\n")
-        if self._show_scaler:
-            f.write('<div style="display: none;">\n')
-            f.write(
-                f'*Total data points: `{self._row_count}`, displaying every <input type="range" id="slider_{self.__class__.__name__}" min="1" max="{scale * 2}" value="{scale}">'
-            )
-            f.write(f'<code id="sliderValue_{self.__class__.__name__}">{scale}</code> point(s).*\n\n')
-            f.write("</div>\n\n")
+
         if self._show_reset:
             f.write(f'<input type="button" id="reset_{self.__class__.__name__}" value="Reset">\n\n')
         f.write('<script type="text/javascript">\n')
         f.write("document.addEventListener('DOMContentLoaded', function() {\n")
-        if self._show_scaler:
-            f.write(f"let slider = document.getElementById('slider_{self.__class__.__name__}');\n")
-            f.write(f"let sliderValue = document.getElementById('sliderValue_{self.__class__.__name__}');\n")
-            f.write("slider.oninput = function() {\n")
-            f.write("  let value = parseInt(slider.value);\n")
-            f.write("  sliderValue.textContent = value;\n")
-            f.write("}\n")
-            f.write("slider.onchange = function() {\n")
-            f.write("  onSlide(slider, sliderValue, scaleCharts);\n")
-            f.write("}\n")
-            f.write("let scale = parseInt(sliderValue.innerText);\n")
         if self._show_reset:
             f.write(f"let resetButton = document.getElementById('reset_{self.__class__.__name__}');\n")
         f.write("let data = [\n")

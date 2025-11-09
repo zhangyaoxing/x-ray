@@ -9,7 +9,6 @@ class SlowChartItem(BaseItem):
         super().__init__(output_folder, config)
         self.name = "Slow Operations Chart"
         self.description = "Generate a scatter plot showing slow operations over time, with each point representing a slow query colored by namespace."
-        self._show_scaler = False
         self._show_reset = True
         self._cache = None
 

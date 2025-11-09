@@ -8,7 +8,6 @@ class InfoItem(BaseItem):
         self.name = "Basic Info"
         self.description = "Basic information about the instance."
         self._cache = {}
-        self._show_scaler = False
 
         self._ids = [
             20721,  # Process Details

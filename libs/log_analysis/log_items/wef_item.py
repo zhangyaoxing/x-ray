@@ -10,7 +10,6 @@ class WEFItem(BaseItem):
         self._cache = {}
         self.name = "Warning/Error/Fatal Logs"
         self.description = "Visualize warning, error, and fatal log messages."
-        self._show_scaler = False
         self._ai_support = self.config.get("ai_support", False)
 
     def analyze(self, log_line):

@@ -5,9 +5,12 @@
     <meta charset="UTF-8">
     <title>Log Analysis Report</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.8.1/github-markdown.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" media="(prefers-color-scheme: light)">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" media="(prefers-color-scheme: dark)">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.8.1/github-markdown.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+        media="(prefers-color-scheme: light)">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+        media="(prefers-color-scheme: dark)">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/plugins/copy-to-clipboard.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -47,20 +50,20 @@
         linkElms = [];
         titleElms = [];
         charts = [];
-        
+
         Chart.register(ChartZoom);
         function getWindowHeight() {
-            return window.innerHeight || 
-                   document.documentElement.clientHeight || 
-                   document.body.clientHeight;
+            return window.innerHeight ||
+                document.documentElement.clientHeight ||
+                document.body.clientHeight;
         }
-        
+
         function getWindowWidth() {
-            return window.innerWidth || 
-                   document.documentElement.clientWidth || 
-                   document.body.clientWidth;
+            return window.innerWidth ||
+                document.documentElement.clientWidth ||
+                document.body.clientWidth;
         }
-        
+
         function highLightOutline() {
             for (var i = 0; i < titleElms.length; i++) {
                 var rect = titleElms[i].getBoundingClientRect();
@@ -117,7 +120,7 @@
             b = outline.getElementsByTagName('b')[0];
             state = 1;
             states = [["none", "block"], ["none", "inline"], ["inline", "none"], ["none", "inline"], ["0 auto", '0 auto 0 ' + outlineWidth + 'px']];
-            window.onresize = function() {
+            window.onresize = function () {
                 blank = (getWindowWidth() - VIEWPORT_WIDTH) / 2;
                 if (blank > outlineWidth) {
                     states = [["none", "block"], ["none", "inline"], ["inline", "none"], ["none", "inline"], ["0 auto", '0 auto 0 auto']];
@@ -143,20 +146,6 @@
             highLightOutline();
             window.onscroll = highLightOutline;
         };
-        function scaleData(data, scale) {
-            if (data.length <= MAX_DATA_POINTS) {
-                return data;
-            }
-            var scaled = [];
-            for (var i = 0; i < data.length; i += scale) {
-                scaled.push(data[i]);
-            }
-            return scaled;
-        }
-        function onSlide(sliderElm, valueElm, scaleCharts) {
-            var value = parseInt(sliderElm.value);
-            scaleCharts(value);
-        }
         function generateRandomColor(alpha = 0.8) {
             const hue = Math.floor(Math.random() * 360);
             const saturation = Math.floor(Math.random() * 30) + 70; // 70-100%
@@ -188,30 +177,36 @@
             margin: 0 auto 0 350px;
             padding: 45px;
         }
+
         @media(max-width:90%) {
             .markdown-body {
                 padding: 15px;
             }
         }
+
         #outline {
             position: fixed;
             top: 10px;
             left: 10px;
             padding: 40px 0;
         }
+
         .pie {
             display: inline-block;
             width: 45%;
         }
+
         .bar {
             display: inline-block;
             width: 100%;
         }
+
         a.in-view {
             background-color: var(--bgColor-default);
             color: var(--fgColor-default);
             font-weight: bold;
         }
+
         .tooltip {
             position: relative;
             display: inline-block;
@@ -245,9 +240,9 @@
             opacity: 1;
             transform: translateX(-50%) translateY(0);
         }
-        
     </style>
 </head>
+
 <body class="markdown-body">
     <script type="text/javascript">
         const ROOT_STYLES = getComputedStyle(document.body);
@@ -262,4 +257,5 @@
     </div>
     {{ content }}
 </body>
+
 </html>
