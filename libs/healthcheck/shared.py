@@ -339,9 +339,9 @@ def enum_result_items(result, **kwargs):
         func_sh_cluster("mongos", result, level="sh_cluster")
         for component_name, host_info in result["map"].items():
             set_name = host_info["setName"]
-            if set_name == "mongos":
+            if component_name == "mongos":
                 func_all_mongos(set_name, host_info, level="all_mongos")
-            elif set_name == "config":
+            elif component_name == "config":
                 func_config(set_name, host_info, level="config")
             else:
                 func_shard(set_name, host_info, level="shard")
