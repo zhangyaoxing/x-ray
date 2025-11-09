@@ -117,8 +117,6 @@ def analyze_query_pattern(log_line):
         # The update command can contain multiple updates
         query_type = "update.$cmd"
         query = command.get("updates", [])
-        # if isinstance(query, list) and len(query) > 0:
-        #     query = query[0].get("q", {})
     elif "aggregate" in command:
         query_type = "aggregate"
         query = command.get("pipeline", [])
