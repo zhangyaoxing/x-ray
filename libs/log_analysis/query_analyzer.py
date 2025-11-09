@@ -139,8 +139,6 @@ def analyze_query_pattern(log_line):
     elif "delete" in command:
         query_type = "remove.$cmd"
         query = command.get("deletes", [])
-        # if isinstance(query, list) and len(query) > 0:
-        #     query = query[0].get("q", {})
     elif op_type == "remove":
         query_type = "remove"
         query = command.get("q", {})
