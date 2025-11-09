@@ -30,7 +30,16 @@ Log analysis requires JSON format logs, which is supported since 4.4.
 | >=4.4 &check; |  >=4.4 &check;  | >=4.4 &check; |
 
 ## 2 Building
-The tool is tested with `Python 3.9.22`.
+### 2.1 Prebuilt Binaries
+Currently the prebuilt binaries are built on 3 platforms:
+- Ubuntu Latest (AMD64)
+- MacOS Latest (ARM64)
+- Windows Latest (AMD64)
+
+More platforms will be added in later releases. If you are not using one of the above, follow instructions in the next chapter to build binary for your platform.
+
+### 2.2 Manual Build
+The tool is tested on `Python 3.9.22`. On MacOS or Linux distributions, you can use the `make` command to build the binary:
 ```bash
 make deps # if it's the first time you build the project
 make # equal to `make build` and `make build-lite`
@@ -41,6 +50,21 @@ For developers the `make deps` will be enough to prepare the environment so you 
 
 You can also build the tool with AI modules for log analysis. For more details refer to: [Build with AI Support](https://github.com/zhangyaoxing/x-ray/wiki/Build-with-AI-Support).
 
+There are other make targets. Use `make help` to find out.
+
+For Windows users, `make` command is not available. You can use Python commands to build the binary:
+```bash
+python -m venv .venv
+.venv\Scripts\python.exe -m pip install --upgrade pip
+.venv\Scripts\python.exe -m pip install -r requirements-base.txt
+.venv\Scripts\python.exe -m PyInstaller --onefile `
+  --name x-ray --add-data="templates;templates" `
+  --add-data="config.json;." `
+  --add-data="libs;libs" `
+  --add-data="compatibility_matrix.json;." `
+  --hidden-import=openai `
+  x-ray
+```
 
 ## 3 Using the Tool
 ```bash

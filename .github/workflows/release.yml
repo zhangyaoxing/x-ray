@@ -20,7 +20,7 @@ jobs:
             asset_name: x-ray-linux-amd64
           - os: macos-latest
             artifact_name: x-ray
-            asset_name: x-ray-macos-amd64
+            asset_name: x-ray-macos-arm64
           - os: windows-latest
             artifact_name: x-ray.exe
             asset_name: x-ray-windows-amd64.exe
@@ -51,7 +51,7 @@ jobs:
 
       - name: Build executable (Windows)
         if: runner.os == 'Windows'
-        run: .venv\Scripts\python.exe -m PyInstaller --onefile --name x-ray --add-data="templates;templates" --add-data="config.json;." --add-data="libs;libs" --add-data="compatibility_matrix.json;." --hidden-import=openai --exclude-module torch --exclude-module torchvision --exclude-module transformers --exclude-module numpy --exclude-module scipy x-ray
+        run: .venv\Scripts\python.exe -m PyInstaller --onefile --name x-ray --add-data="templates;templates" --add-data="config.json;." --add-data="libs;libs" --add-data="compatibility_matrix.json;." --hidden-import=openai x-ray
         shell: cmd
 
       - name: Build executable (Unix)

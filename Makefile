@@ -49,11 +49,6 @@ build-lite:
 		--add-data="libs:libs" \
 		--add-data="compatibility_matrix.json:." \
 		--hidden-import=openai \
-		--exclude-module torch \
-		--exclude-module torchvision \
-		--exclude-module transformers \
-		--exclude-module numpy \
-		--exclude-module scipy \
 		x-ray
 	@echo "\033[32m✓ Lightweight build complete: dist/x-ray\033[0m"
 
