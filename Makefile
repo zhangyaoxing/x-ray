@@ -3,8 +3,18 @@
 # Project name
 PROJECT_NAME = x-ray
 
-# Python interpreter (using Python from virtual environment)
-PYTHON = .venv/bin/python
+# Detect OS and set Python path accordingly
+ifeq ($(OS),Windows_NT)
+	PYTHON = .venv\Scripts\python.exe
+	VENV_ACTIVATE = .venv\Scripts\activate
+	RM = cmd /C rmdir /S /Q
+	MKDIR = cmd /C mkdir
+else
+	PYTHON = .venv/bin/python
+	VENV_ACTIVATE = source .venv/bin/activate
+	RM = rm -rf
+	MKDIR = mkdir -p
+endif
 
 # Default target
 all: deps build
@@ -12,10 +22,20 @@ all: deps build
 # Install dependencies
 deps:
 	@echo "Creating virtual environment..."
-	python3 -m venv .venv
+	python -m venv .venv
 	@echo "Installing dependencies..."
-	$(PYTHON) -m pip install -r requirements.txt
-	@echo "Activate virtual environment: \033[33msource .venv/bin/activate\033[0m"
+	$(PYTHON) -m pip install --upgrade pip
+	$(PYTHON) -m pip install -r requirements-base.txt
+	@echo "Activate virtual environment: $(VENV_ACTIVATE)"
+
+# Install AI dependencies (for build-ai)
+deps-ai:
+	@echo "Creating virtual environment..."
+	python -m venv .venv
+	@echo "Installing AI dependencies..."
+	$(PYTHON) -m pip install --upgrade pip
+	$(PYTHON) -m pip install -r requirements-ai.txt
+	@echo "Activate virtual environment: $(VENV_ACTIVATE)"
 
 # Build executable (default to lightweight build)
 build: build-lite
@@ -96,12 +116,21 @@ check: check-format check-lint flake8 test
 # Clean build artifacts
 clean:
 	@echo "Cleaning build artifacts..."
+ifeq ($(OS),Windows_NT)
+	@if exist build $(RM) build
+	@if exist dist $(RM) dist
+	@if exist __pycache__ $(RM) __pycache__
+	@if exist $(PROJECT_NAME).spec del /F $(PROJECT_NAME).spec
+	@for /d /r %%i in (__pycache__) do @if exist "%%i" $(RM) "%%i"
+	@for /d /r %%i in (*.egg-info) do @if exist "%%i" $(RM) "%%i"
+	@del /S /Q *.pyc 2>nul || exit 0
+else
 	rm -rf build/ dist/ __pycache__/
-	# Only remove spec file if it exists
 	[ -f $(PROJECT_NAME).spec ] && rm $(PROJECT_NAME).spec || true
-	find . -type d -name __pycache__ -exec rm -rf {} +
-	find . -type d -name "*.egg-info" -exec rm -rf {} +
-	find . -type f -name "*.pyc" -delete
+	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
+	find . -type d -name "*.egg-info" -exec rm -rf {} + 2>/dev/null || true
+	find . -type f -name "*.pyc" -delete 2>/dev/null || true
+endif
 
 # Help information
 help:

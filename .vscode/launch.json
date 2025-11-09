@@ -22,11 +22,12 @@
             "program": "x-ray",
             "console": "integratedTerminal",
             "args": [
-                "-c", "config.json",
+                "-c",
+                "config.json",
                 "hc",
                 // "mongodb+srv://cluster0.wy1z6.mongodb.net/admin",
-                "mongodb://localhost:30017/admin?tls=false&connectTimeoutMS=5000",
-                // "mongodb://localhost:27017/admin?tls=false&connectTimeoutMS=5000",
+                // "mongodb://localhost:30017/admin?tls=false&connectTimeoutMS=5000",
+                "mongodb://localhost:27017/admin?tls=false&connectTimeoutMS=5000",
             ],
             "env": {
                 "LOG_LEVEL": "INFO",
@@ -40,9 +41,11 @@
             "program": "x-ray",
             "console": "integratedTerminal",
             "args": [
-                "-c", "config.json",
+                "-c",
+                "config.json",
                 "log",
-                "-r", "1",
+                "-r",
+                "1",
                 "misc/example.log"
             ],
             "env": {

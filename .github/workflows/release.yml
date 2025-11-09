@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - 'v*'  # 推送 v1.0.0, v2.1.3 等 tag 时触发
+      - "v*"
 
 permissions:
   contents: write
@@ -12,6 +12,7 @@ jobs:
   build:
     name: Build on ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: ubuntu-latest
@@ -23,67 +24,103 @@ jobs:
           - os: windows-latest
             artifact_name: x-ray.exe
             asset_name: x-ray-windows-amd64.exe
-    
+
     runs-on: ${{ matrix.os }}
-    
+    continue-on-error: true
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v5
-    
-    - name: Set up Python
-      uses: actions/setup-python@v6
-      with:
-        python-version: '3.9'
-    
-    - name: Install dependencies
-      run: make deps
-    
-    - name: Build executable
-      run: make build-lite
-    
-    - name: Rename artifact (Unix)
-      if: runner.os != 'Windows'
-      run: |
-        mv dist/${{ matrix.artifact_name }} dist/${{ matrix.asset_name }}
-    
-    - name: Rename artifact (Windows)
-      if: runner.os == 'Windows'
-      run: |
-        move dist\${{ matrix.artifact_name }} dist\${{ matrix.asset_name }}
-    
-    - name: Upload artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: ${{ matrix.asset_name }}
-        path: dist/${{ matrix.asset_name }}
-        retention-days: 1
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.9"
+
+      - name: Install dependencies (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          python -m venv .venv
+          .venv\Scripts\python.exe -m pip install --upgrade pip
+          .venv\Scripts\python.exe -m pip install -r requirements-base.txt
+        shell: cmd
+
+      - name: Install dependencies (Unix)
+        if: runner.os != 'Windows'
+        run: make deps
+
+      - name: Build executable (Windows)
+        if: runner.os == 'Windows'
+        run: .venv\Scripts\python.exe -m PyInstaller --onefile --name x-ray --add-data="templates;templates" --add-data="config.json;." --add-data="libs;libs" --add-data="compatibility_matrix.json;." --hidden-import=openai --exclude-module torch --exclude-module torchvision --exclude-module transformers --exclude-module numpy --exclude-module scipy x-ray
+        shell: cmd
+
+      - name: Build executable (Unix)
+        if: runner.os != 'Windows'
+        run: make build
+
+      - name: Rename artifact (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          mv dist/${{ matrix.artifact_name }} dist/${{ matrix.asset_name }}
+
+      - name: Rename artifact (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          move dist\${{ matrix.artifact_name }} dist\${{ matrix.asset_name }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.asset_name }}
+          path: dist/${{ matrix.asset_name }}
+          retention-days: 1
 
   release:
     name: Create Release
     needs: build
     runs-on: ubuntu-latest
-    
+    if: always()
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v5
-    
-    - name: Download all artifacts
-      uses: actions/download-artifact@v6
-      with:
-        path: ./artifacts
-    
-    - name: Display structure of downloaded files
-      run: ls -R ./artifacts
-    
-    - name: Create Release
-      uses: softprops/action-gh-release@v2
-      with:
-        files: |
-          ./artifacts/x-ray-linux-amd64/x-ray-linux-amd64
-          ./artifacts/x-ray-macos-amd64/x-ray-macos-amd64
-          ./artifacts/x-ray-windows-amd64.exe/x-ray-windows-amd64.exe
-        draft: false
-        prerelease: false
-        generate_release_notes: true
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v6
+        with:
+          path: ./artifacts
+        continue-on-error: true
+
+      - name: Display structure of downloaded files
+        run: ls -R ./artifacts
+
+      - name: Generate build summary
+        run: |
+          echo "## Build Status" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ -f "./artifacts/x-ray-linux-amd64/x-ray-linux-amd64" ]; then
+            echo "✅ Linux (amd64)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Linux (amd64) - Build failed" >> $GITHUB_STEP_SUMMARY
+          fi
+          if [ -f "./artifacts/x-ray-macos-amd64/x-ray-macos-amd64" ]; then
+            echo "✅ macOS (amd64)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ macOS (amd64) - Build failed" >> $GITHUB_STEP_SUMMARY
+          fi
+          if [ -f "./artifacts/x-ray-windows-amd64.exe/x-ray-windows-amd64.exe" ]; then
+            echo "✅ Windows (amd64)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Windows (amd64) - Build failed" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ./artifacts/**/*
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          fail_on_unmatched_files: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
