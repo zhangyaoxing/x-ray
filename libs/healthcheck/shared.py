@@ -261,7 +261,7 @@ def enum_all_nodes(nodes, **kwargs):  # pylint: disable=too-many-branches
             )
     else:
         result["map"] = {}
-        test_result, raw_result = None, None
+        # test_result, raw_result = None, None
         try:
             test_result, raw_result = func_sh_cluster("mongos", nodes, level="sh_cluster")
             result["testResult"], result["rawResult"] = test_result, raw_result
@@ -275,7 +275,7 @@ def enum_all_nodes(nodes, **kwargs):  # pylint: disable=too-many-branches
                 "rawResult": None,
                 "testResult": None,
             }
-            test_result, raw_result = None, None
+            # test_result, raw_result = None, None
             try:
                 if component_name == "mongos":
                     test_result, raw_result = func_all_mongos(set_name, host_info, level="all_mongos")
@@ -289,7 +289,7 @@ def enum_all_nodes(nodes, **kwargs):  # pylint: disable=too-many-branches
                 logger.error(red(f"Failed to get execution result from {set_name}: {e.__class__.__name__} {str(e)}"))
 
             for member in host_info["members"]:
-                test_result, raw_result = None, None
+                # test_result, raw_result = None, None
                 try:
                     if component_name == "mongos":
                         test_result, raw_result = func_mongos_member(set_name, member, level="mongos_member")
