@@ -1,4 +1,3 @@
-from pymongo import MongoClient
 from libs.healthcheck.check_items.base_item import BaseItem
 from libs.healthcheck.shared import (
     MAX_MONGOS_PING_LATENCY,

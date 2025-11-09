@@ -4,7 +4,7 @@ import logging
 from getpass import getpass
 from pymongo import MongoClient
 from pymongo.uri_parser import parse_uri
-from libs.utils import load_config, green
+from libs.utils import load_config
 from libs.healthcheck.framework import Framework as HealthCheckFramework
 from libs.log_analysis.framework import Framework as LogAnalysisFramework
 

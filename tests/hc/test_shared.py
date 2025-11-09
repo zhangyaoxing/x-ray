@@ -9,7 +9,7 @@ def test_to_json():
     s = SEVERITY.HIGH
     date = datetime(2025, 9, 25, 23, 39, 51, 220000)
     data = {
-        "severity": "HIGH",
+        "severity": s,
         "timestamp": date,
     }
     assert to_json(data) == '{\n"severity": "HIGH",\n"timestamp": "2025-09-25T23:39:51.220000"\n}'
@@ -205,7 +205,6 @@ def test_enum_result_items_rs():
 
     def func_rs_cluster(name, node, **kwargs):
         try:
-            level = kwargs.get("level")
             assert name == "replset"
             assert node["type"] == "RS"
             return None, None
