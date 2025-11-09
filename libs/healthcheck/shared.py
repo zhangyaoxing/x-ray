@@ -74,11 +74,11 @@ def connect_and_test(host, uri):
         ping = client.admin.command("ping")
         cluster_time = ping["$clusterTime"]["clusterTime"]
         latency = (datetime.now(timezone.utc) - datetime.fromtimestamp(cluster_time.time, timezone.utc)).total_seconds()
-        logger.debug("Successfully connected to MongoDB at %s", uri)
+        logger.debug("Successfully connected to MongoDB.")
     except Exception as e:
         latency = MAX_MONGOS_PING_LATENCY + 1  # Set to a high value to indicate failure
         irresponsive_nodes.append({"host": host, "pingLatencySec": latency})
-        logger.debug("Failed to connect to MongoDB at %s: %s", uri, e)
+        logger.debug("Failed to connect to MongoDB: %s", e)
     return latency, client
 
 
