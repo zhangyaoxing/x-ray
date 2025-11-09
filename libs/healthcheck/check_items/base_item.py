@@ -24,11 +24,12 @@ TABLE_ALIGNMENT = {
 
 
 class BaseItem:
-    def __init__(self, output_folder: str, config: dict = None):
-        self._name = "BaseItem"
-        self._description = (
-            "Base item for checklist framework. If you see this, it means the item is not properly defined."
-        )
+    _name: str
+    _description: str
+    _test_result: list
+    _config: dict
+
+    def __init__(self, output_folder: str, config: dict = None, **kwargs):
         self._config = config or {}
         self._test_result = []
         self._logger = logging.getLogger(self.__class__.__name__)
