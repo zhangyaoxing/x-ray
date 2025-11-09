@@ -1,23 +1,27 @@
 {
     "type": "RS",
     "setName": "replset",
-    "uri": "mongodb://localhost:27017,localhost:27018,localhost:27019/?authSource=admin&connectTimeoutMS=5000",
-    "client": "<MongoClient object that connects to the above URI>",
+    "uri": "mongodb://localhost:27017/admin?tls=false",
+    "pingLatencySec": 5.778188,
+    "client": "<MongoClient>",
     "members": [
         {
             "host": "localhost:27017",
-            "uri": "mongodb://localhost:27017/?authSource=admin&directConnection=true&connectTimeoutMS=5000",
-            "client": "<MongoClient object that connects to the above URI>"
+            "uri": "mongodb://localhost:27017/admin?tls=false&directConnection=true",
+            "client": "<MongoClient>",
+            "pingLatencySec": 5.79853
         },
         {
             "host": "localhost:27018",
-            "uri": "mongodb://localhost:27018/?authSource=admin&directConnection=true&connectTimeoutMS=5000",
-            "client": "<MongoClient object that connects to the above URI>"
+            "uri": "mongodb://localhost:27018/admin?tls=false&directConnection=true",
+            "client": "<MongoClient>",
+            "pingLatencySec": 5.811037
         },
         {
             "host": "localhost:27019",
-            "uri": "mongodb://localhost:27019/?authSource=admin&directConnection=true&connectTimeoutMS=5000",
-            "client": "<MongoClient object that connects to the above URI>"
+            "uri": "mongodb://localhost:27019/admin?tls=false&directConnection=true",
+            "client": "<MongoClient>",
+            "pingLatencySec": 5.825411
         }
     ]
 }

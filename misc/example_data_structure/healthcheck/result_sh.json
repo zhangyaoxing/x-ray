@@ -1,0 +1,713 @@
+{
+  "type": "SH",
+  "map": {
+    "shard01": {
+      "setName": "shard01",
+      "members": [
+        {
+          "host": "localhost:30018",
+          "rawResult": {
+            "system": {
+              "currentTime": {
+                "$date": "2025-11-09T13:51:58.482Z"
+              },
+              "hostname": "M-QTFH0WFXLG:30018",
+              "cpuAddrSize": 64,
+              "memSizeMB": 32768,
+              "memLimitMB": 32768,
+              "numCores": 10,
+              "numPhysicalCores": 10,
+              "numCpuSockets": 1,
+              "cpuArch": "x86_64",
+              "numaEnabled": false,
+              "numNumaNodes": 1
+            },
+            "os": {
+              "type": "Darwin",
+              "name": "Mac OS X",
+              "version": "24.6.0"
+            },
+            "extra": {
+              "versionString": "Darwin Kernel Version 24.6.0: Wed Oct 15 21:12:06 PDT 2025; root:xnu-11417.140.69.703.14~1/RELEASE_ARM64_T6000",
+              "alwaysFullSync": 0,
+              "nfsAsync": 0,
+              "model": "MacBookPro18,4",
+              "cpuFrequencyMHz": 2400,
+              "cpuString": "Apple M1 Max",
+              "cpuFeatures": "FPU VME DE PSE TSC MSR PAE MCE CX8 APIC SEP MTRR PGE MCA CMOV PAT PSE36 CLFSH DS ACPI MMX FXSR SSE SSE2 SS HTT TM PBE SSE3 PCLMULQDQ DTSE64 MON DSCPL VMX EST TM2 SSSE3 CX16 TPR PDCM SSE4.1 SSE4.2 AES SEGLIM64",
+              "pageSize": 4096,
+              "scheduler": "edge"
+            },
+            "ok": 1.0,
+            "$gleStats": {
+              "lastOpTime": {
+                "$timestamp": {
+                  "t": 0,
+                  "i": 0
+                }
+              },
+              "electionId": {
+                "$oid": "7fffffff00000000000001ef"
+              }
+            },
+            "lastCommittedOpTime": {
+              "$timestamp": {
+                "t": 1762696313,
+                "i": 1
+              }
+            },
+            "$configServerState": {
+              "opTime": {
+                "ts": {
+                  "$timestamp": {
+                    "t": 1762696317,
+                    "i": 1
+                  }
+                },
+                "t": -1
+              }
+            },
+            "$clusterTime": {
+              "clusterTime": {
+                "$timestamp": {
+                  "t": 1762696317,
+                  "i": 1
+                }
+              },
+              "signature": {
+                "hash": {
+                  "$binary": {
+                    "base64": "AAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+                    "subType": "00"
+                  }
+                },
+                "keyId": 0
+              }
+            },
+            "operationTime": {
+              "$timestamp": {
+                "t": 1762696313,
+                "i": 1
+              }
+            }
+          },
+          "testResult": null
+        },
+        {
+          "host": "localhost:30019",
+          "rawResult": {
+            "system": {
+              "currentTime": {
+                "$date": "2025-11-09T13:51:58.483Z"
+              },
+              "hostname": "M-QTFH0WFXLG:30019",
+              "cpuAddrSize": 64,
+              "memSizeMB": 32768,
+              "memLimitMB": 32768,
+              "numCores": 10,
+              "numPhysicalCores": 10,
+              "numCpuSockets": 1,
+              "cpuArch": "x86_64",
+              "numaEnabled": false,
+              "numNumaNodes": 1
+            },
+            "os": {
+              "type": "Darwin",
+              "name": "Mac OS X",
+              "version": "24.6.0"
+            },
+            "extra": {
+              "versionString": "Darwin Kernel Version 24.6.0: Wed Oct 15 21:12:06 PDT 2025; root:xnu-11417.140.69.703.14~1/RELEASE_ARM64_T6000",
+              "alwaysFullSync": 0,
+              "nfsAsync": 0,
+              "model": "MacBookPro18,4",
+              "cpuFrequencyMHz": 2400,
+              "cpuString": "Apple M1 Max",
+              "cpuFeatures": "FPU VME DE PSE TSC MSR PAE MCE CX8 APIC SEP MTRR PGE MCA CMOV PAT PSE36 CLFSH DS ACPI MMX FXSR SSE SSE2 SS HTT TM PBE SSE3 PCLMULQDQ DTSE64 MON DSCPL VMX EST TM2 SSSE3 CX16 TPR PDCM SSE4.1 SSE4.2 AES SEGLIM64",
+              "pageSize": 4096,
+              "scheduler": "edge"
+            },
+            "ok": 1.0,
+            "$gleStats": {
+              "lastOpTime": {
+                "$timestamp": {
+                  "t": 0,
+                  "i": 0
+                }
+              },
+              "electionId": {
+                "$oid": "000000000000000000000000"
+              }
+            },
+            "lastCommittedOpTime": {
+              "$timestamp": {
+                "t": 1762696313,
+                "i": 1
+              }
+            },
+            "$configServerState": {
+              "opTime": {
+                "ts": {
+                  "$timestamp": {
+                    "t": 1762696313,
+                    "i": 1
+                  }
+                },
+                "t": -1
+              }
+            },
+            "$clusterTime": {
+              "clusterTime": {
+                "$timestamp": {
+                  "t": 1762696313,
+                  "i": 1
+                }
+              },
+              "signature": {
+                "hash": {
+                  "$binary": {
+                    "base64": "AAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+                    "subType": "00"
+                  }
+                },
+                "keyId": 0
+              }
+            },
+            "operationTime": {
+              "$timestamp": {
+                "t": 1762696313,
+                "i": 1
+              }
+            }
+          },
+          "testResult": null
+        },
+        {
+          "host": "localhost:30020",
+          "rawResult": {
+            "system": {
+              "currentTime": {
+                "$date": "2025-11-09T13:51:58.484Z"
+              },
+              "hostname": "M-QTFH0WFXLG:30020",
+              "cpuAddrSize": 64,
+              "memSizeMB": 32768,
+              "memLimitMB": 32768,
+              "numCores": 10,
+              "numPhysicalCores": 10,
+              "numCpuSockets": 1,
+              "cpuArch": "x86_64",
+              "numaEnabled": false,
+              "numNumaNodes": 1
+            },
+            "os": {
+              "type": "Darwin",
+              "name": "Mac OS X",
+              "version": "24.6.0"
+            },
+            "extra": {
+              "versionString": "Darwin Kernel Version 24.6.0: Wed Oct 15 21:12:06 PDT 2025; root:xnu-11417.140.69.703.14~1/RELEASE_ARM64_T6000",
+              "alwaysFullSync": 0,
+              "nfsAsync": 0,
+              "model": "MacBookPro18,4",
+              "cpuFrequencyMHz": 2400,
+              "cpuString": "Apple M1 Max",
+              "cpuFeatures": "FPU VME DE PSE TSC MSR PAE MCE CX8 APIC SEP MTRR PGE MCA CMOV PAT PSE36 CLFSH DS ACPI MMX FXSR SSE SSE2 SS HTT TM PBE SSE3 PCLMULQDQ DTSE64 MON DSCPL VMX EST TM2 SSSE3 CX16 TPR PDCM SSE4.1 SSE4.2 AES SEGLIM64",
+              "pageSize": 4096,
+              "scheduler": "edge"
+            },
+            "ok": 1.0,
+            "$gleStats": {
+              "lastOpTime": {
+                "$timestamp": {
+                  "t": 0,
+                  "i": 0
+                }
+              },
+              "electionId": {
+                "$oid": "000000000000000000000000"
+              }
+            },
+            "lastCommittedOpTime": {
+              "$timestamp": {
+                "t": 1762696313,
+                "i": 1
+              }
+            },
+            "$configServerState": {
+              "opTime": {
+                "ts": {
+                  "$timestamp": {
+                    "t": 1762696317,
+                    "i": 1
+                  }
+                },
+                "t": -1
+              }
+            },
+            "$clusterTime": {
+              "clusterTime": {
+                "$timestamp": {
+                  "t": 1762696317,
+                  "i": 1
+                }
+              },
+              "signature": {
+                "hash": {
+                  "$binary": {
+                    "base64": "AAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+                    "subType": "00"
+                  }
+                },
+                "keyId": 0
+              }
+            },
+            "operationTime": {
+              "$timestamp": {
+                "t": 1762696313,
+                "i": 1
+              }
+            }
+          },
+          "testResult": null
+        }
+      ],
+      "rawResult": null,
+      "testResult": null
+    },
+    "shard02": {
+      "setName": "shard02",
+      "members": [
+        {
+          "host": "localhost:30021",
+          "rawResult": {
+            "system": {
+              "currentTime": {
+                "$date": "2025-11-09T13:51:58.484Z"
+              },
+              "hostname": "M-QTFH0WFXLG:30021",
+              "cpuAddrSize": 64,
+              "memSizeMB": 32768,
+              "memLimitMB": 32768,
+              "numCores": 10,
+              "numPhysicalCores": 10,
+              "numCpuSockets": 1,
+              "cpuArch": "x86_64",
+              "numaEnabled": false,
+              "numNumaNodes": 1
+            },
+            "os": {
+              "type": "Darwin",
+              "name": "Mac OS X",
+              "version": "24.6.0"
+            },
+            "extra": {
+              "versionString": "Darwin Kernel Version 24.6.0: Wed Oct 15 21:12:06 PDT 2025; root:xnu-11417.140.69.703.14~1/RELEASE_ARM64_T6000",
+              "alwaysFullSync": 0,
+              "nfsAsync": 0,
+              "model": "MacBookPro18,4",
+              "cpuFrequencyMHz": 2400,
+              "cpuString": "Apple M1 Max",
+              "cpuFeatures": "FPU VME DE PSE TSC MSR PAE MCE CX8 APIC SEP MTRR PGE MCA CMOV PAT PSE36 CLFSH DS ACPI MMX FXSR SSE SSE2 SS HTT TM PBE SSE3 PCLMULQDQ DTSE64 MON DSCPL VMX EST TM2 SSSE3 CX16 TPR PDCM SSE4.1 SSE4.2 AES SEGLIM64",
+              "pageSize": 4096,
+              "scheduler": "edge"
+            },
+            "ok": 1.0,
+            "$gleStats": {
+              "lastOpTime": {
+                "$timestamp": {
+                  "t": 0,
+                  "i": 0
+                }
+              },
+              "electionId": {
+                "$oid": "7fffffff00000000000001ee"
+              }
+            },
+            "lastCommittedOpTime": {
+              "$timestamp": {
+                "t": 1762696311,
+                "i": 1
+              }
+            },
+            "$configServerState": {
+              "opTime": {
+                "ts": {
+                  "$timestamp": {
+                    "t": 1762696317,
+                    "i": 1
+                  }
+                },
+                "t": -1
+              }
+            },
+            "$clusterTime": {
+              "clusterTime": {
+                "$timestamp": {
+                  "t": 1762696317,
+                  "i": 1
+                }
+              },
+              "signature": {
+                "hash": {
+                  "$binary": {
+                    "base64": "AAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+                    "subType": "00"
+                  }
+                },
+                "keyId": 0
+              }
+            },
+            "operationTime": {
+              "$timestamp": {
+                "t": 1762696311,
+                "i": 1
+              }
+            }
+          },
+          "testResult": null
+        },
+        {
+          "host": "localhost:30022",
+          "rawResult": {
+            "system": {
+              "currentTime": {
+                "$date": "2025-11-09T13:51:58.485Z"
+              },
+              "hostname": "M-QTFH0WFXLG:30022",
+              "cpuAddrSize": 64,
+              "memSizeMB": 32768,
+              "memLimitMB": 32768,
+              "numCores": 10,
+              "numPhysicalCores": 10,
+              "numCpuSockets": 1,
+              "cpuArch": "x86_64",
+              "numaEnabled": false,
+              "numNumaNodes": 1
+            },
+            "os": {
+              "type": "Darwin",
+              "name": "Mac OS X",
+              "version": "24.6.0"
+            },
+            "extra": {
+              "versionString": "Darwin Kernel Version 24.6.0: Wed Oct 15 21:12:06 PDT 2025; root:xnu-11417.140.69.703.14~1/RELEASE_ARM64_T6000",
+              "alwaysFullSync": 0,
+              "nfsAsync": 0,
+              "model": "MacBookPro18,4",
+              "cpuFrequencyMHz": 2400,
+              "cpuString": "Apple M1 Max",
+              "cpuFeatures": "FPU VME DE PSE TSC MSR PAE MCE CX8 APIC SEP MTRR PGE MCA CMOV PAT PSE36 CLFSH DS ACPI MMX FXSR SSE SSE2 SS HTT TM PBE SSE3 PCLMULQDQ DTSE64 MON DSCPL VMX EST TM2 SSSE3 CX16 TPR PDCM SSE4.1 SSE4.2 AES SEGLIM64",
+              "pageSize": 4096,
+              "scheduler": "edge"
+            },
+            "ok": 1.0,
+            "$gleStats": {
+              "lastOpTime": {
+                "$timestamp": {
+                  "t": 0,
+                  "i": 0
+                }
+              },
+              "electionId": {
+                "$oid": "000000000000000000000000"
+              }
+            },
+            "lastCommittedOpTime": {
+              "$timestamp": {
+                "t": 1762696311,
+                "i": 1
+              }
+            },
+            "$configServerState": {
+              "opTime": {
+                "ts": {
+                  "$timestamp": {
+                    "t": 1762696311,
+                    "i": 2
+                  }
+                },
+                "t": -1
+              }
+            },
+            "$clusterTime": {
+              "clusterTime": {
+                "$timestamp": {
+                  "t": 1762696311,
+                  "i": 2
+                }
+              },
+              "signature": {
+                "hash": {
+                  "$binary": {
+                    "base64": "AAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+                    "subType": "00"
+                  }
+                },
+                "keyId": 0
+              }
+            },
+            "operationTime": {
+              "$timestamp": {
+                "t": 1762696311,
+                "i": 1
+              }
+            }
+          },
+          "testResult": null
+        },
+        {
+          "host": "localhost:30023",
+          "rawResult": {
+            "system": {
+              "currentTime": {
+                "$date": "2025-11-09T13:51:58.485Z"
+              },
+              "hostname": "M-QTFH0WFXLG:30023",
+              "cpuAddrSize": 64,
+              "memSizeMB": 32768,
+              "memLimitMB": 32768,
+              "numCores": 10,
+              "numPhysicalCores": 10,
+              "numCpuSockets": 1,
+              "cpuArch": "x86_64",
+              "numaEnabled": false,
+              "numNumaNodes": 1
+            },
+            "os": {
+              "type": "Darwin",
+              "name": "Mac OS X",
+              "version": "24.6.0"
+            },
+            "extra": {
+              "versionString": "Darwin Kernel Version 24.6.0: Wed Oct 15 21:12:06 PDT 2025; root:xnu-11417.140.69.703.14~1/RELEASE_ARM64_T6000",
+              "alwaysFullSync": 0,
+              "nfsAsync": 0,
+              "model": "MacBookPro18,4",
+              "cpuFrequencyMHz": 2400,
+              "cpuString": "Apple M1 Max",
+              "cpuFeatures": "FPU VME DE PSE TSC MSR PAE MCE CX8 APIC SEP MTRR PGE MCA CMOV PAT PSE36 CLFSH DS ACPI MMX FXSR SSE SSE2 SS HTT TM PBE SSE3 PCLMULQDQ DTSE64 MON DSCPL VMX EST TM2 SSSE3 CX16 TPR PDCM SSE4.1 SSE4.2 AES SEGLIM64",
+              "pageSize": 4096,
+              "scheduler": "edge"
+            },
+            "ok": 1.0,
+            "$gleStats": {
+              "lastOpTime": {
+                "$timestamp": {
+                  "t": 0,
+                  "i": 0
+                }
+              },
+              "electionId": {
+                "$oid": "000000000000000000000000"
+              }
+            },
+            "lastCommittedOpTime": {
+              "$timestamp": {
+                "t": 1762696311,
+                "i": 1
+              }
+            },
+            "$configServerState": {
+              "opTime": {
+                "ts": {
+                  "$timestamp": {
+                    "t": 1762696311,
+                    "i": 2
+                  }
+                },
+                "t": -1
+              }
+            },
+            "$clusterTime": {
+              "clusterTime": {
+                "$timestamp": {
+                  "t": 1762696311,
+                  "i": 2
+                }
+              },
+              "signature": {
+                "hash": {
+                  "$binary": {
+                    "base64": "AAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+                    "subType": "00"
+                  }
+                },
+                "keyId": 0
+              }
+            },
+            "operationTime": {
+              "$timestamp": {
+                "t": 1762696311,
+                "i": 1
+              }
+            }
+          },
+          "testResult": null
+        }
+      ],
+      "rawResult": null,
+      "testResult": null
+    },
+    "config": {
+      "setName": "configRepl",
+      "members": [
+        {
+          "host": "localhost:30024",
+          "rawResult": {
+            "system": {
+              "currentTime": {
+                "$date": "2025-11-09T13:51:58.486Z"
+              },
+              "hostname": "M-QTFH0WFXLG:30024",
+              "cpuAddrSize": 64,
+              "memSizeMB": 32768,
+              "memLimitMB": 32768,
+              "numCores": 10,
+              "numPhysicalCores": 10,
+              "numCpuSockets": 1,
+              "cpuArch": "x86_64",
+              "numaEnabled": false,
+              "numNumaNodes": 1
+            },
+            "os": {
+              "type": "Darwin",
+              "name": "Mac OS X",
+              "version": "24.6.0"
+            },
+            "extra": {
+              "versionString": "Darwin Kernel Version 24.6.0: Wed Oct 15 21:12:06 PDT 2025; root:xnu-11417.140.69.703.14~1/RELEASE_ARM64_T6000",
+              "alwaysFullSync": 0,
+              "nfsAsync": 0,
+              "model": "MacBookPro18,4",
+              "cpuFrequencyMHz": 2400,
+              "cpuString": "Apple M1 Max",
+              "cpuFeatures": "FPU VME DE PSE TSC MSR PAE MCE CX8 APIC SEP MTRR PGE MCA CMOV PAT PSE36 CLFSH DS ACPI MMX FXSR SSE SSE2 SS HTT TM PBE SSE3 PCLMULQDQ DTSE64 MON DSCPL VMX EST TM2 SSSE3 CX16 TPR PDCM SSE4.1 SSE4.2 AES SEGLIM64",
+              "pageSize": 4096,
+              "scheduler": "edge"
+            },
+            "ok": 1.0,
+            "$gleStats": {
+              "lastOpTime": {
+                "$timestamp": {
+                  "t": 0,
+                  "i": 0
+                }
+              },
+              "electionId": {
+                "$oid": "7fffffff000000000000000a"
+              }
+            },
+            "lastCommittedOpTime": {
+              "$timestamp": {
+                "t": 1762696317,
+                "i": 1
+              }
+            },
+            "$clusterTime": {
+              "clusterTime": {
+                "$timestamp": {
+                  "t": 1762696317,
+                  "i": 1
+                }
+              },
+              "signature": {
+                "hash": {
+                  "$binary": {
+                    "base64": "AAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+                    "subType": "00"
+                  }
+                },
+                "keyId": 0
+              }
+            },
+            "operationTime": {
+              "$timestamp": {
+                "t": 1762696317,
+                "i": 1
+              }
+            }
+          },
+          "testResult": null
+        }
+      ],
+      "rawResult": null,
+      "testResult": null
+    },
+    "mongos": {
+      "setName": "mongos",
+      "members": [
+        {
+          "host": "M-QTFH0WFXLG:30017",
+          "rawResult": {
+            "system": {
+              "currentTime": {
+                "$date": "2025-11-09T13:51:58.486Z"
+              },
+              "hostname": "M-QTFH0WFXLG:30017",
+              "cpuAddrSize": 64,
+              "memSizeMB": 32768,
+              "memLimitMB": 32768,
+              "numCores": 10,
+              "numPhysicalCores": 10,
+              "numCpuSockets": 1,
+              "cpuArch": "x86_64",
+              "numaEnabled": false,
+              "numNumaNodes": 1
+            },
+            "os": {
+              "type": "Darwin",
+              "name": "Mac OS X",
+              "version": "24.6.0"
+            },
+            "extra": {
+              "versionString": "Darwin Kernel Version 24.6.0: Wed Oct 15 21:12:06 PDT 2025; root:xnu-11417.140.69.703.14~1/RELEASE_ARM64_T6000",
+              "alwaysFullSync": 0,
+              "nfsAsync": 0,
+              "model": "MacBookPro18,4",
+              "cpuFrequencyMHz": 2400,
+              "cpuString": "Apple M1 Max",
+              "cpuFeatures": "FPU VME DE PSE TSC MSR PAE MCE CX8 APIC SEP MTRR PGE MCA CMOV PAT PSE36 CLFSH DS ACPI MMX FXSR SSE SSE2 SS HTT TM PBE SSE3 PCLMULQDQ DTSE64 MON DSCPL VMX EST TM2 SSSE3 CX16 TPR PDCM SSE4.1 SSE4.2 AES SEGLIM64",
+              "pageSize": 4096,
+              "scheduler": "edge"
+            },
+            "ok": 1.0,
+            "$clusterTime": {
+              "clusterTime": {
+                "$timestamp": {
+                  "t": 1762696317,
+                  "i": 1
+                }
+              },
+              "signature": {
+                "hash": {
+                  "$binary": {
+                    "base64": "AAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+                    "subType": "00"
+                  }
+                },
+                "keyId": 0
+              }
+            },
+            "operationTime": {
+              "$timestamp": {
+                "t": 1762696317,
+                "i": 1
+              }
+            }
+          },
+          "testResult": null
+        },
+        {
+          "host": "M-QTFH0WFXLG:30028",
+          "rawResult": null,
+          "testResult": null
+        }
+      ],
+      "rawResult": null,
+      "testResult": null
+    }
+  },
+  "testResult": null,
+  "rawResult": null
+}
