@@ -1,7 +1,7 @@
 import logging
 import os
 from bson import json_util
-from libs.log_analysis.shared import MAX_DATA_POINTS, to_json
+from libs.log_analysis.shared import to_json
 from libs.utils import get_script_path
 from libs.version import Version
 from libs.utils import to_ejson
@@ -23,12 +23,12 @@ def get_version(log_line):
 class BaseItem:
     _cache = None
 
-    def __init__(self, output_folder: str, config):
+    def __init__(self, output_folder: str, config, **kwargs):
         self.config = config
         self._output_file = os.path.join(output_folder, f"{self.__class__.__name__}.json")
         self._logger = logging.getLogger(__name__)
         self._row_count = 0
-        self._show_reset = False
+        self._show_reset = kwargs.get("show_reset", False)
         self._server_version = None
         if os.path.isfile(self._output_file):
             os.remove(self._output_file)

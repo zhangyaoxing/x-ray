@@ -7,11 +7,10 @@ from libs.log_analysis.log_items.base_item import BaseItem
 
 class SlowRateItem(BaseItem):
     def __init__(self, output_folder: str, config):
-        super().__init__(output_folder, config)
+        super().__init__(output_folder, config, show_reset=True)
         self._cache = None
         self.name = "Slow Rate"
         self.description = "Analyse the rate of slow queries."
-        self._show_reset = True
 
     def analyze(self, log_line):
         log_id = log_line.get("id", "")

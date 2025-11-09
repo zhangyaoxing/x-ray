@@ -6,10 +6,9 @@ from libs.log_analysis.log_items.base_item import BaseItem
 
 class SlowChartItem(BaseItem):
     def __init__(self, output_folder, config):
-        super().__init__(output_folder, config)
+        super().__init__(output_folder, config, show_reset=True)
         self.name = "Slow Operations Chart"
         self.description = "Generate a scatter plot showing slow operations over time, with each point representing a slow query colored by namespace."
-        self._show_reset = True
         self._cache = None
 
     def analyze(self, log_line):
