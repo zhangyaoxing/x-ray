@@ -108,8 +108,9 @@ def discover_nodes(client, parsed_uri):
             active_nodes["type"] = "RS"
             active_nodes["setName"] = is_master["setName"]
             hosts = [f"{host[0]}:{host[1]}" for host in parsed_uri["nodelist"]]
-            active_nodes["uri"] = f"mongodb://{credential}{','.join(hosts)}/{database}?{options_str}"
-            active_nodes["pingLatencySec"], active_nodes["client"] = connect_and_test("cluster", active_nodes["uri"])
+            uri = f"mongodb://{credential}{','.join(hosts)}/{database}?{options_str}"
+            # active_nodes["uri"] = uri
+            active_nodes["pingLatencySec"], active_nodes["client"] = connect_and_test("cluster", uri)
             members = client.admin.command("replSetGetStatus")["members"]
 
             # Prepare the nodes information
@@ -120,7 +121,7 @@ def discover_nodes(client, parsed_uri):
                 active_nodes["members"].append(
                     {
                         "host": member["name"],
-                        "uri": uri,
+                        # "uri": uri,
                         "client": c,
                         "pingLatencySec": l,
                     }
@@ -129,8 +130,9 @@ def discover_nodes(client, parsed_uri):
             # Discover sharded cluster nodes, including config servers and shards
             active_nodes["type"] = "SH"
             hosts = [f"{host[0]}:{host[1]}" for host in parsed_uri["nodelist"]]
-            active_nodes["uri"] = f"mongodb://{credential}{','.join(hosts)}/{database}?{options_str}"
-            active_nodes["pingLatencySec"], active_nodes["client"] = connect_and_test("cluster", active_nodes["uri"])
+            uri = f"mongodb://{credential}{','.join(hosts)}/{database}?{options_str}"
+            # active_nodes["uri"] = uri
+            active_nodes["pingLatencySec"], active_nodes["client"] = connect_and_test("cluster", uri)
             shard_map = client.admin.command("getShardMap")["map"]
             parsed_map = {}
             # config and shard nodes
@@ -141,7 +143,7 @@ def discover_nodes(client, parsed_uri):
                 l, c = connect_and_test(rs_name, uri)
                 parsed_map[k] = {
                     "setName": rs_name,
-                    "uri": uri,
+                    # "uri": uri,
                     "client": c,
                     "pingLatencySec": l,
                     "members": [],
@@ -149,11 +151,22 @@ def discover_nodes(client, parsed_uri):
                 for host in hosts:
                     uri = f"mongodb://{credential}{host}/{database}?{options_str_direct}"
                     l, c = connect_and_test(host, uri)
-                    parsed_map[k]["members"].append({"host": host, "uri": uri, "client": c, "pingLatencySec": l})
+                    parsed_map[k]["members"].append(
+                        {
+                            "host": host,
+                            # "uri": uri,
+                            "client": c,
+                            "pingLatencySec": l,
+                        }
+                    )
             # mongos nodes
             all_mongos = list(client.config.get_collection("mongos").find())
             uri = f"mongodb://{credential}{','.join(host['_id'] for host in all_mongos)}/{database}?{options_str}"
-            parsed_map["mongos"] = {"setName": "mongos", "uri": uri, "members": []}
+            parsed_map["mongos"] = {
+                "setName": "mongos",
+                # "uri": uri,
+                "members": [],
+            }
             for host in all_mongos:
                 ping = host.get("ping", datetime.now()).replace(tzinfo=timezone.utc)
                 uri = f"mongodb://{credential}{host['_id']}/{database}?{options_str_direct}"
@@ -166,7 +179,7 @@ def discover_nodes(client, parsed_uri):
                 parsed_map["mongos"]["members"].append(
                     {
                         "host": host["_id"],
-                        "uri": uri,
+                        # "uri": uri,
                         "client": c,
                         "pingLatencySec": l,
                         "lastPing": ping,

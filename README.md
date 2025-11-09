@@ -44,9 +44,9 @@ The tool is tested on `Python 3.9.22`. On MacOS or Linux distributions, you can 
 make deps # if it's the first time you build the project
 make # equal to `make build` and `make build-lite`
 ```
-The compiled executable is in the folder `./dist/`.
+The compiled binary is in the folder `./dist/`.
 
-For developers the `make deps` will be enough to prepare the environment so you can run this tool in the IDE.
+For developers, the `make deps` will be enough to prepare the environment for running in the IDE.
 
 You can also build the tool with AI modules for log analysis. For more details refer to: [Build with AI Support](https://github.com/zhangyaoxing/x-ray/wiki/Build-with-AI-Support).
 
