@@ -45,6 +45,9 @@ class WEFItem(BaseItem):
                     "Local AI model (%s) loaded for W/E/F log analysis. This can take a few minutes...",
                     green(bold(MODEL_NAME)),
                 )
+                for item in cache:
+                    item["ai_analysis"] = analyze_log_line_local(item["sample"], tokenizer, model, gen_config)
+                    self._logger.debug("AI analyzed log: %s", item["id"])
             except ImportError as e:
                 self._logger.error("AI support enabled but AI libraries not available: %s", e)
                 self._logger.error("Please install AI dependencies or disable AI support in config.json")
@@ -61,19 +64,14 @@ class WEFItem(BaseItem):
                     "Using GPT model (%s) for W/E/F log analysis. This can take a few minutes...",
                     green(bold(GPT_MODEL)),
                 )
+                for item in cache:
+                    item["ai_analysis"] = analyze_log_line_gpt(item["sample"])
+                    self._logger.debug("AI analyzed log: %s", item["id"])
+
             except ImportError as e:
                 self._logger.error("AI support enabled but AI libraries not available: %s", e)
                 self._logger.error("Please install AI dependencies or disable AI support in config.json")
                 self._ai_support = False
-
-        for item in cache:
-            if self._ai_support == "local":
-                item["ai_analysis"] = analyze_log_line_local(item["sample"], tokenizer, model, gen_config)
-            elif self._ai_support == "gpt":
-                item["ai_analysis"] = analyze_log_line_gpt(item["sample"])
-
-            if self._ai_support:
-                self._logger.debug("AI analyzed log: %s", item["id"])
 
         super().finalize_analysis()
 
