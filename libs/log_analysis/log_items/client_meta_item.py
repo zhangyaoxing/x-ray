@@ -36,6 +36,7 @@ class ClientMetaItem(BaseItem):
         attr = log_line.get("attr", {})
         ip = attr["remote"].split(":")[0]
         doc = {
+            "application": attr["doc"].get("application", {}),
             "driver": attr["doc"].get("driver", {}),
             "os": attr["doc"].get("os", {}),
             "platform": attr["doc"].get("platform", ""),
