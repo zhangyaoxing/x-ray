@@ -114,7 +114,8 @@ class BaseItem:
                 result += "\n"
                 i += 1
             elif chart_type in ["bar", "pie"]:
-                result += f"<div class='{chart_type}'><canvas class='{chart_type}' id='canvas_{j}'></canvas></div>"
+                cid = f"{self.__class__.__name__}_{j}"
+                result += f"<div class='{chart_type}'><canvas class='{chart_type}' id='canvas_{cid}'></canvas></div>"
 
         # Output charts next because they are dynamic via JavaScript and need to be in the same context.
         result += "<script type='text/javascript'>\n"
@@ -127,9 +128,10 @@ class BaseItem:
         file_name = f"{self.__class__.__name__}.js"
         file_path = os.path.join("templates", "healthcheck", "snippets", file_name)
         file_path = get_script_path(file_path)
-        with open(file_path, "r", encoding="utf-8") as js_file:
-            for line in js_file:
-                result += line.replace("{name}", self.__class__.__name__)
+        if os.path.exists(file_path):
+            with open(file_path, "r", encoding="utf-8") as js_file:
+                for line in js_file:
+                    result += line.replace("{name}", self.__class__.__name__)
         result += "})()\n"
         result += "</script>\n"
         return result

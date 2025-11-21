@@ -1,4 +1,4 @@
-const ctx = document.getElementById('canvas_1').getContext('2d');
+const ctx = document.getElementById('canvas_{name}_1').getContext('2d');
 let data = data_1;
 const chart = new Chart(ctx, {
     "type": "pie",
