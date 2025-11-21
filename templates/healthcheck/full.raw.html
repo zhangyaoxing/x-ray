@@ -109,6 +109,16 @@
             highLightOutline();
             window.onscroll = highLightOutline;
         };
+        function formatSize(sizeBytes, decimal = 2) {
+            const units = ["B", "KB", "MB", "GB", "TB"];
+            for (let unit of units) {
+                if (sizeBytes < 1024) {
+                    return sizeBytes.toFixed(decimal) + " " + unit;
+                }
+                sizeBytes /= 1024;
+            }
+            return sizeBytes.toFixed(decimal) + " PB";
+        }
     </script>
     <style>
         .markdown-body {

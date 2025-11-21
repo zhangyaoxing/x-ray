@@ -105,9 +105,9 @@ class CollInfoItem(BaseItem):
 
             # Check index:size ratio
             total_index_size = storage_stats.get("totalIndexSize", 0)
-            storage_size = storage_stats.get("storageSize", 0)
+            data_size = storage_stats.get("size", 0)
             threshold = self._config.get("index_size_ratio", 0.2)
-            ratio = total_index_size / storage_size if storage_size > 0 else 0
+            ratio = total_index_size / data_size if data_size > 0 else 0
             if ratio > threshold:
                 test_result.append(
                     {
@@ -264,27 +264,39 @@ class CollInfoItem(BaseItem):
             ],
             "rows": [],
         }
+        frag_table = {
+            "type": "table",
+            "caption": "Storage Fragmentation",
+            "columns": [
+                {"name": "Component", "type": "string"},
+                {"name": "Host", "type": "string"},
+                {"name": "Namespace", "type": "string"},
+                {"name": "Collection Fragmentation", "type": "string"},
+                {"name": "Index Fragmentation", "type": "decimal", "align": "left"},
+            ],
+            "rows": [],
+        }
+        latency_table = {
+            "type": "table",
+            "caption": "Operation Latency",
+            "columns": [
+                {"name": "Component", "type": "string"},
+                {"name": "Host", "type": "string"},
+                {"name": "Namespace", "type": "string"},
+                {"name": "Read Latency", "type": "string"},
+                {"name": "Write Latency", "type": "decimal"},
+                {"name": "Command Latency", "type": "decimal"},
+                {"name": "Transaction Latency", "type": "decimal"},
+            ],
+            "rows": [],
+        }
+        data_sizes = {}
+        data_frag = []
         data.append(stats_table)
-        data_sizes = []
-        data_size_pie = {
-            "type": "pie",
-            "data": {
-                "labels": [],
-                "datasets": [{"label": "Data Sizes", "data": data_sizes}],
-            },
-            "options": {"plugins": {"title": {"display": True, "text": "Data Size"}}},
-        }
-        index_sizes = []
-        index_size_pie = {
-            "type": "pie",
-            "data": {
-                "labels": [],
-                "datasets": [{"label": "Index Sizes", "data": index_sizes}],
-            },
-            "options": {"plugins": {"title": {"display": True, "text": "Index Size"}}},
-        }
-        data.append(data_size_pie)
-        data.append(index_size_pie)
+        data.append({"type": "chart", "data": data_sizes})
+        data.append(frag_table)
+        data.append({"type": "chart", "data": data_frag})
+        data.append(latency_table)
 
         def func_overview(set_name, node, **kwargs):
             raw_result = node["rawResult"]
@@ -309,73 +321,7 @@ class CollInfoItem(BaseItem):
                         f"{index_data_ratio:.2%}",
                     ]
                 )
-                data_size_pie["data"]["labels"].append(f"{ns}")
-                data_sizes.append(size)
-                index_size_pie["data"]["labels"].append(f"{ns}")
-                index_sizes.append(total_index_size)
-
-        frag_table = {
-            "type": "table",
-            "caption": "Storage Fragmentation",
-            "columns": [
-                {"name": "Component", "type": "string"},
-                {"name": "Host", "type": "string"},
-                {"name": "Namespace", "type": "string"},
-                {"name": "Collection Fragmentation", "type": "string"},
-                {"name": "Index Fragmentation", "type": "decimal", "align": "left"},
-            ],
-            "rows": [],
-        }
-        label_set = set()
-        hosts_set = set()
-        frag_data = []
-        coll_frag_bar = {
-            "type": "bar",
-            "data": {"labels": [], "datasets": []},
-            "options": {
-                "indexAxis": "y",
-                "scales": {
-                    "x": {
-                        "title": {
-                            "display": True,
-                            "text": "Storage Fragmentation Ratio",
-                        }
-                    },
-                    "y": {"title": {"display": True, "text": "Namespaces"}},
-                },
-                "plugins": {"title": {"display": True, "text": "Storage Fragmentation"}},
-            },
-        }
-        index_frag_bar = {
-            "type": "bar",
-            "data": {"labels": [], "datasets": []},
-            "options": {
-                "indexAxis": "y",
-                "scales": {
-                    "x": {"title": {"display": True, "text": "Index Fragmentation Ratio"}},
-                    "y": {"title": {"display": True, "text": "Namespaces"}},
-                },
-                "plugins": {"title": {"display": True, "text": "Index Fragmentation"}},
-            },
-        }
-        latency_table = {
-            "type": "table",
-            "caption": "Operation Latency",
-            "columns": [
-                {"name": "Component", "type": "string"},
-                {"name": "Host", "type": "string"},
-                {"name": "Namespace", "type": "string"},
-                {"name": "Read Latency", "type": "string"},
-                {"name": "Write Latency", "type": "decimal"},
-                {"name": "Command Latency", "type": "decimal"},
-                {"name": "Transaction Latency", "type": "decimal"},
-            ],
-            "rows": [],
-        }
-        data.append(frag_table)
-        data.append(coll_frag_bar)
-        data.append(index_frag_bar)
-        data.append(latency_table)
+                data_sizes[ns] = {"size": size, "index_size": total_index_size}
 
         def func_node(set_name, node, **kwargs):
             raw_result = node["rawResult"]
@@ -385,7 +331,6 @@ class CollInfoItem(BaseItem):
                 return
             for stats in raw_result:
                 ns = stats["ns"]
-                label_set.add(ns)
                 # Fragmentation visualization
                 coll_frag = stats.get("collFragmentation", {}).get("fragmentation", 0)
                 index_frags = stats.get("indexFragmentation", [])
@@ -409,8 +354,7 @@ class CollInfoItem(BaseItem):
                     ]
                 )
                 label = f"{set_name}/{host}"
-                hosts_set.add(label)
-                frag_data.append(
+                data_frag.append(
                     {
                         "label": label,
                         "ns": ns,
@@ -442,22 +386,5 @@ class CollInfoItem(BaseItem):
             func_rs_member=func_node,
             func_shard_member=func_node,
         )
-        labels = list(label_set)
-        hosts = list(hosts_set)
-        labels.sort()
-        hosts.sort()
-        coll_frag_bar["data"]["labels"] = labels
-        index_frag_bar["data"]["labels"] = labels
-        for label in hosts:
-            ns_data = []
-            idx_data = []
-            for ns in labels:
-                search = [item for item in frag_data if item["label"] == label and item["ns"] == ns]
-                v = search[0]["collFrag"] if len(search) > 0 else 0
-                ns_data.append(v)
-                v = search[0]["indexFrag"] if len(search) > 0 else 0
-                idx_data.append(v)
-            coll_frag_bar["data"]["datasets"].append({"label": label, "data": ns_data, "stack": label})
-            index_frag_bar["data"]["datasets"].append({"label": label, "data": idx_data})
 
         return {"title": self.name, "description": self.description, "data": data}
