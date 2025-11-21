@@ -10,8 +10,6 @@ This project aims to create tools for MongoDB analysis and diagnosis. So far 3 m
 - Log analysis module.
 - `getMongoData` visualization module (Under construction).
 
-**By using this software, you acknowledge and agree that you assume full responsibility and risk. If you do not agree with these terms, do not use this software.**
-
 ## 1 Compatibility Matrix
 ### Health Check
 |  Replica Set  | Sharded Cluster | Standalone |
