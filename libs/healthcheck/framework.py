@@ -106,6 +106,7 @@ class Framework:
 
             f.write("## 2 Review Raw Results\n\n")
             for i, item in enumerate(self._items):
+                # The link to the related test result
                 title = f"1.{i + 1} {item.name}"
                 title_id = str_to_md_id(title)
                 review_title = f"2.{i + 1} Review {item.name}"

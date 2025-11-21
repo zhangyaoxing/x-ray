@@ -1,9 +1,10 @@
 from abc import abstractmethod
 import logging
 import gzip
+import os
 from bson import json_util
 from libs.healthcheck.shared import SEVERITY, to_json
-from libs.utils import env, to_ejson
+from libs.utils import env, get_script_path, to_ejson
 
 
 def colorize_severity(severity: SEVERITY) -> str:
@@ -93,6 +94,7 @@ class BaseItem:
             result += "(No data)\n\n"
             return result
         i = 0
+        # Output tables first because they are static in markdown.
         for j, block in enumerate(result_data):
             chart_type = block.get("type")
             caption = block.get("caption")
@@ -112,13 +114,24 @@ class BaseItem:
                 result += "\n"
                 i += 1
             elif chart_type in ["bar", "pie"]:
-                cid = f"{self.__class__.__name__}_{j}"
-                result += f"<div class='{chart_type}'><canvas class='{chart_type}' id='{cid}'></canvas></div>"
-                result += "<script type='text/javascript'>\n"
-                result += f"  const canvas{cid} = document.getElementById('{cid}');\n"
-                result += f"  const chart{cid} = new Chart(canvas{cid}, {to_json(block)});\n"
-                result += f"  charts.push(chart{cid});\n"
-                result += "</script>\n"
+                result += f"<div class='{chart_type}'><canvas class='{chart_type}' id='canvas_{j}'></canvas></div>"
+
+        # Output charts next because they are dynamic via JavaScript and need to be in the same context.
+        result += "<script type='text/javascript'>\n"
+        result += "(function() {\n"
+        for j, block in enumerate(result_data):
+            chart_type = block.get("type")
+            if chart_type in ["bar", "pie"]:
+                result += f"let data_{j} = {to_json(block.get('data'))};\n"
+        # Run the JS snippets
+        file_name = f"{self.__class__.__name__}.js"
+        file_path = os.path.join("templates", "healthcheck", "snippets", file_name)
+        file_path = get_script_path(file_path)
+        with open(file_path, "r", encoding="utf-8") as js_file:
+            for line in js_file:
+                result += line.replace("{name}", self.__class__.__name__)
+        result += "})()\n"
+        result += "</script>\n"
         return result
 
     @captured_sample.setter
