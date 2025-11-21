@@ -292,11 +292,13 @@ class CollInfoItem(BaseItem):
         }
         data_sizes = {}
         data_frag = []
+        data_latency = []
         data.append(stats_table)
         data.append({"type": "chart", "data": data_sizes})
         data.append(frag_table)
         data.append({"type": "chart", "data": data_frag})
         data.append(latency_table)
+        data.append({"type": "chart", "data": data_latency})
 
         def func_overview(set_name, node, **kwargs):
             raw_result = node["rawResult"]
@@ -377,6 +379,16 @@ class CollInfoItem(BaseItem):
                         f"{avg_commands_latency:.2f}ms",
                         f"{avg_transactions_latency:.2f}ms",
                     ]
+                )
+                data_latency.append(
+                    {
+                        "label": label,
+                        "ns": ns,
+                        "readsLatency": avg_reads_latency,
+                        "writesLatency": avg_writes_latency,
+                        "commandsLatency": avg_commands_latency,
+                        "transactionsLatency": avg_transactions_latency,
+                    }
                 )
 
         enum_result_items(
