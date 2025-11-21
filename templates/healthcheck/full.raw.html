@@ -10,22 +10,23 @@
     </link>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script type="text/javascript">
+        VIEWPORT_WIDTH = 1200;
         linkElms = [];
         titleElms = [];
         charts = [];
 
         function getWindowHeight() {
-            return window.innerHeight || 
-                   document.documentElement.clientHeight || 
-                   document.body.clientHeight;
+            return window.innerHeight ||
+                document.documentElement.clientHeight ||
+                document.body.clientHeight;
         }
-        
+
         function getWindowWidth() {
-            return window.innerWidth || 
-                   document.documentElement.clientWidth || 
-                   document.body.clientWidth;
+            return window.innerWidth ||
+                document.documentElement.clientWidth ||
+                document.body.clientWidth;
         }
-        
+
         function highLightOutline() {
             for (var i = 0; i < titleElms.length; i++) {
                 var rect = titleElms[i].getBoundingClientRect();
@@ -82,8 +83,8 @@
             b = outline.getElementsByTagName('b')[0];
             state = 1;
             states = [["none", "block"], ["none", "inline"], ["inline", "none"], ["none", "inline"], ["0 auto", '0 auto 0 ' + outlineWidth + 'px']];
-            window.onresize = function() {
-                blank = (getWindowWidth() - 980) / 2;
+            window.onresize = function () {
+                blank = (getWindowWidth() - VIEWPORT_WIDTH) / 2;
                 if (blank > outlineWidth) {
                     states = [["none", "block"], ["none", "inline"], ["inline", "none"], ["none", "inline"], ["0 auto", '0 auto 0 auto']];
                 } else {
@@ -113,35 +114,41 @@
         .markdown-body {
             box-sizing: border-box;
             min-width: 200px;
-            max-width: 980px;
+            max-width: 1200px;
             margin: 0 auto 0 350px;
             padding: 45px;
         }
+
         @media(max-width:90%) {
             .markdown-body {
                 padding: 15px;
             }
         }
+
         #outline {
             position: fixed;
             top: 10px;
             left: 10px;
             padding: 40px 0;
         }
+
         .pie {
             display: inline-block;
-            width: 45%;
+            width: 30%;
         }
+
         .bar {
             display: inline-block;
             width: 100%;
         }
+
         a.in-view {
             background-color: #eee;
             font-weight: bold;
         }
     </style>
 </head>
+
 <body class="markdown-body">
     <div id="outline">
         <a href="#" id="collapse-outline">&#x25C0;</a>
@@ -150,4 +157,5 @@
     </div>
     {{ content }}
 </body>
+
 </html>
