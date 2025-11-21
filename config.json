@@ -15,15 +15,16 @@
             },
             "test": {
                 "items": [
-                    "BuildInfoItem"
+                    "CollInfoItem",
+                    "ServerStatusItem"
                 ]
             }
         },
         "item_config": {
             "BuildInfoItem": {
                 "eol_version": [
-                    4,
-                    4,
+                    6,
+                    0,
                     0
                 ]
             },

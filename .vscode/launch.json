@@ -26,10 +26,9 @@
                 "config.json",
                 "hc",
                 "-s",
-                "test",
-                // "mongodb+srv://cluster0.wy1z6.mongodb.net/admin",
-                // "mongodb://localhost:30017/admin?tls=false&connectTimeoutMS=5000",
-                "mongodb://localhost:27017/admin?tls=false&connectTimeoutMS=5000",
+                "default",
+                "mongodb://localhost:30017/admin?tls=false&connectTimeoutMS=5000",
+                // "mongodb://localhost:27017/admin?tls=false&connectTimeoutMS=5000",
             ],
             "env": {
                 "LOG_LEVEL": "INFO",

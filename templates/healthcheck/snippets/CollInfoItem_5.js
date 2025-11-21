@@ -1,8 +1,6 @@
-// 获取所有唯一的 ns 和 label
 const namespaces = [...new Set(data.map(item => item.ns))];
 const labels = [...new Set(data.map(item => item.label))];
 
-// 为每个 label 和每种延迟类型准备数据集
 const latencyTypes = [
     { key: 'readsLatency', name: 'Reads', color: [54, 162, 235] },
     { key: 'writesLatency', name: 'Writes', color: [255, 99, 132] },
