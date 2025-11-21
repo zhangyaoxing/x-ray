@@ -15,15 +15,18 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-20.04
+          - os: ubuntu-22.04
             artifact_name: x-ray
-            asset_name: x-ray-linux-amd64
+            platform: linux
+            arch: amd64
           - os: macos-14
             artifact_name: x-ray
-            asset_name: x-ray-macos-arm64
+            platform: macos
+            arch: arm64
           - os: windows-2022
             artifact_name: x-ray.exe
-            asset_name: x-ray-windows-amd64.exe
+            platform: windows
+            arch: amd64
 
     runs-on: ${{ matrix.os }}
     continue-on-error: true
@@ -58,21 +61,30 @@ jobs:
         if: runner.os != 'Windows'
         run: make build
 
-      - name: Rename artifact (Unix)
+      - name: Create release directory (Unix)
         if: runner.os != 'Windows'
         run: |
-          mv dist/${{ matrix.artifact_name }} dist/${{ matrix.asset_name }}
+          RELEASE_DIR="x-ray-${{ matrix.platform }}-${{ matrix.arch }}-${{ github.ref_name }}"
+          mkdir -p "dist/${RELEASE_DIR}"
+          mv dist/${{ matrix.artifact_name }} "dist/${RELEASE_DIR}/x-ray"
+          cp LICENSE "dist/${RELEASE_DIR}/"
+          cd dist && tar -czf "${RELEASE_DIR}.tar.gz" "${RELEASE_DIR}"
 
-      - name: Rename artifact (Windows)
+      - name: Create release directory (Windows)
         if: runner.os == 'Windows'
         run: |
-          move dist\${{ matrix.artifact_name }} dist\${{ matrix.asset_name }}
+          set RELEASE_DIR=x-ray-${{ matrix.platform }}-${{ matrix.arch }}-${{ github.ref_name }}
+          mkdir dist\%RELEASE_DIR%
+          move dist\${{ matrix.artifact_name }} dist\%RELEASE_DIR%\x-ray.exe
+          copy LICENSE dist\%RELEASE_DIR%\
+          cd dist && tar -czf %RELEASE_DIR%.tar.gz %RELEASE_DIR%
+        shell: cmd
 
       - name: Upload artifact
         uses: actions/upload-artifact@v5
         with:
-          name: ${{ matrix.asset_name }}
-          path: dist/${{ matrix.asset_name }}
+          name: x-ray-${{ matrix.platform }}-${{ matrix.arch }}-${{ github.ref_name }}
+          path: dist/x-ray-${{ matrix.platform }}-${{ matrix.arch }}-${{ github.ref_name }}.tar.gz
           retention-days: 1
 
   release:
@@ -98,17 +110,17 @@ jobs:
         run: |
           echo "## Build Status" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          if [ -f "./artifacts/x-ray-linux-amd64/x-ray-linux-amd64" ]; then
+          if [ -f "./artifacts/x-ray-linux-amd64-${{ github.ref_name }}/x-ray-linux-amd64-${{ github.ref_name }}.tar.gz" ]; then
             echo "✅ Linux (amd64)" >> $GITHUB_STEP_SUMMARY
           else
             echo "❌ Linux (amd64) - Build failed" >> $GITHUB_STEP_SUMMARY
           fi
-          if [ -f "./artifacts/x-ray-macos-amd64/x-ray-macos-amd64" ]; then
-            echo "✅ macOS (amd64)" >> $GITHUB_STEP_SUMMARY
+          if [ -f "./artifacts/x-ray-macos-arm64-${{ github.ref_name }}/x-ray-macos-arm64-${{ github.ref_name }}.tar.gz" ]; then
+            echo "✅ macOS (ARM64)" >> $GITHUB_STEP_SUMMARY
           else
-            echo "❌ macOS (amd64) - Build failed" >> $GITHUB_STEP_SUMMARY
+            echo "❌ macOS (ARM64) - Build failed" >> $GITHUB_STEP_SUMMARY
           fi
-          if [ -f "./artifacts/x-ray-windows-amd64.exe/x-ray-windows-amd64.exe" ]; then
+          if [ -f "./artifacts/x-ray-windows-amd64-${{ github.ref_name }}/x-ray-windows-amd64-${{ github.ref_name }}.tar.gz" ]; then
             echo "✅ Windows (amd64)" >> $GITHUB_STEP_SUMMARY
           else
             echo "❌ Windows (amd64) - Build failed" >> $GITHUB_STEP_SUMMARY
