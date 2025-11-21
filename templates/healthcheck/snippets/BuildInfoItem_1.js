@@ -1,4 +1,3 @@
-const container = document.getElementById('container_{name}');
 let wrapper = document.createElement('div');
 let canvas = document.createElement('canvas');
 wrapper.className = "pie";
@@ -6,7 +5,6 @@ canvas.className = 'pie';
 container.appendChild(wrapper);
 wrapper.appendChild(canvas);
 const ctx = canvas.getContext('2d');
-let data = data_1;
 const chart = new Chart(ctx, {
     "type": "pie",
     "data": {
