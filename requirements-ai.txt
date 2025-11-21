@@ -15,7 +15,7 @@ huggingface-hub==1.1.4
 safetensors==0.6.2
 tokenizers==0.22.1
 filelock==3.19.1
-fsspec==2025.9.0
+fsspec==2025.10.0
 hf-xet==1.2.0
 
 # Scientific computing
@@ -30,7 +30,7 @@ pydantic==2.12.4
 pydantic_core==2.41.5
 annotated-types==0.7.0
 typing_extensions==4.15.0
-jiter==0.11.0
+jiter==0.12.0
 
 # Utilities
 psutil==7.1.3
