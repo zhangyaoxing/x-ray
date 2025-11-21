@@ -21,7 +21,7 @@ jobs:
           - os: macos-14
             artifact_name: x-ray
             asset_name: x-ray-macos-arm64
-          - os: windows-2019
+          - os: windows-2022
             artifact_name: x-ray.exe
             asset_name: x-ray-windows-amd64.exe
 
