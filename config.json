@@ -1,13 +1,31 @@
 {
     "healthcheck": {
-        "checksets":{
+        "checksets": {
             "default": {
-                "items": ["BuildInfoItem", "ClusterItem", "ServerStatusItem", "ShardKeyItem","HostInfoItem", "SecurityItem", "CollInfoItem", "IndexInfoItem"]
+                "items": [
+                    "BuildInfoItem",
+                    "ClusterItem",
+                    "ServerStatusItem",
+                    "ShardKeyItem",
+                    "HostInfoItem",
+                    "SecurityItem",
+                    "CollInfoItem",
+                    "IndexInfoItem"
+                ]
+            },
+            "test": {
+                "items": [
+                    "BuildInfoItem"
+                ]
             }
         },
         "item_config": {
             "BuildInfoItem": {
-                "eol_version": [4, 4, 0]
+                "eol_version": [
+                    4,
+                    4,
+                    0
+                ]
             },
             "CollInfoItem": {
                 "obj_size_kb": 32,
@@ -40,7 +58,16 @@
         "sample_rate": 1.0,
         "logsets": {
             "default": {
-                "items": ["ConnectionRateItem", "SlowRateItem", "ClientMetaItem", "TopSlowItem", "SlowChartItem", "StateTraceItem", "WEFItem", "InfoItem"]
+                "items": [
+                    "ConnectionRateItem",
+                    "SlowRateItem",
+                    "ClientMetaItem",
+                    "TopSlowItem",
+                    "SlowChartItem",
+                    "StateTraceItem",
+                    "WEFItem",
+                    "InfoItem"
+                ]
             }
         },
         "item_config": {
