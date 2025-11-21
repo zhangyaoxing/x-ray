@@ -22,7 +22,7 @@ iniconfig==2.1.0
 tomli==2.3.0
 
 # Development tools
-pylint==3.3.3
+pylint==3.3.9
 black==25.9.0
 flake8==7.3.0
 
