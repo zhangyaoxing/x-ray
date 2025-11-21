@@ -113,16 +113,14 @@ class BaseItem:
                     result += "|" + "|".join(str(cell) for cell in row) + "|\n"
                 result += "\n"
                 i += 1
-            elif chart_type in ["bar", "pie"]:
-                cid = f"{self.__class__.__name__}_{j}"
-                result += f"<div class='{chart_type}'><canvas class='{chart_type}' id='canvas_{cid}'></canvas></div>"
 
+        result += f'<div id="container_{self.__class__.__name__}"></div>'
         # Output charts next because they are dynamic via JavaScript and need to be in the same context.
         result += "<script type='text/javascript'>\n"
         result += "(function() {\n"
         for j, block in enumerate(result_data):
             chart_type = block.get("type")
-            if chart_type in ["bar", "pie"]:
+            if chart_type != "table":
                 result += f"let data_{j} = {to_json(block.get('data'))};\n"
         # Run the JS snippets
         file_name = f"{self.__class__.__name__}.js"
