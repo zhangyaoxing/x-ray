@@ -17,7 +17,7 @@ else
 endif
 
 # Default target
-all: deps build
+all: deps build test
 
 # Install dependencies
 deps:
