@@ -295,23 +295,7 @@ class ServerStatusItem(BaseItem):
         }
         current = []
         active = []
-        conn_bar = {
-            "type": "bar",
-            "data": {
-                "labels": [],
-                "datasets": [
-                    {"label": "Idle Connections", "data": current},
-                    {"label": "Active Connections", "data": active},
-                ],
-            },
-            "options": {
-                "scales": {
-                    "x": {"stacked": True},
-                    "y": {"stacked": True, "beginAtZero": True, "title": {"display": True, "text": "Connections"}},
-                },
-                "plugins": {"title": {"display": True, "text": "Connection Count"}},
-            },
-        }
+        data_conn = {}
         opcounters_table = {
             "type": "table",
             "caption": "Operation Counters",
@@ -333,31 +317,11 @@ class ServerStatusItem(BaseItem):
         deletes = []
         commands = []
         getmores = []
-        ops_bar = {
-            "type": "bar",
-            "data": {
-                "labels": [],
-                "datasets": [
-                    {"label": "Inserts", "data": inserts},
-                    {"label": "Queries", "data": queries},
-                    {"label": "Updates", "data": updates},
-                    {"label": "Deletes", "data": deletes},
-                    {"label": "Commands", "data": commands},
-                    {"label": "Getmores", "data": getmores},
-                ],
-            },
-            "options": {
-                "scales": {
-                    "x": {"stacked": True},
-                    "y": {"stacked": True, "beginAtZero": True, "title": {"display": True, "text": "Operation Count"}},
-                },
-                "plugins": {"title": {"display": True, "text": "Operation Count"}},
-            },
-        }
+        data_ops = {}
         data.append(conn_table)
-        data.append(conn_bar)
+        data.append({"type": "chart", "data": data_conn})
         data.append(opcounters_table)
-        data.append(ops_bar)
+        data.append({"type": "chart", "data": data_ops})
 
         def func_all_members(set_name, node, **kwargs):
             raw_result = node.get("rawResult", {})
@@ -368,24 +332,47 @@ class ServerStatusItem(BaseItem):
                 opcounters_table["rows"].append(
                     [escape_markdown(set_name), node["host"], "n/a", "n/a", "n/a", "n/a", "n/a", "n/a"]
                 )
+                data_conn[f"{set_name}/{node['host']}"] = {
+                    "current": 0,
+                    "available": 0,
+                    "active": 0,
+                    "totalCreated": 0,
+                    "rejected": 0,
+                    "threaded": 0,
+                }
+                data_ops[f"{set_name}/{node['host']}"] = {
+                    "insert": 0,
+                    "query": 0,
+                    "update": 0,
+                    "delete": 0,
+                    "command": 0,
+                    "getmore": 0,
+                }
                 return
             host = node["host"]
-            connections = raw_result.get("connections", {})
+            conns = raw_result.get("connections", {})
             conn_table["rows"].append(
                 [
                     escape_markdown(set_name),
                     host,
-                    connections.get("current", 0),
-                    connections.get("available", 0),
-                    connections.get("active", 0),
-                    connections.get("totalCreated", 0),
-                    connections.get("rejected", "n/a"),
-                    connections.get("threaded", "n/a"),
+                    conns.get("current", 0),
+                    conns.get("available", 0),
+                    conns.get("active", 0),
+                    conns.get("totalCreated", 0),
+                    conns.get("rejected", "n/a"),
+                    conns.get("threaded", "n/a"),
                 ]
             )
-            conn_bar["data"]["labels"].append(f"{set_name}/{host}")
-            active.append(connections.get("active", 0))
-            current.append(connections.get("current", 0) - connections.get("active", 0))
+            data_conn[f"{set_name}/{host}"] = {
+                "current": conns.get("current", 0),
+                "available": conns.get("available", 0),
+                "active": conns.get("active", 0),
+                "totalCreated": conns.get("totalCreated", 0),
+                "rejected": conns.get("rejected", 0),
+                "threaded": conns.get("threaded", 0),
+            }
+            active.append(conns.get("active", 0))
+            current.append(conns.get("current", 0) - conns.get("active", 0))
             opcounters = raw_result.get("op_counters", {})
             opcounters_table["rows"].append(
                 [
@@ -399,7 +386,14 @@ class ServerStatusItem(BaseItem):
                     opcounters.get("getmore", 0),
                 ]
             )
-            ops_bar["data"]["labels"].append(f"{set_name}/{host}")
+            data_ops[f"{set_name}/{host}"] = {
+                "insert": opcounters.get("insert", 0),
+                "query": opcounters.get("query", 0),
+                "update": opcounters.get("update", 0),
+                "delete": opcounters.get("delete", 0),
+                "command": opcounters.get("command", 0),
+                "getmore": opcounters.get("getmore", 0),
+            }
             inserts.append(opcounters.get("insert", 0))
             queries.append(opcounters.get("query", 0))
             updates.append(opcounters.get("update", 0))
@@ -442,39 +436,9 @@ class ServerStatusItem(BaseItem):
         in_cache_sizes = []
         read_into_sizes = []
         written_from_sizes = []
-        cache_bar = {
-            "type": "bar",
-            "data": {
-                "labels": [],
-                "datasets": [
-                    {"label": "Cache Size", "data": cache_sizes, "stack": "cache", "yAxisID": "y1"},
-                    {"label": "In-Cache Size", "data": in_cache_sizes, "stack": "cache", "yAxisID": "y1"},
-                    {"label": "Read Into", "data": read_into_sizes, "stack": "swap", "yAxisID": "y2"},
-                    {"label": "Written From", "data": written_from_sizes, "stack": "swap", "yAxisID": "y2"},
-                ],
-            },
-            "options": {
-                "scales": {
-                    "x": {"stacked": True},
-                    "y1": {
-                        "position": "left",
-                        "stacked": True,
-                        "beginAtZero": True,
-                        "title": {"display": True, "text": "In-Cache/Total"},
-                    },
-                    "y2": {
-                        "position": "right",
-                        "stacked": True,
-                        "beginAtZero": True,
-                        "grid": {"drawOnChartArea": False},
-                        "title": {"display": True, "text": "Read/Write"},
-                    },
-                },
-                "plugins": {"title": {"display": True, "text": "Cache Size"}},
-            },
-        }
+        data_cache = {}
         data.append(cache_table)
-        data.append(cache_bar)
+        data.append({"type": "chart", "data": data_cache})
         data.append(qt_table)
 
         def func_data_member(set_name, node, **kwargs):
@@ -483,6 +447,12 @@ class ServerStatusItem(BaseItem):
             if not raw_result:
                 cache_table["rows"].append([escape_markdown(set_name), host, "n/a", "n/a", "n/a", "n/a"])
                 qt_table["rows"].append([escape_markdown(set_name), node["host"], "n/a", "n/a"])
+                data_cache[f"{set_name}/{host}"] = {
+                    "cacheSize": 0,
+                    "inCacheSize": 0,
+                    "readInto": 0,
+                    "writtenFrom": 0,
+                }
                 return
             cache = raw_result.get("cache", {})
             cache_table["rows"].append(
@@ -495,7 +465,12 @@ class ServerStatusItem(BaseItem):
                     f"{format_size(cache.get('writtenFrom', 0))}/s",
                 ]
             )
-            cache_bar["data"]["labels"].append(f"{escape_markdown(set_name)}/{host}")
+            data_cache[f"{set_name}/{host}"] = {
+                "cacheSize": cache.get("cacheSize", 0),
+                "inCacheSize": cache.get("inCacheSize", 0),
+                "readInto": cache.get("readInto", 0),
+                "writtenFrom": cache.get("writtenFrom", 0),
+            }
             cache_sizes.append(cache.get("cacheSize", 0))
             in_cache_sizes.append(cache.get("inCacheSize", 0))
             read_into_sizes.append(cache.get("readInto", 0))

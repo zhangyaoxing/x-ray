@@ -102,13 +102,6 @@ class BuildInfoItem(BaseItem):
             func_shard_member=func_node,
             func_config_member=func_node,
         )
-        version_pie = {
-            "type": "pie",
-            "data": {
-                "labels": list(versions.keys()),
-                "datasets": [{"label": "Count", "data": list(versions.values())}],
-            },
-            "options": {"plugins": {"title": {"display": True, "text": "Version Distribution"}}},
-        }
+        version_pie = {"type": "chart", "data": versions}
 
         return {"name": self.name, "description": self.description, "data": [table, version_pie]}

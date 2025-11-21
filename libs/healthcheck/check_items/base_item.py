@@ -1,9 +1,10 @@
 from abc import abstractmethod
 import logging
 import gzip
+import os
 from bson import json_util
 from libs.healthcheck.shared import SEVERITY, to_json
-from libs.utils import env, to_ejson
+from libs.utils import env, get_script_path, to_ejson
 
 
 def colorize_severity(severity: SEVERITY) -> str:
@@ -111,13 +112,20 @@ class BaseItem:
                     result += "|" + "|".join(str(cell) for cell in row) + "|\n"
                 result += "\n"
                 i += 1
-            elif chart_type in ["bar", "pie"]:
-                cid = f"{self.__class__.__name__}_{j}"
-                result += f"<div class='{chart_type}'><canvas class='{chart_type}' id='{cid}'></canvas></div>"
+            elif chart_type == "chart":
+                result += f'<div id="container_{self.__class__.__name__}_{j}"></div>'
                 result += "<script type='text/javascript'>\n"
-                result += f"  const canvas{cid} = document.getElementById('{cid}');\n"
-                result += f"  const chart{cid} = new Chart(canvas{cid}, {to_json(block)});\n"
-                result += f"  charts.push(chart{cid});\n"
+                result += "(function() {\n"
+                result += f"const container = document.getElementById('container_{self.__class__.__name__}_{j}');\n"
+                result += f"let data = {to_json(block.get('data'))};\n"
+                file_name = f"{self.__class__.__name__}_{j}.js"
+                file_path = os.path.join("templates", "healthcheck", "snippets", file_name)
+                file_path = get_script_path(file_path)
+                if os.path.exists(file_path):
+                    with open(file_path, "r", encoding="utf-8") as js_file:
+                        for line in js_file:
+                            result += line.replace("{name}", self.__class__.__name__)
+                result += "})()\n"
                 result += "</script>\n"
         return result
 
