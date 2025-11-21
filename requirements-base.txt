@@ -1,5 +1,5 @@
 # Base requirements for all platforms
-pymongo==4.13.2
+pymongo==4.15.4
 Jinja2==3.1.6
 Markdown==3.9
 MarkupSafe==3.0.3
@@ -10,7 +10,7 @@ requests==2.32.5
 urllib3==2.5.0
 
 # Build tools
-pyinstaller==6.14.2
+pyinstaller==6.16.0
 pyinstaller-hooks-contrib==2025.9
 macholib==1.16.3
 altgraph==0.17.4
@@ -22,16 +22,16 @@ iniconfig==2.1.0
 tomli==2.3.0
 
 # Development tools
-pylint==3.3.3
-black==25.9.0
+pylint==3.3.9
+black==25.11.0
 flake8==7.3.0
 
 # OpenAI API
-openai==2.3.0
+openai==2.8.0
 httpx==0.28.1
 httpcore==1.0.9
 h11==0.16.0
-certifi==2025.10.5
+certifi==2025.11.12
 idna==3.11
 sniffio==1.3.1
 anyio==4.11.0
