@@ -29,14 +29,14 @@ const datasets = Object.keys(data).map((host, index) => {
             details: event.details,
             id: event.id
         };
-        if ([21215, 21216, 21358].includes(event.id)) {
+        if ([20722, 21215, 21216, 21358].includes(event.id)) {
             // State changed, update the latest state
             state = event.details.new_state || "UNKNOWN";
         }
         point.state = state;
         return point;
     });
-    
+
     return {
         label: host,
         data: points,
@@ -65,9 +65,7 @@ const datasets = Object.keys(data).map((host, index) => {
 
 const canvas = document.getElementById('canvas_{name}')
 let height = Object.keys(data).length * 30;
-if (height == 0) {
-    height = 90;
-}
+height = height < 90 ? 90 : height;
 canvas.style.height = `${height}px`;
 canvas.height = height;
 const ctx = canvas.getContext('2d');
@@ -90,7 +88,7 @@ const chart = new Chart(ctx, {
                     text: 'Time'
                 },
                 ticks: {
-                    callback: function(value) {
+                    callback: function (value) {
                         // Convert epoch to ISO time HH:MM:SS
                         const date = new Date(value);
                         const timeStr = date.toISOString().match(/(?<=T)[^\.Z]+/)[0];
@@ -103,7 +101,7 @@ const chart = new Chart(ctx, {
                 max: Object.keys(data).length + 1,
                 ticks: {
                     stepSize: 1,
-                    callback: function(value) {
+                    callback: function (value) {
                         return valueHostMapping[value.toString()] || '';
                     }
                 },
@@ -118,7 +116,7 @@ const chart = new Chart(ctx, {
                 display: true,
                 position: 'top',
                 labels: {
-                    generateLabels: function(chart) {
+                    generateLabels: function (chart) {
                         return Object.keys(COLOR_MAPPING).map(state => {
                             return {
                                 text: state,
@@ -138,10 +136,10 @@ const chart = new Chart(ctx, {
             },
             tooltip: {
                 callbacks: {
-                    title: function(context) {
+                    title: function (context) {
                         return `${context[0].dataset.label}`;
                     },
-                    label: function(context) {
+                    label: function (context) {
                         const dataPoint = context.raw;
                         const date = dataPoint.timestamp;
                         const timeStr = date.toISOString();
@@ -188,6 +186,6 @@ const chart = new Chart(ctx, {
         }
     }
 });
-resetButton.onclick = function() {
+resetButton.onclick = function () {
     chart.resetZoom();
 }

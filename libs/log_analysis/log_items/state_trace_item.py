@@ -5,6 +5,7 @@ class StateTraceItem(BaseItem):
     LOG_IDS = [
         4615611,  # starting (for rs members)
         20721,  # starting (for shard members)
+        20722,  # new state
         21392,  # new configuration applied
         21215,  # new state
         21216,  # new state
@@ -23,16 +24,32 @@ class StateTraceItem(BaseItem):
     def analyze(self, log_line):
         super().analyze(log_line)
         log_id = log_line.get("id", "")
+        self._last_log = log_line
         if log_id not in self.LOG_IDS:
             return
         if self._cache is None:
             self._cache = {}
         msg = log_line.get("msg", "")
-        if log_id == 4615611:
+        if log_id in [4615611, 20721]:
             # Identify myself
             host = log_line.get("attr", {}).get("host", "unknown")
             port = log_line.get("attr", {}).get("port", "unknown")
             self._myself = f"{host}:{port}"
+        if log_id == 20722:
+            # New state
+            host = self._myself
+            new_state = log_line.get("attr", {}).get("memberState", "unknown")
+            if host not in self._cache:
+                self._cache[host] = []
+            self._cache[host].append(
+                {
+                    "id": log_id,
+                    "host": host,
+                    "timestamp": log_line.get("t", ""),
+                    "event": "NewMemberState",
+                    "details": {"new_state": new_state, "msg": "Initial State"},
+                }
+            )
         if log_id == 21392:
             # New configuration applied
             host = self._myself
@@ -117,7 +134,6 @@ class StateTraceItem(BaseItem):
                     "details": {"msg": msg},
                 }
             )
-        self._last_log = log_line
 
     def finalize_analysis(self):
         if self._last_log:
