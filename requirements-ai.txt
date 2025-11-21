@@ -15,7 +15,7 @@ huggingface-hub==0.36.0
 safetensors==0.6.2
 tokenizers==0.22.1
 filelock==3.19.1
-fsspec==2025.9.0
+fsspec==2025.10.0
 hf-xet==1.2.0
 
 # Scientific computing
