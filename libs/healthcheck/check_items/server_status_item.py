@@ -164,12 +164,16 @@ class ServerStatusItem(BaseItem):
                 cache[host] = {
                     "readInto": wt["cache"]["bytes read into cache"],
                     "writtenFrom": wt["cache"]["bytes written from cache"],
+                    "forUpdates": wt["cache"]["bytes allocated for updates"],
+                    "dirty": wt["cache"]["bytes dirty in the cache cumulative"],
                     "uptimeMillis": raw_result["server_status"]["uptimeMillis"],
                 }
             else:
                 # Enumerating result2
                 read_into = wt["cache"]["bytes read into cache"]
                 written_from = wt["cache"]["bytes written from cache"]
+                for_updates = wt["cache"]["bytes allocated for updates"]
+                dirty = wt["cache"]["bytes dirty in the cache cumulative"]
                 uptime = raw_result["server_status"]["uptimeMillis"]
                 interval = (uptime - cache[host]["uptimeMillis"]) / 1000
                 cache[host] = {
@@ -177,6 +181,8 @@ class ServerStatusItem(BaseItem):
                     "inCacheSize": wt["cache"]["bytes currently in the cache"],
                     "readInto": (read_into - cache[host]["readInto"]) / interval,
                     "writtenFrom": (written_from - cache[host]["writtenFrom"]) / interval,
+                    "forUpdates": for_updates - cache[host]["forUpdates"],
+                    "dirty": dirty - cache[host]["dirty"],
                     "uptimeMillis": (uptime - cache[host]["uptimeMillis"]),
                 }
                 test_result = []
@@ -451,6 +457,8 @@ class ServerStatusItem(BaseItem):
                     "cacheSize": 0,
                     "inCacheSize": 0,
                     "readInto": 0,
+                    "forUpdates": 0,
+                    "dirty": 0,
                     "writtenFrom": 0,
                 }
                 return
@@ -469,6 +477,8 @@ class ServerStatusItem(BaseItem):
                 "cacheSize": cache.get("cacheSize", 0),
                 "inCacheSize": cache.get("inCacheSize", 0),
                 "readInto": cache.get("readInto", 0),
+                "forUpdates": cache.get("forUpdates", 0),
+                "dirty": cache.get("dirty", 0),
                 "writtenFrom": cache.get("writtenFrom", 0),
             }
             cache_sizes.append(cache.get("cacheSize", 0))

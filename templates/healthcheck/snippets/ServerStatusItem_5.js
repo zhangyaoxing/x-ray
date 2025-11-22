@@ -2,6 +2,8 @@ const labels = Object.keys(data);
 const inCacheSizeData = labels.map(key => data[key].inCacheSize);
 const readIntoData = labels.map(key => data[key].readInto);
 const writtenFromData = labels.map(key => Math.abs(data[key].writtenFrom));
+const forUpdatesData = labels.map(key => data[key].forUpdates);
+const dirtyData = labels.map(key => data[key].dirty);
 const cacheSizeData = labels.map(key => data[key].cacheSize);
 
 let wrapper = document.createElement('div');
@@ -20,6 +22,20 @@ const chart = new Chart(ctx, {
             {
                 label: 'In Cache Size',
                 data: inCacheSizeData,
+                backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                yAxisID: 'y',
+                cacheSizes: cacheSizeData
+            },
+            {
+                label: 'Updates Ratio',
+                data: forUpdatesData,
+                backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                yAxisID: 'y',
+                cacheSizes: cacheSizeData
+            },
+            {
+                label: 'Dirty Fill Ratio',
+                data: dirtyData,
                 backgroundColor: 'rgba(54, 162, 235, 0.8)',
                 yAxisID: 'y',
                 cacheSizes: cacheSizeData
@@ -96,9 +112,21 @@ const chart = new Chart(ctx, {
                                 'Cache Fill Ratio: ' + fillRatio + '%'
                             ];
                         }
-
-                        if (label === 'Written From') {
-                            return label + ': ' + formatSize(value) + '/s';
+                        if (label === 'Updates Ratio' && context.dataset.cacheSizes) {
+                            const cacheSize = context.dataset.cacheSizes[context.dataIndex];
+                            const updateRatio = ((value / cacheSize) * 100).toFixed(2);
+                            return [
+                                label + ': ' + formatSize(value),
+                                'Updates Ratio: ' + updateRatio + '%'
+                            ];
+                        }
+                        if (label === 'Dirty Fill Ratio' && context.dataset.cacheSizes) {
+                            const cacheSize = context.dataset.cacheSizes[context.dataIndex];
+                            const dirtyRatio = ((value / cacheSize) * 100).toFixed(2);
+                            return [
+                                label + ': ' + formatSize(value),
+                                'Dirty Ratio: ' + dirtyRatio + '%'
+                            ];
                         }
 
                         return label + ': ' + formatSize(value) + '/s';
