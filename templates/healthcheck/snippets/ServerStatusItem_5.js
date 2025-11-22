@@ -20,34 +20,34 @@ const chart = new Chart(ctx, {
         labels: labels,
         datasets: [
             {
-                label: 'In Cache Size',
+                label: 'Bytes In Cache',
                 data: inCacheSizeData,
                 backgroundColor: 'rgba(54, 162, 235, 0.8)',
                 yAxisID: 'y',
                 cacheSizes: cacheSizeData
             },
             {
-                label: 'Updates Ratio',
+                label: 'Bytes Allocated for Updates',
                 data: forUpdatesData,
-                backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                backgroundColor: 'rgba(255, 206, 86, 0.8)',
                 yAxisID: 'y',
                 cacheSizes: cacheSizeData
             },
             {
-                label: 'Dirty Fill Ratio',
+                label: 'Bytes Dirty in Cache',
                 data: dirtyData,
-                backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                backgroundColor: 'rgba(153, 102, 255, 0.8)',
                 yAxisID: 'y',
                 cacheSizes: cacheSizeData
             },
             {
-                label: 'Read Into',
+                label: 'Bytes Read Into',
                 data: readIntoData,
                 backgroundColor: 'rgba(75, 192, 192, 0.8)',
                 yAxisID: 'y1'
             },
             {
-                label: 'Written From',
+                label: 'Bytes Written From',
                 data: writtenFromData,
                 backgroundColor: 'rgba(255, 99, 132, 0.8)',
                 yAxisID: 'y1'
@@ -104,7 +104,7 @@ const chart = new Chart(ctx, {
                         const label = context.dataset.label || '';
                         const value = context.parsed.y;
 
-                        if (label === 'In Cache Size' && context.dataset.cacheSizes) {
+                        if (label === 'Bytes In Cache' && context.dataset.cacheSizes) {
                             const cacheSize = context.dataset.cacheSizes[context.dataIndex];
                             const fillRatio = ((value / cacheSize) * 100).toFixed(2);
                             return [
@@ -112,7 +112,7 @@ const chart = new Chart(ctx, {
                                 'Cache Fill Ratio: ' + fillRatio + '%'
                             ];
                         }
-                        if (label === 'Updates Ratio' && context.dataset.cacheSizes) {
+                        if (label === 'Bytes Allocated for Updates' && context.dataset.cacheSizes) {
                             const cacheSize = context.dataset.cacheSizes[context.dataIndex];
                             const updateRatio = ((value / cacheSize) * 100).toFixed(2);
                             return [
@@ -120,12 +120,12 @@ const chart = new Chart(ctx, {
                                 'Updates Ratio: ' + updateRatio + '%'
                             ];
                         }
-                        if (label === 'Dirty Fill Ratio' && context.dataset.cacheSizes) {
+                        if (label === 'Bytes Dirty in Cache' && context.dataset.cacheSizes) {
                             const cacheSize = context.dataset.cacheSizes[context.dataIndex];
                             const dirtyRatio = ((value / cacheSize) * 100).toFixed(2);
                             return [
                                 label + ': ' + formatSize(value),
-                                'Dirty Ratio: ' + dirtyRatio + '%'
+                                'Dirty Fill Ratio: ' + dirtyRatio + '%'
                             ];
                         }
 
