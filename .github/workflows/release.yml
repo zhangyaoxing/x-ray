@@ -40,25 +40,15 @@ jobs:
         with:
           python-version: "3.9"
 
-      - name: Install dependencies (Windows)
+      - name: Install Make (Windows)
         if: runner.os == 'Windows'
-        run: |
-          python -m venv .venv
-          .venv\Scripts\python.exe -m pip install --upgrade pip
-          .venv\Scripts\python.exe -m pip install -r requirements-base.txt
+        run: choco install make -y
         shell: cmd
 
-      - name: Install dependencies (Unix)
-        if: runner.os != 'Windows'
+      - name: Install dependencies
         run: make deps
 
-      - name: Build executable (Windows)
-        if: runner.os == 'Windows'
-        run: .venv\Scripts\python.exe -m PyInstaller --onefile --name x-ray --add-data="templates;templates" --add-data="config.json;." --add-data="libs;libs" --add-data="compatibility_matrix.json;." --hidden-import=openai x-ray
-        shell: cmd
-
-      - name: Build executable (Unix)
-        if: runner.os != 'Windows'
+      - name: Build executable
         run: make build
 
       - name: Create release directory (Unix)
