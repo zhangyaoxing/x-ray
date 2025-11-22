@@ -48,15 +48,17 @@ You can also build the tool with AI modules for log analysis. For more details r
 There are other make targets. Use `make help` to find out.
 
 For Windows users, `make` command is not available. You can use Python commands to build the binary:
-```bash
-python -m venv .venv
+```powershell
+python.exe -m venv .venv
 .venv\Scripts\python.exe -m pip install --upgrade pip
 .venv\Scripts\python.exe -m pip install -r requirements-base.txt
 .venv\Scripts\python.exe -m PyInstaller --onefile `
-  --name x-ray --add-data="templates;templates" `
+  --name x-ray `
+  --add-data="templates;templates" `
   --add-data="config.json;." `
   --add-data="libs;libs" `
   --add-data="compatibility_matrix.json;." `
+  --icon="misc/x-ray.ico" `
   --hidden-import=openai `
   x-ray
 ```

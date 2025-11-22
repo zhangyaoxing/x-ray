@@ -17,7 +17,7 @@ else
 endif
 
 # Default target
-all: deps build test
+all: deps test build
 
 # Install dependencies
 deps:
@@ -48,6 +48,7 @@ build-lite:
 		--add-data="config.json:." \
 		--add-data="libs:libs" \
 		--add-data="compatibility_matrix.json:." \
+		--icon="misc/x-ray.ico" \
 		--hidden-import=openai \
 		x-ray
 	@echo "\033[32m✓ Lightweight build complete: dist/x-ray\033[0m"
@@ -64,6 +65,7 @@ build-ai:
 		--hidden-import transformers \
 		--hidden-import transformers.models.qwen2 \
 		--hidden-import tokenizers \
+		--icon="misc/x-ray.ico" \
 		x-ray
 	@echo "\033[32m✓ Full build complete: dist/x-ray-ai\033[0m"
 	@echo "\033[33m⚠ Note: This does NOT include model weights. Models will be downloaded on first use.\033[0m"

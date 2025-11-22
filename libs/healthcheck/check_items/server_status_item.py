@@ -14,6 +14,9 @@ class ServerStatusItem(BaseItem):
         self._description += "- Whether used/total connection ratio is too high.\n"
         self._description += "- Whether query targeting is poor.\n"
         self._description += "- Whether the cache read into rate is too high.\n"
+        self._description += "- Whether updates ratio is too high.\n"
+        self._description += "- Whether dirty data ratio is too high.\n"
+        self._description += "- Whether cache fill ratio is too high.\n"
 
     def _check_connections(self, host, server_status):
         """
@@ -70,9 +73,6 @@ class ServerStatusItem(BaseItem):
             )
 
         return test_result, {"scanned/returned": scanned_returned, "scanned_obj/returned": scanned_obj_returned}
-
-    def _check_cache(self, host, ss1, ss2):
-        pass
 
     def test(self, *args, **kwargs):
         """
@@ -143,6 +143,9 @@ class ServerStatusItem(BaseItem):
         # These metrics needs to compare 2 `serverStatus` results
         cache = {}
         read_into_threshold = self._config.get("cache_read_into_mb", 100)
+        updates_ratio_threshold = self._config.get("updates_ratio", [0.08, 0.1])
+        dirty_ratio_threshold = self._config.get("dirty_ratio", [0.15, 0.2])
+        cache_fill_ratio_threshold = self._config.get("cache_fill_ratio", [0.9, 0.95])
 
         def func_data_member(set_name, node, **kwargs):
             raw_result = node.get("rawResult", {})
@@ -164,12 +167,16 @@ class ServerStatusItem(BaseItem):
                 cache[host] = {
                     "readInto": wt["cache"]["bytes read into cache"],
                     "writtenFrom": wt["cache"]["bytes written from cache"],
+                    "forUpdates": wt["cache"].get("bytes allocated for updates", 0),
+                    "dirty": wt["cache"]["bytes dirty in the cache cumulative"],
                     "uptimeMillis": raw_result["server_status"]["uptimeMillis"],
                 }
             else:
                 # Enumerating result2
                 read_into = wt["cache"]["bytes read into cache"]
                 written_from = wt["cache"]["bytes written from cache"]
+                for_updates = wt["cache"].get("bytes allocated for updates", 0)
+                dirty = wt["cache"]["bytes dirty in the cache cumulative"]
                 uptime = raw_result["server_status"]["uptimeMillis"]
                 interval = (uptime - cache[host]["uptimeMillis"]) / 1000
                 cache[host] = {
@@ -177,6 +184,8 @@ class ServerStatusItem(BaseItem):
                     "inCacheSize": wt["cache"]["bytes currently in the cache"],
                     "readInto": (read_into - cache[host]["readInto"]) / interval,
                     "writtenFrom": (written_from - cache[host]["writtenFrom"]) / interval,
+                    "forUpdates": for_updates - cache[host]["forUpdates"],
+                    "dirty": dirty - cache[host]["dirty"],
                     "uptimeMillis": (uptime - cache[host]["uptimeMillis"]),
                 }
                 test_result = []
@@ -187,6 +196,43 @@ class ServerStatusItem(BaseItem):
                             "severity": SEVERITY.MEDIUM,
                             "title": "High Swapping",
                             "description": f"Read into cache rate `{format_size(cache[host]['readInto'])}/s` exceeds the threshold `{format_size(read_into_threshold * 1024 * 1024)}/s`. This usually indicates insufficient cache size or suboptimal indexes.",
+                        }
+                    )
+                update_ratio = (
+                    cache[host]["forUpdates"] / cache[host]["cacheSize"] if cache[host]["cacheSize"] > 0 else 0
+                )
+                dirty_ratio = cache[host]["dirty"] / cache[host]["cacheSize"] if cache[host]["cacheSize"] > 0 else 0
+                fill_ratio = (
+                    cache[host]["inCacheSize"] / cache[host]["cacheSize"] if cache[host]["cacheSize"] > 0 else 0
+                )
+                if update_ratio > updates_ratio_threshold[0]:
+                    severity = SEVERITY.MEDIUM if update_ratio <= updates_ratio_threshold[1] else SEVERITY.HIGH
+                    test_result.append(
+                        {
+                            "host": host,
+                            "severity": severity,
+                            "title": "High Updates Ratio",
+                            "description": f"Bytes allocated for updates ratio `{update_ratio:.2f}` is approaching the threshold `{updates_ratio_threshold[1]}`. Once the ratio exceeds 10%, all operations will be throttled.",
+                        }
+                    )
+                if dirty_ratio > dirty_ratio_threshold[0]:
+                    severity = SEVERITY.MEDIUM if dirty_ratio <= dirty_ratio_threshold[1] else SEVERITY.HIGH
+                    test_result.append(
+                        {
+                            "host": host,
+                            "severity": severity,
+                            "title": "High Dirty Fill Ratio",
+                            "description": f"Dirty fill ratio `{dirty_ratio:.2f}` is approaching the threshold `{dirty_ratio_threshold[1]}`. Once the ratio exceeds 20%, all operations will be throttled.",
+                        }
+                    )
+                if fill_ratio > cache_fill_ratio_threshold[0]:
+                    severity = SEVERITY.MEDIUM if fill_ratio <= cache_fill_ratio_threshold[1] else SEVERITY.HIGH
+                    test_result.append(
+                        {
+                            "host": host,
+                            "severity": severity,
+                            "title": "High Cache Fill Ratio",
+                            "description": f"Cache fill ratio `{fill_ratio:.2f}` is approaching the threshold `{cache_fill_ratio_threshold[1]}`. Once the ratio exceeds 95%, all operations will be throttled.",
                         }
                     )
                 self.append_test_results(test_result)
@@ -451,6 +497,8 @@ class ServerStatusItem(BaseItem):
                     "cacheSize": 0,
                     "inCacheSize": 0,
                     "readInto": 0,
+                    "forUpdates": 0,
+                    "dirty": 0,
                     "writtenFrom": 0,
                 }
                 return
@@ -469,6 +517,8 @@ class ServerStatusItem(BaseItem):
                 "cacheSize": cache.get("cacheSize", 0),
                 "inCacheSize": cache.get("inCacheSize", 0),
                 "readInto": cache.get("readInto", 0),
+                "forUpdates": cache.get("forUpdates", 0),
+                "dirty": cache.get("dirty", 0),
                 "writtenFrom": cache.get("writtenFrom", 0),
             }
             cache_sizes.append(cache.get("cacheSize", 0))

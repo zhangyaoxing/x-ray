@@ -47,7 +47,19 @@
                 "used_connection_ratio": 0.8,
                 "query_targeting": 1000,
                 "query_targeting_obj": 1000,
-                "cache_read_into_mb": 100
+                "cache_read_into_mb": 100,
+                "updates_ratio": [
+                    0.08,
+                    0.1
+                ],
+                "dirty_ratio": [
+                    0.15,
+                    0.2
+                ],
+                "cache_fill_ratio": [
+                    0.9,
+                    0.95
+                ]
             },
             "ShardKeyItem": {
                 "sharding_imbalance_percentage": 0.1
