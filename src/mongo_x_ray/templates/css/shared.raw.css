@@ -82,6 +82,17 @@ pre {
     position: relative; /* anchor the top-right copy icon of code blocks */
 }
 
+/* Keep <pre> blocks inside table cells (e.g. JSON samples) visually distinct
+ * from the cell background. */
+.markdown-body table td pre,
+.markdown-body table th pre {
+    background-color: var(--bgColor-muted, #f6f8fa);
+    border: 1px solid var(--borderColor-default, #d0d7de);
+    border-radius: 6px;
+    padding: 8px 10px;
+    margin: 4px 0;
+}
+
 .hljs-copy-wrapper {
     position: relative;
 }
