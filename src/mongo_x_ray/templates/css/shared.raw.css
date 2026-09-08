@@ -296,3 +296,51 @@
 .risk-badge:hover .risk-tooltip {
     display: block;
 }
+
+/* Inline code copy button (issue #334): backtick strings get a copy icon
+   that appears on the right when hovered; clicking copies the string. */
+code.code-copyable {
+    position: relative;
+}
+
+.code-copy-btn {
+    display: none;
+    position: absolute;
+    top: 50%;
+    right: -20px;
+    transform: translateY(-50%);
+    width: 14px;
+    height: 14px;
+    padding: 1px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--borderColor-default, #d0d7de);
+    border-radius: 3px;
+    background: var(--bgColor-default, #ffffff);
+    color: var(--fgColor-muted, #57606a);
+    cursor: pointer;
+    line-height: 1;
+    z-index: 10;
+}
+
+.code-copy-btn svg {
+    width: 9px;
+    height: 9px;
+    fill: currentColor;
+}
+
+code.code-copyable:hover + .code-copy-btn,
+.code-copy-btn:hover,
+.code-copy-btn:focus-visible {
+    display: flex;
+}
+
+.code-copy-btn.code-copied svg {
+    display: none;
+}
+
+.code-copy-btn.code-copied::after {
+    content: "✓";
+    font-size: 9px;
+    color: #1a7f37;
+}
