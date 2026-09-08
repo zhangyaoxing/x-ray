@@ -124,15 +124,17 @@ function blockCodeCopySetup() {
     });
 }
 
-/* Inline (backtick) code can be set up immediately; the block/bare-<pre>
- * buttons wait until the report scripts (hljs highlighting, dynamic tables)
- * have finished so nothing overwrites them afterwards. */
+/* Inline code and code blocks can both be set up once the document model is
+ * ready: the module scripts (hljs.highlightAll and the like) run while the
+ * page parses, i.e. before DOMContentLoaded, so the buttons they create exist
+ * by the time this runs. The takeover only manages buttons inside an hljs
+ * wrapper and never removes the bare-<pre> buttons it added itself. */
 if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", inlineCodeCopySetup);
+    document.addEventListener("DOMContentLoaded", function () {
+        inlineCodeCopySetup();
+        blockCodeCopySetup();
+    });
 } else {
     inlineCodeCopySetup();
+    blockCodeCopySetup();
 }
-function lateBlockSetup() { blockCodeCopySetup(); }
-window.addEventListener("load", lateBlockSetup);
-setTimeout(lateBlockSetup, 400);
-setTimeout(lateBlockSetup, 1200);
