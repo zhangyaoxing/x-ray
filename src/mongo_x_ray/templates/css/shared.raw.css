@@ -331,7 +331,7 @@ code.code-copyable {
     fill: currentColor;
 }
 
-code.code-copyable:hover + .code-copy-btn,
+code.code-copyable:hover .code-copy-btn,
 .code-copy-btn:hover,
 .code-copy-btn:focus-visible {
     opacity: 1;

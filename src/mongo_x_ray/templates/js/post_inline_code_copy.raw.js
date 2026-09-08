@@ -40,7 +40,7 @@ function inlineCodeCopySetup() {
             }
         });
 
-        code.parentNode.insertBefore(btn, code.nextSibling);
+        code.appendChild(btn);
     });
 }
 
