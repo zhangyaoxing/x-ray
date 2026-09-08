@@ -42,6 +42,27 @@ function copyCodeText(text, btn) {
     }
 }
 
+/* Reconstruct the text of a <pre> block. Report content is often rendered as
+ * <br> line breaks and &nbsp; indentation (not literal newlines), so
+ * textContent alone would lose the line breaks. */
+function preBlockText(pre) {
+    var out = "";
+    (function walk(node) {
+        node.childNodes.forEach(function (c) {
+            if (c.nodeType === 3) {
+                out += c.nodeValue;
+            } else if (c.nodeType === 1) {
+                if (c.tagName === "BR") {
+                    out += "\n";
+                } else {
+                    walk(c);
+                }
+            }
+        });
+    })(pre);
+    return out.replace(/\u00a0/g, " ");
+}
+
 /* Inline (backtick) code: add a copy icon inside each <code> element. */
 function inlineCodeCopySetup() {
     var codes = document.querySelectorAll("code");
@@ -70,40 +91,6 @@ function inlineCodeCopySetup() {
 function blockCodeCopySetup() {
     document.querySelectorAll(".hljs-copy-button").forEach(function (btn) {
         if (btn.dataset.codeCopyUnified) return;
-        btn.dataset.codeCopyUnified = "1";
-        var wrapper = btn.closest(".hljs-copy-wrapper");
-        var code = wrapper ? wrapper.querySelector("pre code") || wrapper.querySelector("code") : null;
-        if (!code) {
-            btn.remove();
-            return;
-        }
-        // Replace the button to drop the hljs plugin's own click handler.
-        var fresh = btn.cloneNode(false);
-        btn.parentNode.replaceChild(fresh, btn);
-        fresh.setAttribute("aria-label", "Copy code");
-        fresh.title = "Copy";
-        fresh.innerHTML = CODE_COPY_ICON;
-        fresh.addEventListener("click", function () { copyCodeText(code.textContent || "", fresh); });
-    });
-
-    document.querySelectorAll("pre").forEach(function (pre) {
-        if (pre.classList.contains("hljs-copy-wrapper") || pre.closest(".risk-tooltip")) return;
-        if (pre.dataset.codeCopyUnified) return;
-        pre.dataset.codeCopyUnified = "1";
-        var btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "hljs-copy-button"; // reuse the block-button styles
-        btn.setAttribute("aria-label", "Copy code");
-        btn.title = "Copy";
-        btn.innerHTML = CODE_COPY_ICON;
-        btn.addEventListener("click", function () { copyCodeText(pre.textContent || "", btn); });
-        pre.appendChild(btn);
-    });
-}
-
-function blockCodeCopySetup() {
-    document.querySelectorAll(".hljs-copy-button").forEach(function (btn) {
-        if (btn.dataset.codeCopyUnified) return;
         var wrapper = btn.closest(".hljs-copy-wrapper");
         if (!wrapper) return; // only manage buttons that live in an hljs wrapper
         var code = wrapper.querySelector("pre code") || wrapper.querySelector("code");
@@ -118,7 +105,7 @@ function blockCodeCopySetup() {
         fresh.setAttribute("aria-label", "Copy code");
         fresh.title = "Copy";
         fresh.innerHTML = CODE_COPY_ICON;
-        fresh.addEventListener("click", function () { copyCodeText(code.textContent || "", fresh); });
+        fresh.addEventListener("click", function () { copyCodeText(preBlockText(code), fresh); });
     });
 
     document.querySelectorAll("pre").forEach(function (pre) {
@@ -132,7 +119,7 @@ function blockCodeCopySetup() {
         btn.setAttribute("aria-label", "Copy code");
         btn.title = "Copy";
         btn.innerHTML = CODE_COPY_ICON;
-        btn.addEventListener("click", function () { copyCodeText(pre.textContent || "", btn); });
+        btn.addEventListener("click", function () { copyCodeText(preBlockText(pre), btn); });
         pre.appendChild(btn);
     });
 }
