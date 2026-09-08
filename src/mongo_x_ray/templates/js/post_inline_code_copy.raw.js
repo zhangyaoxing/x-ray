@@ -64,7 +64,9 @@ function inlineCodeCopySetup() {
 
 /* Code blocks: take over the highlightjs-copy button and restyle it as the
  * same icon (top-right of the block) with our own copy behavior, so it never
- * conflicts with the "Copy"/"Copied!" text swapping of the hljs plugin. */
+ * conflicts with the "Copy"/"Copied!" text swapping of the hljs plugin.
+ * Bare <pre> blocks (e.g. JSON samples inside tables) that hljs does not
+ * manage get the same top-right icon too. */
 function blockCodeCopySetup() {
     document.querySelectorAll(".hljs-copy-button").forEach(function (btn) {
         if (btn.dataset.codeCopyUnified) return;
@@ -83,18 +85,67 @@ function blockCodeCopySetup() {
         fresh.innerHTML = CODE_COPY_ICON;
         fresh.addEventListener("click", function () { copyCodeText(code.textContent || "", fresh); });
     });
+
+    document.querySelectorAll("pre").forEach(function (pre) {
+        if (pre.classList.contains("hljs-copy-wrapper") || pre.closest(".risk-tooltip")) return;
+        if (pre.dataset.codeCopyUnified) return;
+        pre.dataset.codeCopyUnified = "1";
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "hljs-copy-button"; // reuse the block-button styles
+        btn.setAttribute("aria-label", "Copy code");
+        btn.title = "Copy";
+        btn.innerHTML = CODE_COPY_ICON;
+        btn.addEventListener("click", function () { copyCodeText(pre.textContent || "", btn); });
+        pre.appendChild(btn);
+    });
 }
 
-function codeCopySetup() {
-    inlineCodeCopySetup();
-    blockCodeCopySetup();
+function blockCodeCopySetup() {
+    document.querySelectorAll(".hljs-copy-button").forEach(function (btn) {
+        if (btn.dataset.codeCopyUnified) return;
+        var wrapper = btn.closest(".hljs-copy-wrapper");
+        if (!wrapper) return; // only manage buttons that live in an hljs wrapper
+        var code = wrapper.querySelector("pre code") || wrapper.querySelector("code");
+        if (!code) {
+            btn.remove();
+            return;
+        }
+        // Replace the button to drop the hljs plugin's own click handler.
+        var fresh = btn.cloneNode(false);
+        btn.parentNode.replaceChild(fresh, btn);
+        fresh.dataset.codeCopyUnified = "1";
+        fresh.setAttribute("aria-label", "Copy code");
+        fresh.title = "Copy";
+        fresh.innerHTML = CODE_COPY_ICON;
+        fresh.addEventListener("click", function () { copyCodeText(code.textContent || "", fresh); });
+    });
+
+    document.querySelectorAll("pre").forEach(function (pre) {
+        if (pre.classList.contains("hljs-copy-wrapper") || pre.closest(".risk-tooltip")) return;
+        if (pre.dataset.codeCopyUnified) return;
+        pre.dataset.codeCopyUnified = "1";
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "hljs-copy-button"; // reuse the block-button styles
+        btn.dataset.codeCopyUnified = "1";
+        btn.setAttribute("aria-label", "Copy code");
+        btn.title = "Copy";
+        btn.innerHTML = CODE_COPY_ICON;
+        btn.addEventListener("click", function () { copyCodeText(pre.textContent || "", btn); });
+        pre.appendChild(btn);
+    });
 }
 
+/* Inline (backtick) code can be set up immediately; the block/bare-<pre>
+ * buttons wait until the report scripts (hljs highlighting, dynamic tables)
+ * have finished so nothing overwrites them afterwards. */
 if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", codeCopySetup);
+    document.addEventListener("DOMContentLoaded", inlineCodeCopySetup);
 } else {
-    codeCopySetup();
+    inlineCodeCopySetup();
 }
-// highlightjs may finish highlighting after the initial pass (async / late
-// module scripts); keep the block pass idempotent and re-run on load.
-window.addEventListener("load", blockCodeCopySetup);
+function lateBlockSetup() { blockCodeCopySetup(); }
+window.addEventListener("load", lateBlockSetup);
+setTimeout(lateBlockSetup, 400);
+setTimeout(lateBlockSetup, 1200);

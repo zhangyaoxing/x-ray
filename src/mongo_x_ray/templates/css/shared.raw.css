@@ -78,6 +78,10 @@
     width: 100%;
 }
 
+pre {
+    position: relative; /* anchor the top-right copy icon of code blocks */
+}
+
 .hljs-copy-wrapper {
     position: relative;
 }
@@ -107,6 +111,7 @@
     fill: currentColor;
 }
 
+pre:hover .hljs-copy-button,
 .hljs-copy-wrapper:hover .hljs-copy-button,
 .hljs-copy-button:hover,
 .hljs-copy-button:focus-visible {
