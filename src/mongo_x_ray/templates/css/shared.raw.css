@@ -299,35 +299,33 @@
 
 /* Inline code copy button (issue #334): backtick strings get a copy icon on
    their right edge; clicking copies the string. Always visible (subtle),
-   stronger on hover. */
+   stronger on hover. The button is inline-flex inside the code, so it flows
+   after the text and stays on the right line even when the code wraps. */
 code.code-copyable {
-    position: relative;
-    padding-right: 15px;
+    /* keep room so the inline icon never disturbs the code's line box */
+    padding-right: 0.2em;
 }
 
 .code-copy-btn {
-    display: flex;
-    position: absolute;
-    top: 50%;
-    right: 2px;
-    transform: translateY(-50%);
-    width: 12px;
-    height: 12px;
-    padding: 1px;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
+    width: 1.1em;
+    height: 1.1em;
+    margin-left: 0.25em;
+    vertical-align: -0.15em;
+    padding: 0;
     border: none;
     background: transparent;
     color: var(--fgColor-muted, #57606a);
-    opacity: 0.5;
+    opacity: 0.55;
     cursor: pointer;
     line-height: 1;
-    z-index: 10;
 }
 
 .code-copy-btn svg {
-    width: 9px;
-    height: 9px;
+    width: 0.85em;
+    height: 0.85em;
     fill: currentColor;
 }
 
@@ -344,6 +342,6 @@ code.code-copyable:hover .code-copy-btn,
 
 .code-copy-btn.code-copied::after {
     content: "✓";
-    font-size: 9px;
+    font-size: 0.8em;
     color: #1a7f37;
 }
