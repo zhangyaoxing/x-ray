@@ -86,13 +86,42 @@
     position: absolute;
     top: 8px;
     right: 8px;
-    padding: 4px 8px;
-    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    font-size: 0; /* hide any leftover plugin label text */
     cursor: pointer;
-    opacity: 0.6;
-    background-color: var(--bgColor-default);
-    border: none;
+    opacity: 0.55;
+    background-color: var(--bgColor-muted, rgba(127, 127, 127, 0.1));
+    color: var(--fgColor-muted, #57606a);
+    border: 1px solid var(--borderColor-default, #d0d7de);
     border-radius: 4px;
+}
+
+.hljs-copy-button svg {
+    width: 14px;
+    height: 14px;
+    fill: currentColor;
+}
+
+.hljs-copy-wrapper:hover .hljs-copy-button,
+.hljs-copy-button:hover,
+.hljs-copy-button:focus-visible {
+    opacity: 1;
+    color: var(--fgColor-default, #1f2328);
+}
+
+.hljs-copy-button.code-copied svg {
+    display: none;
+}
+
+.hljs-copy-button.code-copied::after {
+    content: "✓";
+    font-size: 13px;
+    color: #1a7f37;
 }
 
 .hljs-copy-alert {
