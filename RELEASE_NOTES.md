@@ -1,49 +1,37 @@
-# mongo-x-ray 2.0.0 — Release Notes
+# mongo-x-ray 2.1.0 — Release Notes
 
-**Scope**: v1.5.3 (2026-08-19) → 2.0.0 (2026-08-31, 68 commits)
-**TL;DR**: Re-architected from a monolith into a **core + plugin (`mongo-x-ray-*`)** model, with security hardening, packaging and engineering improvements.
-
-## Breaking Changes ⚠️
-
-- **Plugin architecture**: analysis features were extracted from the core into separate `mongo-x-ray-*` plugin packages. `pip install mongo-x-ray` alone no longer provides any commands — you must also install the plugins you need (e.g. `mongo-x-ray-log`, `mongo-x-ray-ftdc`)
-- **Import package rename**: `x_ray` → `mongo_x_ray` (update imports in any code referencing the core)
-- **Prebuilt binaries**: ship with the `log` and `ftdc` plugins bundled; other functionality is available via `pip`-installed plugins or a custom build
-- **MongoDB 5.0+** is now the documented minimum; the compatibility matrix was removed
+**Scope**: v2.0.0 (2026-08-31) → 2.1.0 (2026-09-08)
+**TL;DR**: Report usability improvements (copy icons for every code string, better output folder names), and the issue catalog moved back to the plugin that owns it.
 
 ## New Features ✨
 
-- **Dynamic CLI from plugin discovery**: the command list is built from the installed plugins at startup; `--help` shows what is available, and subcommand aliases are supported (`healthcheck` / `hc`)
-- **Per-plugin `--version`**: `x-ray <command> --version` reports the plugin's own version
-- **Library-plugin detection**: packages that register no CLI command are detected and listed in `--help`
-- **Security hardening**: plugin loading is gated on the **install origin** (local editable installs, trusted git owners, allow-listed PyPI packages); untrusted plugins are skipped with a warning
-- **Packaging**: the PyInstaller build automatically bundles every plugin installed in the build environment; the frozen binary only uses bundled plugins and never probes externally installed ones
+- **Copy icons in every report** (#334): all backtick-wrapped strings (inline `<code>`) now show a small copy icon on their right edge — click copies the exact string with a transient ✓ confirmation
+  - The icon is always visible (subtle, full opacity on hover) and flows with the text, so it stays correct when a long string wraps onto several lines
+  - Code blocks (` ``` ` fenced, managed by highlight.js) re-use the same icon in the **top-right corner** instead of the plugin's "Copy" text
+  - Bare `<pre>` blocks (e.g. the JSON samples inside tables) get the same icon too, and are now outlined with a border so they no longer blend into the cell background
+  - Copying a block preserves line breaks and indentation (`<br>`/`&nbsp;` markup is converted back to newlines/spaces)
+- **Better output folder names** (#335): generated report folders are renamed with the plugin name as a prefix — `log-default-<timestamp>`, `log-<hostname>-default-<timestamp>`, `ftdc-…`, `healthcheck-…`, `gmd-…` — so it is always clear which plugin produced a report (and, with `--discover`, which run)
 
-## Refactoring / Architecture 🏗️
+## Changed 🔧
 
-- Split out separate plugin repositories: `mongo-x-ray-log`, `mongo-x-ray-ftdc` (see below)
-- Shared components consolidated in core: a unified `BaseFramework`, `BaseParser`, `shared` utilities, and a shared issue catalog (`mongo_x_ray.issues`)
-- Runtime dependencies trimmed from 23 to 5 (pymongo / Markdown / openai / python-dotenv / WeasyPrint)
+- **Issue catalog ownership**: `mongo_x_ray.issues` was removed from core — the catalog is maintained by the healthcheck plugin (`mongo_x_ray_hc.issues`), and the plugins that reuse healthcheck rules (log, gmd) reference it through those rules. Core no longer ships any module's issue definitions
+- **Shared configuration**: added warning thresholds used by the log plugin's rules (slow rate, connection rate, slow operations, query targeting high) now that Top Slow Operations and its chart are a single `SlowItem`
+- **Issue definitions**: NUMA is now reported on all MongoDB versions (previously version-dependent)
+- Version bumped to 2.0.1 (intermediate fix release) and then to **2.1.0**
 
-## Tooling / CI / Quality 🔧
+## Fixed 🐛
 
-- **ruff fully replaces pylint + black** (editor + lint gate), with matching VSCode recommendations
-- pyright `typeCheckingMode=basic` with type fixes; explicit isort `known-first-party` config eliminates cross-workspace import-order differences
-- **CodeQL enabled on all repositories**; all alerts fixed (uninitialized variables, mixed returns, …)
-- Copyright header script (`misc/add_copyright.sh`): scans core sources, unifies/adds headers, auto-updates the year, and produces format-clean output
-- Dependency updates: openai → 3.5.0, ruff → 0.16.5, pyinstaller, pygments, idna, python-dotenv, …
+- No behavioural regressions; the report-copy work above includes several fixes found while validating it in a real browser (button anchoring, wrapped-line positioning, preserved line breaks, setup timing)
 
-## New Repositories 📦
+## Dependencies
 
-| Repository | Description |
-|---|---|
-| `mongo-x-ray-log` | MongoDB log analysis (with AI-assisted analysis) |
-| `mongo-x-ray-ftdc` | FTDC analysis |
+- Routine bumps: `openai` → 3.5.0, `ruff`, `pyinstaller`, `idna`, `python-dotenv`
 
-## Upgrade Guide (1.5.3 → 2.0.0)
+## Upgrade Guide (2.0.0 → 2.1.0)
 
 ```bash
-pip install mongo-x-ray mongo-x-ray-log mongo-x-ray-ftdc
+pip install -U mongo-x-ray mongo-x-ray-log mongo-x-ray-ftdc
 ```
 
-- Rename `x_ray.*` imports to `mongo_x_ray.*`
-- Binary users: download the prebuilt binary (ships with `log` and `ftdc`); build your own with `make plugin-deps` + `make build` to bundle additional installed plugins
+- No API or CLI breaking changes — commands, options and report structure are unchanged
+- If you maintain code against the core, note that `mongo_x_ray.issues` no longer exists; use the healthcheck plugin's catalog (`mongo_x_ray_hc.issues`) or your own
