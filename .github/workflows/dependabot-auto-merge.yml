@@ -14,29 +14,70 @@ jobs:
         if: github.actor == 'dependabot[bot]'
 
         steps:
-            - name: Check out code
-              uses: actions/checkout@v7
-
             - name: Fetch Dependabot metadata
               id: metadata
               uses: dependabot/fetch-metadata@v3
               with:
                   github-token: "${{ secrets.GITHUB_TOKEN }}"
 
-            - name: Enable auto-merge for Dependabot PRs
-              if: |
-                  steps.metadata.outputs.update-type == 'version-update:semver-patch' ||
-                  steps.metadata.outputs.update-type == 'version-update:semver-minor'
+            # Patch and minor updates merge without review. Major updates merge
+            # without review only for the CI actions and the build/lint/test
+            # tooling, which cannot change the behaviour of a released package.
+            # A major update of a runtime dependency always needs a human.
+            - name: Decide whether this update can merge without review
+              id: policy
+              env:
+                  UPDATE_TYPE: ${{ steps.metadata.outputs['update-type'] }}
+                  DEPENDENCY_NAMES: ${{ steps.metadata.outputs['dependency-names'] }}
+                  HEAD_REF: ${{ github.event.pull_request.head.ref }}
               run: |
-                  gh pr merge --auto --squash "$PR_URL"
+                  if [ "${UPDATE_TYPE}" = "version-update:semver-patch" ] || [ "${UPDATE_TYPE}" = "version-update:semver-minor" ]; then
+                      echo "merge=true" >> "${GITHUB_OUTPUT}"
+                  elif [[ "${HEAD_REF}" == dependabot/github_actions/* ]] || echo '["setuptools","wheel","ruff","pylint","pyright","pytest","pytest-cov","coverage","pluggy","iniconfig","tomli","types-Markdown"]' | grep -qF "\"${DEPENDENCY_NAMES}\""
+                  then
+                      echo "merge=true" >> "${GITHUB_OUTPUT}"
+                  else
+                      echo "merge=false" >> "${GITHUB_OUTPUT}"
+                  fi
+
+            # These branches have no required status checks, so `gh pr merge
+            # --auto` would merge immediately. Poll the checks instead, and only
+            # merge a green pull request; anything else stays open for a human.
+            - name: Wait for every check to pass
+              if: steps.policy.outputs.merge == 'true'
+              run: |
+                  for attempt in $(seq 1 60); do
+                      states="$(gh pr checks "${PR_URL}" --json state --jq '.[].state' 2>/dev/null | sort -u | tr '\n' ' ')"
+                      echo "attempt ${attempt}: checks=[${states}]"
+                      if [ -z "${states}" ] || echo "${states}" | grep -Eq 'PENDING|QUEUED|IN_PROGRESS|WAITING|EXPECTED'; then
+                          sleep 20
+                          continue
+                      fi
+                      if echo "${states}" | grep -Eq 'FAILURE|ERROR|CANCELLED|TIMED_OUT|ACTION_REQUIRED|STARTUP_FAILURE'; then
+                          echo "::error::Checks are not green - leaving the pull request open for review."
+                          exit 1
+                      fi
+                      echo "all checks are green"
+                      exit 0
+                  done
+                  echo "::error::Timed out waiting for checks - leaving the pull request open for review."
+                  exit 1
               env:
                   PR_URL: ${{github.event.pull_request.html_url}}
                   GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
-            - name: Comment on major version updates
-              if: steps.metadata.outputs.update-type == 'version-update:semver-major'
+            - name: Merge the pull request
+              if: steps.policy.outputs.merge == 'true'
               run: |
-                  gh pr comment "$PR_URL" --body "⚠️ This is a **major version update**. Please review carefully before merging."
+                  gh pr merge --squash "${PR_URL}"
+              env:
+                  PR_URL: ${{github.event.pull_request.html_url}}
+                  GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+            - name: Comment on updates that need a human
+              if: steps.policy.outputs.merge == 'false'
+              run: |
+                  gh pr comment "${PR_URL}" --body "⚠️ This is a **major version update** of a runtime dependency. Please review carefully before merging."
               env:
                   PR_URL: ${{github.event.pull_request.html_url}}
                   GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
