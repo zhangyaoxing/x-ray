@@ -134,9 +134,9 @@ jobs:
           files: ./artifacts/**/*
           tag_name: ${{ inputs.tag != '' && inputs.tag || github.ref_name }}
           target_commitish: ${{ github.sha }}
+          body_path: RELEASE_NOTES.md
           draft: false
           prerelease: false
-          generate_release_notes: true
           fail_on_unmatched_files: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
