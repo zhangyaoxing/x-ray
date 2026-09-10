@@ -46,8 +46,8 @@ Currently the prebuilt binaries are available on 3 platforms:
 
 Download them from [Releases](https://github.com/mongodb-ps/ce-mongo-x-ray/releases).
 
-The prebuilt binaries bundle the `ftdc` and `log` plugins, so those commands
-work out of the box; the other plugins are not included in the binary.
+The prebuilt binaries bundle the `ftdc`, `log` and `hc` plugins, so those
+commands work out of the box; the other plugins are not included in the binary.
 
 #### 1.2.2 Build from Source
 x-ray is tested on `Python 3.9.22`. On MacOS or Linux distributions, you can use the `make` command to build the binary:
@@ -55,12 +55,12 @@ x-ray is tested on `Python 3.9.22`. On MacOS or Linux distributions, you can use
 git clone https://github.com/mongodb-ps/ce-mongo-x-ray
 cd ce-mongo-x-ray
 make deps # if it's the first time you build the project
-make plugin-deps # installs the plugins that ship in the binary (log, ftdc)
+make plugin-deps # installs the plugins that ship in the binary (log, ftdc, hc)
 make # equal to `make build`
 ```
 
 The binary bundles every `mongo-x-ray-*` plugin installed in the build
-environment — `make plugin-deps` installs `log` and `ftdc`; install more
+environment — `make plugin-deps` installs `log`, `ftdc` and `hc`; install more
 plugins in the venv if you want them bundled too.
 
 There are other make targets. Use `make help` to find out.
