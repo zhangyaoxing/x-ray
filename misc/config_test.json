@@ -69,8 +69,7 @@
                     "ConnectionRateItem",
                     "SlowRateItem",
                     "ClientMetaItem",
-                    "TopSlowItem",
-                    "SlowChartItem",
+                    "SlowItem",
                     "StateTraceItem",
                     "WEFItem",
                     "InfoItem"
@@ -81,7 +80,7 @@
             "WEFItem": {
                 "ai_support": "none"
             },
-            "TopSlowItem": {
+            "SlowItem": {
                 "top": 10
             }
         },

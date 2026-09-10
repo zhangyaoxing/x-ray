@@ -79,8 +79,7 @@
                     "LogRateItem",
                     "SlowRateItem",
                     "ClientMetaItem",
-                    "TopSlowItem",
-                    "SlowChartItem",
+                    "SlowItem",
                     "StateTraceItem",
                     "WEFItem",
                     "InfoItem"
@@ -88,11 +87,22 @@
             }
         },
         "item_config": {
+            "ConnectionRateItem": {
+                "connection_rate_medium": 0.5,
+                "connection_rate_high": 0.75
+            },
+            "SlowRateItem": {
+                "slow_rate_medium": 100,
+                "slow_rate_high": 500
+            },
             "WEFItem": {
                 "ai_support": "none"
             },
-            "TopSlowItem": {
-                "top": 10
+            "SlowItem": {
+                "top": 10,
+                "query_targeting": 1000,
+                "query_targeting_obj": 1000,
+                "query_targeting_high": 5000
             },
             "LogRateItem": {
                 "WhiteListIDs": [

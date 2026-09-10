@@ -78,6 +78,21 @@
     width: 100%;
 }
 
+pre {
+    position: relative; /* anchor the top-right copy icon of code blocks */
+}
+
+/* Keep <pre> blocks inside table cells (e.g. JSON samples) visually distinct
+ * from the cell background. */
+.markdown-body table td pre,
+.markdown-body table th pre {
+    background-color: var(--bgColor-muted, #f6f8fa);
+    border: 1px solid var(--borderColor-default, #d0d7de);
+    border-radius: 6px;
+    padding: 8px 10px;
+    margin: 4px 0;
+}
+
 .hljs-copy-wrapper {
     position: relative;
 }
@@ -86,13 +101,43 @@
     position: absolute;
     top: 8px;
     right: 8px;
-    padding: 4px 8px;
-    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    font-size: 0; /* hide any leftover plugin label text */
     cursor: pointer;
-    opacity: 0.6;
-    background-color: var(--bgColor-default);
-    border: none;
+    opacity: 0.55;
+    background-color: var(--bgColor-muted, rgba(127, 127, 127, 0.1));
+    color: var(--fgColor-muted, #57606a);
+    border: 1px solid var(--borderColor-default, #d0d7de);
     border-radius: 4px;
+}
+
+.hljs-copy-button svg {
+    width: 14px;
+    height: 14px;
+    fill: currentColor;
+}
+
+pre:hover .hljs-copy-button,
+.hljs-copy-wrapper:hover .hljs-copy-button,
+.hljs-copy-button:hover,
+.hljs-copy-button:focus-visible {
+    opacity: 1;
+    color: var(--fgColor-default, #1f2328);
+}
+
+.hljs-copy-button.code-copied svg {
+    display: none;
+}
+
+.hljs-copy-button.code-copied::after {
+    content: "✓";
+    font-size: 13px;
+    color: #1a7f37;
 }
 
 .hljs-copy-alert {
@@ -295,4 +340,53 @@
 
 .risk-badge:hover .risk-tooltip {
     display: block;
+}
+
+/* Inline code copy button (issue #334): backtick strings get a copy icon on
+   their right edge; clicking copies the string. Always visible (subtle),
+   stronger on hover. The button is inline-flex inside the code, so it flows
+   after the text and stays on the right line even when the code wraps. */
+code.code-copyable {
+    /* keep room so the inline icon never disturbs the code's line box */
+    padding-right: 0.2em;
+}
+
+.code-copy-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.1em;
+    height: 1.1em;
+    margin-left: 0.25em;
+    vertical-align: -0.15em;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--fgColor-muted, #57606a);
+    opacity: 0.55;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.code-copy-btn svg {
+    width: 0.85em;
+    height: 0.85em;
+    fill: currentColor;
+}
+
+code.code-copyable:hover .code-copy-btn,
+.code-copy-btn:hover,
+.code-copy-btn:focus-visible {
+    opacity: 1;
+    color: var(--fgColor-default, #1f2328);
+}
+
+.code-copy-btn.code-copied svg {
+    display: none;
+}
+
+.code-copy-btn.code-copied::after {
+    content: "✓";
+    font-size: 0.8em;
+    color: #1a7f37;
 }

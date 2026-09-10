@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mongo-x-ray"
-version = "2.0.1"
+version = "2.1.0"
 description = "MongoDB diagnostics toolkit with health checks and log analysis"
 readme = "README.md"
 requires-python = ">=3.10,<4"

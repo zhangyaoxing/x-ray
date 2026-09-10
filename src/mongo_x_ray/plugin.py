@@ -94,25 +94,30 @@ def _sanitize_filename(name: str) -> str:
 
 
 def rename_with_hostname(batch_folder: str, framework) -> str:
-    """Rename *batch_folder* to include the hostname prefix if available.
+    """Rename *batch_folder* to include the plugin name as a prefix.
 
-    Returns the final folder path (renamed or original).
+    Returns the final folder path (renamed or original). In production the
+    folder is renamed to ``<plugin>-<hostname>-<name>`` (or ``<plugin>-<name>``
+    when the framework knows no hostname), where *plugin* is the framework's
+    ``template_module`` (e.g. ``log``) — so it is always clear which plugin
+    produced the report, and with ``--discover`` which run it belongs to.
     """
     if env == "development":
-        return batch_folder
-    hostname = getattr(framework, "hostname", None)
-    if hostname is None:
         return batch_folder
     batch_path = Path(batch_folder)
     if not batch_path.is_dir():
         return batch_folder
-    safe_hostname = _sanitize_filename(hostname)
-    if not safe_hostname:
-        return batch_folder
-    new_name = f"{safe_hostname}-{batch_path.name}"
-    new_path = batch_path.parent / new_name
+    plugin = _sanitize_filename(getattr(framework, "template_module", "") or "") or "x-ray"
+    hostname = getattr(framework, "hostname", None)
+    if hostname:
+        safe_hostname = _sanitize_filename(hostname)
+        if safe_hostname:
+            plugin = f"{plugin}-{safe_hostname}"
+    if batch_path.name.startswith(plugin + "-"):
+        return batch_folder  # already prefixed
+    new_path = batch_path.parent / f"{plugin}-{batch_path.name}"
     shutil.move(str(batch_path), str(new_path))
-    logger.info("Renamed output folder to: %s", green(new_name))
+    logger.info("Renamed output folder to: %s", green(new_path.name))
     return str(new_path)
 
 
