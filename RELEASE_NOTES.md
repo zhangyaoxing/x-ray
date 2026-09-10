@@ -26,11 +26,14 @@
 ## Dependencies
 
 - Routine bumps: `openai` → 3.5.0, `ruff`, `pyinstaller`, `idna`, `python-dotenv`
+- Security: `WeasyPrint` 69.0 → 70.0, which fixes an SSRF / local-file-read issue
+  ([GHSA-jf6q-chmf-3h3v](https://github.com/advisories/GHSA-jf6q-chmf-3h3v),
+  CVE-2026-55073) in PDF rendering
 
 ## Upgrade Guide (2.0.0 → 2.1.0)
 
 ```bash
-pip install -U mongo-x-ray mongo-x-ray-log mongo-x-ray-ftdc
+pip install -U mongo-x-ray mongo-x-ray-log mongo-x-ray-ftdc mongo-x-ray-hc
 ```
 
 - No API or CLI breaking changes — commands, options and report structure are unchanged

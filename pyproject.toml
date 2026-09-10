@@ -30,7 +30,7 @@ dependencies = [
   "Markdown==3.10.3",
   "openai==3.8.0",
   "python-dotenv==1.2.3",
-  "WeasyPrint==69.0",
+  "WeasyPrint==70.0",
 ]
 
 [project.optional-dependencies]

@@ -50,7 +50,7 @@ The prebuilt binaries bundle the `ftdc`, `log` and `hc` plugins, so those
 commands work out of the box; the other plugins are not included in the binary.
 
 #### 1.2.2 Build from Source
-x-ray is tested on `Python 3.9.22`. On MacOS or Linux distributions, you can use the `make` command to build the binary:
+x-ray requires `Python >= 3.10` and is tested on `Python 3.10`. On MacOS or Linux distributions, you can use the `make` command to build the binary:
 ```bash
 git clone https://github.com/mongodb-ps/ce-mongo-x-ray
 cd ce-mongo-x-ray
